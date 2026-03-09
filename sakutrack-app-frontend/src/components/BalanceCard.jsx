@@ -4,8 +4,8 @@ import { Wallet, TrendingUp } from 'lucide-react'; // library ikon yang sudah ki
 const BalanceCard = ({ balance, projection }) => {
     return (
         /* wadah utama kartu dengan desain gradasi modern */
-        <div className="bg-gradient-to-br from-blue-600 to-indio-800 p-6 rounded-3xl text-white shadow-xl shadow-blue-100">
-            <div className="flex items-center gap-2 mb-1 opacity-70 uppercase text-[10px] tracking-widest fonst-bold">
+        <div className="bg-gradient-to-br from-blue-600 to-indigo-800 p-6 rounded-3xl text-white shadow-xl shadow-blue-100">
+            <div className="flex items-center gap-2 mb-1 opacity-70 uppercase text-[10px] tracking-widest font-bold">
                 <Wallet size={14} />
                 <span>Sisa Saldo Kamu</span>
             </div>

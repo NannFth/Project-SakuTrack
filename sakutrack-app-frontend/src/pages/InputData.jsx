@@ -19,7 +19,8 @@ const InputData = () => {
             const dataBaru = {
                 id: Date.now(),
                 nominal: parseInt(nominal),
-                keterangan: new Date().toLocaleDateString()
+                keterangan: keterangan,
+                tanggal: new Date().toLocaleDateString()
             };
 
             // gabungkan dan simpan kembali
@@ -47,7 +48,7 @@ const InputData = () => {
             <form className="space-y-6">
                 {/* bagian input nominal uang */}
                 <div>
-                    <label className="text-[10px] font-bold text-slaye-400 uppercase mb-2 block tracking-widest">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase mb-2 block tracking-widest">
                         Nominal (Rp)
                     </label>
                     <input

@@ -18,17 +18,32 @@ const Dashboard = () => {
     const sekolahUser = location.state?.sekolah || localStorage.getItem("user_sekolah") || "SMK NEGERI";
 
     const riwayat = JSON.parse(localStorage.getItem(keyDinamis) || "[]");
+    // ambil 7 transaksi terakhir
+    const last7 = riwayat.slice(-7);
     const modalAwal = 1000000;
-    const totalPengeluaran = riwayat.reduce((acc, curr) => acc + curr.nominal, 0);
-    const saldo = modalAwal - totalPengeluaran;
-    const hari = riwayat.length > 0 ? Math.floor(saldo / (totalPengeluaran / riwayat.length)) : 30;
+    //hitung total pengeluaran
+    const totalPengeluaran = last7
+        .filter(item => item.jenis === "pengeluaran")
+        .reduce((acc, curr) => acc + (curr.nominal || 0), 0);
+    //hitung total pemasukan
+    const totalPemasukan = last7
+        .filter(item => item.jenis === "pemasukan")
+        .reduce((acc, curr) => acc + (curr.nominal || 0), 0);
+    //hitung saldo sekrang
+    const saldo = modalAwal + totalPemasukan - totalPengeluaran;
+    // tambahkan target tabungan
+    const targetTabungan = Number(localStorage.getItem("target_tabungan") || 0);
+    const progressTabungan = Math.max(0, Math.min(saldo, targetTabungan));
+    //hitung rata-rata pengeluaran
+    const rataPengeluaran=
+        last7.length > 0 ? totalPengeluaran / last7.length : 0;
+    const hari = rataPengeluaran > 0 ? Math.floor(saldo / rataPengeluaran) : 30;
 
-    const dataPengeluaran = riwayat.length > 0
-        ? riwayat.slice(-7).map(item => item.nominal)
-        : [0, 0, 0, 0, 0, 0, 0];
+    const dataPengeluaran = last7.map(item => item.nominal || 0);
+        
 
     const chartData = {
-        labels: ['Sn', 'Sl', 'Rb', 'Km', 'Jm', 'Sb', 'Mg'],
+        labels: last7.map(item => item.tanggal || "-"),
         datasets: [{
             fill: true,
             label: 'Pengeluaran',
@@ -53,12 +68,55 @@ const Dashboard = () => {
             {/* memanggil komponen kartu saldo */}
             <BalanceCard balance={saldo} projection={hari} />
 
-            {/* grafik tren pengeluaran */}
+            <div className="mt-6 bg-white p-4 rounded-2xl border">
+                <p className="text-sm text-slate-500">Target Tabungan</p>
+
+                <p className="text-lg font-bold">
+                    Rp{progressTabungan.toLocaleString()} / Rp{targetTabungan.toLocaleString()}
+                </p>
+            </div>
+
+            {/* riwayat transaksi */}
             <div className="mt-8">
-                <h3 className="font-bold text-sm text-slate-700 mb-4">Tren Pengeluaran</h3>
+                <h3 className="font-bold text-sm text-slate-700 mb-4">Riwayat Transaksi</h3>
                 <div className="p-4 bg-white border border-slate-100 rounded-3xl shadow-sm">
-                    <Line data={chartData} options={{ responsive: true, plugins: { legend: { display: false } } }} />
+                    <Line data={chartData} 
+                        options={{ 
+                            responsive: true, 
+                            plugins: { 
+                                legend: { display: false } 
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }     
+                        }} 
+                    />
                 </div>
+            </div>
+
+            <h3 className="fot-bold text-sm text-slate-700">Daftar Transaksi</h3>
+            <div className="mt-6 space-y-3">
+                {last7.length === 0 ? (
+                    <p className="text-sm text-slate-400">Belum Ada Transaksi</p>
+                ) : (
+                    last7.slice().reverse().map((item, index) => (
+                        <div 
+                            key={index}
+                            className="flex justify-between items-center bg-white p-3 rounded-xl border"
+                        >
+                            <div>
+                                <p className="text-sm font-semibold">{item.catatan || "Transaksi"}</p>
+                                <p className="text-xs text-slate-400">{item.tanggal}</p>
+                            </div>
+
+                            <p className={`text-sm font-bold ${item.jenis === "pemasukan" ? "text-green-500" : "text-red-500"}`}>
+                                {item.jenis === "pemasukan" ? "+" : "-"}Rp{item.nominal?.toLocaleString()}
+                            </p>
+                        </div>
+                    ))
+                )}
             </div>
 
             {/* tombol melayang (+) untuk tambah data */}
