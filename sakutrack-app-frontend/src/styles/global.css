@@ -1,0 +1,15 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: 0;
+}
+
+body{
+    background: #f1f5f9;
+    color: 0f172a;
+    font-family: 'Inter', sans-serif;
+}
+
+#root{
+    min-height: 100vh;
+}
