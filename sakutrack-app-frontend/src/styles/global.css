@@ -1,15 +1,38 @@
-*{
+/* Reset */
+* {
     margin: 0;
     padding: 0;
-    box-sizing: 0;
+    box-sizing: border-box;
 }
 
-body{
+/* Body */
+body {
     background: #f1f5f9;
-    color: 0f172a;
-    font-family: 'Inter', sans-serif;
+    color: #0f172a;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
 }
 
-#root{
+/* Container */
+#root {
     min-height: 100vh;
+}
+
+/* Media */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Navigasi */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Form */
+button, input, select, textarea {
+    font-family: inherit;
+    outline: none;
 }

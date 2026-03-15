@@ -1,25 +1,25 @@
 export const getUser = () => {
-    return {
-        nama: localStorage.getItem("user_nama"),
-        sekolah: localStorage.getItem("user_sekolah"),
-    };
+  const id = localStorage.getItem("userId");
+  let name = localStorage.getItem("user_nama");
+
+  if (name === null) {
+    name = "User";
+  }
+
+  return { id, nama: name };
 };
 
-export const getTransactions = (nama) => {
-    const key = `riwayat_${nama}`;
-    return JSON.parse(localStorage.getItem(key) || "[]");
+// Status Login
+export const isLoggedIn = () => {
+  const id = localStorage.getItem("userId");
+
+  if (id !== null) {
+    return true;
+  } else {
+    return false;
+  }
 };
 
-export const saveTransaction = (nama, data) => {
-    const key = `riwayat_${nama}`;
-    const lama = JSON.parse(localStorage.getItem(key) || "[]");
-    localStorage.setItem(key, JSON.stringify([...lama, data]));
-};
-
-export const getTarget = () => {
-    return Number(localStorage.getItem("target_tabungan")  || 0);
-};
-
-export const setTarget = (value) => {
-    localStorage.setItem("target_tabungan", value);
+export const clearSession = () => {
+  localStorage.clear();
 };

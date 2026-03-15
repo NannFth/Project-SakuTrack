@@ -1,10 +1,11 @@
-export default function Button({ children, onClick}) {
+export default function Button({ type = "button", onClick, children }) {
     return (
-        <button
-            onClick={onClick}
-            className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition"
-        >
-            {children}
-        </button>
-    );
+    <button
+      type={type} 
+      onClick={onClick}
+      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 active:scale-95 transition shadow-sm"
+    >
+      {children}
+    </button>
+  );
 }
