@@ -23,10 +23,10 @@ export default function Dashboard({ searchQuery, setSearchQuery }) {
   const [showAll, setShowAll] = useState(false);
 
   // Ambil Data
-  useEffect(() => {
+  const ambilData = () => {
     const kunci = localStorage.getItem("userId");
 
-    // Ringkasan
+    // dashboard
     fetch(`${BASE_URL}/dashboard`, {
       headers: { "Authorization": kunci }
     })
@@ -36,27 +36,61 @@ export default function Dashboard({ searchQuery, setSearchQuery }) {
           setDashboardData(result.data);
         }
       })
-      .catch((err) => {
-        console.log("Gagal mengambil dashboard:", err);
-      });
+      .catch((err) => console.log("Gagal mengambil dashboard:", err));
 
-    // Transaksi
+    // transaksi
     fetch(`${BASE_URL}/transactions`, {
       headers: { "Authorization": kunci }
     })
       .then((res) => res.json())
       .then((result) => {
         if (result.success === true) {
-          setTransactions(result.data);
-          if (result.chartData) {
-            setChartData(result.chartData);
-          }
+          // data asli dari API
+          const dataAsli = result.data || [];
+
+          // urutan terbaru
+          const dataTerurut = [...dataAsli].sort((a, b) => {
+            const tglA = new Date(a.date).getTime();
+            const tglB = new Date(b.date).getTime();
+
+            if (isNaN(tglA)) return 1;
+            if (isNaN(tglB)) return -1;
+
+
+            return tglB - tglA;
+          });
+
+          setTransactions(dataTerurut);
+          if (result.chartData) setChartData(result.chartData)
         }
       })
-      .catch((err) => {
-        console.log("Gagal mengambil transaksi:", err);
-      });
-  }, []);
+      .catch((err) => 
+        console.log("Gagal mengambil transaksi:", err));
+    };
+
+    useEffect(() => {
+      ambilData();
+    }, []);
+
+    // fungsi hapus transaksi
+    const hapusTransaksi = async (id) => {
+      if (window.confirm("Yakin ingin menghapus riwayat transaksi ini?")) {
+        try {
+          const kunci = localStorage.getItem("userId");
+          const res = await fetch(`${BASE_URL}/transactions/${id}`, {
+            method: 'DELETE',
+            headers: {  "Authorization": kunci }
+          });
+          const result = await res.json();
+          if (result.success)  {
+            ambilData();
+          }
+         } catch (err) {
+            console.error("Gagal hapus transaksi:", err);
+         }
+        } 
+      };
+
 
   // Filter
   const query = searchQuery ? searchQuery.toLowerCase() : "";

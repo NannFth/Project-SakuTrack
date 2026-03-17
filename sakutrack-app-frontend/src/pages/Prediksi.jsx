@@ -70,7 +70,7 @@ export default function Prediksi() {
   }
 
   return (
-    <DashboardLayout>
+    <>
       <h1 className="text-2xl font-bold mb-4 text-slate-800">Prediksi Keuangan</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -130,6 +130,6 @@ export default function Prediksi() {
           </p>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

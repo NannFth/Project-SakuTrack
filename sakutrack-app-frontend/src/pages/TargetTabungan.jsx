@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"; 
-import DashboardLayout from "../layouts/DashboardLayout";
-import { Plus, Target } from "lucide-react";
+import { Plus, Target, Trash2, CheckCircle2 } from "lucide-react";
 import { BASE_URL } from "../connection";
 
 export default function TargetTabungan() {
@@ -37,6 +36,32 @@ export default function TargetTabungan() {
     ambilData();
   }, []);
 
+  //
+  const hapusTarget = (id) => {
+    if (window.confirm("Yakin mau hapus target tabungan ini?")) {
+      const kunci = localStorage.getItem("userId");
+      fetch(`${BASE_URL}/savings/${id}`, {
+        method: 'DELETE',
+        headers: { "Authorization": kunci}
+      })
+      .then((res) => res.json())
+      .then((result) => {
+        if (result.success === true) {
+          ambilData();
+        }
+      })
+      .catch((err) => console.log("Gagal hapus:", err));
+    }
+  };
+
+  // tandai selesai
+  const selesaiTarget = (item) => {
+    if (item.currentAmount < item.targetAmount) {
+      alert("Tabungan belum penuh nih, tetap semangat dan pantang menyerah ya!");
+      return;
+    }
+    alert(`Selamat! Target "${item.name}" sudah tercapai!`);
+  }
   // Simpan Target
   const tambahTarget = () => {
     if (name === "" || targetAmount === "") {
@@ -102,7 +127,7 @@ export default function TargetTabungan() {
   };
 
   return (
-    <DashboardLayout>
+    <>
       <div className="max-w-4xl mx-auto space-y-8">
         <header>
           <h1 className="text-3xl font-black text-slate-800 tracking-tight">Target Tabungan</h1>
@@ -139,9 +164,24 @@ export default function TargetTabungan() {
                   <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
                     <Target size={24} />
                   </div>
-                  <div className="text-right">
-                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Progress</p>
-                    <p className="text-xl font-black text-indigo-600">{persen.toFixed(0)}%</p>
+
+                  <div className="flex gap-2 items-center">
+                    <button 
+                      onClick={() => selesaiTarget(item)}
+                      className={`p-1.5 rounded-full transition-all ${persen >= 100 ? 'text-emerald-500 hover:bg-emerald-50' : 'text-slate-200'}`}
+                    >
+                      <CheckCircle2 size={20} />
+                    </button>
+                    <button 
+                      onClick={() => hapusTarget(item.id)}
+                      className="p-1.5 text-rose-400 hover: text-rose-600 hover:bg-rose-50 rounded-full transition-all"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                    <div className="text-right ml-2">
+                      <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Progress</p>
+                      <p className="text-xl font-black text-indigo-600">{persen.toFixed(0)}%</p>
+                    </div>
                   </div>
                 </div>
 
@@ -159,13 +199,21 @@ export default function TargetTabungan() {
                 {/* Update */}
                 <div className="pt-4 border-t border-slate-50 flex gap-2">
                   <input 
-                    type="number" 
+                    type="text" 
                     placeholder="Masukkan nominal tambahan..."
                     className="flex-1 text-xs p-2 bg-slate-50 rounded-xl outline-none focus:ring-1 focus:ring-indigo-300"
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/\D/g, "");
+                      const formatted = raw ? "Rp " + new Intl.NumberFormat("id-ID").format(raw) : "";
+                      e.target.value = formatted;
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
-                        updateSaldo(item.id, item.currentAmount, e.target.value);
-                        e.target.value = ""; 
+                        const rawValue = e.target.value.replace(/\D/g, "");
+                        if (rawValue) {
+                          updateSaldo(item.id, item.currentAmount, rawValue);
+                          e.target.value = ""; 
+                        }
                       }
                     }}
                   />
@@ -176,6 +224,6 @@ export default function TargetTabungan() {
           })}
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }
