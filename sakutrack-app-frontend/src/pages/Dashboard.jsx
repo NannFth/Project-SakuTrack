@@ -1,6 +1,5 @@
 import {useState, useEffect} from 'react';
 import {motion, AnimatePresence} from 'framer-motion'; 
-import DashboardLayout from "../layouts/DashboardLayout";
 import BalanceCard from "../components/dashboard/BalanceCard";
 import FinanceChart from "../components/dashboard/FinanceChart";
 import CategoryChart from "../components/dashboard/CategoryChart";
@@ -9,7 +8,7 @@ import {Link} from "react-router-dom";
 import {Plus, SearchX} from "lucide-react";
 import {BASE_URL} from "../connection";
 
-export default function Dashboard() {
+export default function Dashboard({ searchQuery, setSearchQuery }) {
   const [dashboardData, setDashboardData] = useState({
     totalIncome: 0, 
     totalExpense: 0, 
@@ -18,8 +17,10 @@ export default function Dashboard() {
   });
 
   const [transactions, setTransactions] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [chartData, setChartData] = useState({ labels: [], incomeTrend: [], expenseTrend: [] });
+
+  // tambahan state
+  const [showAll, setShowAll] = useState(false);
 
   // Ambil Data
   useEffect(() => {
@@ -58,17 +59,18 @@ export default function Dashboard() {
   }, []);
 
   // Filter
-  const query = searchQuery.toLowerCase();
+  const query = searchQuery ? searchQuery.toLowerCase() : "";
+
   const filteredTransactions = transactions.filter((item) => {
-    const desc = item.description.toLowerCase();
-    const cat = item.category.toLowerCase();
+    const desc = (item.description || "").toLowerCase();
+    const cat = (item.category || "").toLowerCase();
     return desc.includes(query) || cat.includes(query);
   });
 
-  const isSearching = searchQuery !== "";
+  const isSearching = searchQuery && searchQuery.trim() !== "";
 
   return (
-    <DashboardLayout searchQuery={searchQuery} setSearchQuery={setSearchQuery}>
+    <>
       <div className="max-w-[1400px] mx-auto space-y-8 pb-10">
         
         {/* Header Dashboard */}
@@ -123,7 +125,21 @@ export default function Dashboard() {
                 </div>
 
                 <div className="lg:col-span-12">
-                  <TransactionList data={transactions}/>
+                  <TransactionList 
+                    data={ showAll ? transactions : transactions.slice(0, 5)}
+                  />
+
+                  {/* tambahan tombol lihat semua */}
+                  {transactions.length > 5&& (
+                    <div className="text-center mt-4">
+                      <button
+                        onClick={() => setShowAll(!showAll)}
+                        className="text-indigo-600 font-medium text-sm hover:underline mt-2"
+                      >
+                        {showAll ? "Tampilkan Lebih Sedikit" : "Lihat Semua Transaksi"}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -162,6 +178,6 @@ export default function Dashboard() {
           <Plus size={28} />
         </Link>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

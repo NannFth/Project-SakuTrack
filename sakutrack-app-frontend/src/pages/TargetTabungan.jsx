@@ -9,6 +9,12 @@ export default function TargetTabungan() {
   const [targetAmount, setTargetAmount] = useState("");
   const [currentAmount, setCurrentAmount] = useState("");
 
+  // format rupiah
+  const formatRupiah = (value) => {
+    if (!value) return "";
+    return "Rp " + new Intl.NumberFormat("id-ID").format(value);
+  };
+
   // Ambil Data
   const ambilData = () => {
     const kunci = localStorage.getItem("userId");
@@ -49,6 +55,7 @@ export default function TargetTabungan() {
       },
       body: JSON.stringify({
         name,
+        // hapus titik
         targetAmount: Number(targetAmount),
         currentAmount: Number(currentAmount || 0),
         targetDate: tanggal
@@ -111,9 +118,9 @@ export default function TargetTabungan() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <input type="text" placeholder="Mau beli apa?" value={name} onChange={(e) => setName(e.target.value)} 
               className="p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-sm" />
-            <input type="number" placeholder="Target Rp" value={targetAmount} onChange={(e) => setTargetAmount(e.target.value)} 
+            <input type="text" placeholder="Target Rp" value={formatRupiah(targetAmount)} onChange={(e) => { const raw = e.target.value.replace(/\D/g, ""); setTargetAmount(raw); }} 
               className="p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-sm" />
-            <input type="number" placeholder="Saldo Awal Rp" value={currentAmount} onChange={(e) => setCurrentAmount(e.target.value)} 
+            <input type="text" placeholder="Saldo Awal Rp" value={formatRupiah(currentAmount)} onChange={(e) =>  { const raw = e.target.value.replace(/\D/g, ""); setCurrentAmount(raw); }} 
               className="p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-sm" />
           </div>
           <button onClick={tambahTarget} className="w-full mt-4 bg-indigo-600 text-white p-4 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">
@@ -141,7 +148,7 @@ export default function TargetTabungan() {
                 <div>
                   <h3 className="font-bold text-slate-800 text-lg">{item.name}</h3>
                   <p className="text-xs text-slate-400 font-medium">
-                    Rp {item.currentAmount.toLocaleString()} / Rp {item.targetAmount.toLocaleString()}
+                    {formatRupiah(item.currentAmount)} / {formatRupiah(item.targetAmount)}
                   </p>
                 </div>
 

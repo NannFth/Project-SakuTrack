@@ -45,10 +45,6 @@ export default function TransactionList({ data = [] }) {
           );
         })}
       </div>
-      
-      <button className="w-full mt-6 py-2 text-xs text-slate-400 hover:text-indigo-600 transition border-t pt-4">
-        Lihat Semua Aktivitas
-      </button>
     </div>
   );
 }

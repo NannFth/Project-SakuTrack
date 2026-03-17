@@ -1,34 +1,14 @@
-import { useState, useEffect } from "react";
-import { LayoutDashboard, Wallet, Target, TrendingUp, LogOut, User } from "lucide-react";
+import React from "react";
+import { LayoutDashboard, Wallet, Target, User, LogOut, TrendingUp } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { BASE_URL } from "../../connection";
 
-export default function Sidebar() {
+// terima props user
+export default function Sidebar({ user }){
   const location = useLocation();
   const navigate = useNavigate();
-  const [userName, setUserName] = useState("Memuat...");
 
-  // Ambil Profil
-  useEffect(() => {
-    const kunci = localStorage.getItem("userId");
-
-    fetch(`${BASE_URL}/profile`, {
-      method: "GET",
-      headers: { "Authorization": kunci }
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success === true) {
-          setUserName(data.nama);
-        } else {
-          setUserName("User");
-        }
-      })
-      .catch((error) => {
-        console.log("Gagal ambil data profil:", error);
-        setUserName("Guest");
-      });
-  }, []);
+  // logika inisial
+  const inisial = user?.nama ? user.nama[0].toUpperCase() : "U"
 
   // Navigasi
   const menuItems = [
@@ -46,15 +26,25 @@ export default function Sidebar() {
 
   return (
     <div className="w-64 bg-white h-screen flex flex-col border-r">
+      <div className="p-8">
+        <div className="flex-iems-center gap-3">
+          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-100">
+            <Wallet className="text-white" size={24} />
+          </div>
+          <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparant">
+            SakuTrack
+          </span>
+        </div>
+      </div>
       {/* Header Profil */}
       <div className="p-6">
         <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border">
-          <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600">
-            <User size={20} />
+          <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold">
+            {inisial}
           </div>
           <div className="overflow-hidden">
-            <p className="text-sm font-semibold text-slate-800 truncate">{userName}</p>
-            <p className="text-xs text-slate-400">Akun Siswa</p>
+            <p className="text-sm font-semibold text-slate-800 truncate">{user?.nama || "User"}</p>
+            <p className="text-xs text-slate-400 truncate">{user?.email || "user@gmail.com"}</p>
           </div>
         </div>
       </div>

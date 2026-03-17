@@ -21,7 +21,13 @@ export default function CategoryChart({ transactions = [] }) {
     datasets: [
       {
         data: dataValues,
-        backgroundColor: ["#2200ff", "#ff0000", "#15ff00", "#00ccff", "#ff8c00"],
+        backgroundColor: [
+          "#4F46E5", // Indigo
+          "#F43F5E", // Rose (pengekuaran besar)
+          "#FBBF24", // Amber (kebutuhan)
+          "#8B5CF6", // violet
+          "#0EA5E9" // sky blue
+        ],
         borderWidth: 0,
         hoverOffset: 10,
       },
@@ -37,7 +43,10 @@ export default function CategoryChart({ transactions = [] }) {
         labels: {
           usePointStyle: true,
           padding: 20,
-          font: { size: 11 }
+          font: { 
+            size: 11,
+            family: "'Plus Jakarta Sans', sans-serif",
+          }
         }
       },
       tooltip: {
@@ -45,14 +54,14 @@ export default function CategoryChart({ transactions = [] }) {
         padding: 10,
       }
     },
-    cutout: "70%",
+    cutout: "75%",
   };
 
   // Tampilan
   return (
     <div className="bg-white p-6 rounded-xl border shadow-sm h-full">
       <h2 className="text-xl font-semibold text-slate-800 mb-8">
-        Top Kategori
+        Analisis Pengeluaran
       </h2>
       
       <div className="h-[280px] relative">
@@ -64,8 +73,8 @@ export default function CategoryChart({ transactions = [] }) {
           <>
             <Doughnut data={data} options={options} />
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-lg font-semibold text-slate-400">Total Kategori</span>
-              <span className="text-lg font-semibold text-slate-700">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Kategori</span>
+              <span className="text-2xl font-bold text-slate-800">
                 {dataValues.length} 
               </span>
             </div>

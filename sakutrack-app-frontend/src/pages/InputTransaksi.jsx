@@ -14,6 +14,26 @@ export default function InputTransaksi() {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
 
+  // kategori dinamis
+  const kategori = {
+    expense: [
+      "Makanan/Minuman",
+      "Transportasi",
+      "Pendidikan",
+      "Hiburan",
+      "Lainnya"
+    ],
+
+    income: [
+      "Gaji",
+      "Bonus",
+      "Bulanan",
+      "Freelance",
+      "Hadiah",
+      "Lainnya"
+    ]
+  };
+
   const handleAmountChange = (e) => {
     const value = e.target.value.replace(/[^0-9]/g, "");
     const formatted = value ? "Rp " + value.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "";
@@ -88,14 +108,14 @@ export default function InputTransaksi() {
           <div className="flex p-1 bg-slate-100 rounded-2xl">
             <button
               type="button"
-              onClick={() => setType("expense")}
+              onClick={() => { setType("expense"); setCategory("Makanan/Minuman"); }}
               className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${type === "expense" ? "bg-white text-rose-500 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
             >
               Pengeluaran
             </button>
             <button
               type="button"
-              onClick={() => setType("income")}
+              onClick={() => { setType("income"); setCategory("Bulanan"); }}
               className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${type === "income" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
             >
               Pemasukan
@@ -132,16 +152,17 @@ export default function InputTransaksi() {
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
                 <Tag size={12} /> Kategori
               </label>
+              {/* kategori dinamis */}
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 className="w-full p-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-50 transition-all outline-none text-sm font-bold text-slate-600 appearance-none"
               >
-                <option value="Makanan">Makanan & Minuman</option>
-                <option value="Transportasi">Transportasi</option>
-                <option value="Pendidikan">Pendidikan</option>
-                <option value="Hiburan">Hiburan</option>
-                <option value="Lainnya">Lainnya</option>
+                {kategori[type].map((item, index) => (
+                  <option key={index} value={item}>
+                  {item}
+                  </option>
+                ))}
               </select>
             </div>
 

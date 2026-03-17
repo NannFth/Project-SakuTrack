@@ -1,12 +1,19 @@
+// ambil data user
 export const getUser = () => {
   const id = localStorage.getItem("userId");
-  let name = localStorage.getItem("user_nama");
+
+  let name = localStorage.getItem("nama");
+  let email = localStorage.getItem("email");
 
   if (name === null) {
     name = "User";
   }
 
-  return { id, nama: name };
+  if (email === null) {
+    email = "email@gmail.com";
+  }
+
+  return { id, nama: name, email: email };
 };
 
 // Status Login

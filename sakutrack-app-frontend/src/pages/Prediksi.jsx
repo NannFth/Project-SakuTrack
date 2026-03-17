@@ -39,34 +39,34 @@ export default function Prediksi() {
 
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
   const remainingDays = daysInMonth - currentDay;
-  const dailyAverage = data.expense / currentDay;
+  const dailyAverage = currentDay > 0 ? data.expense / currentDay : 0;
   
-  let daysToSurvive = 0;
-  if (dailyAverage > 0) {
-    daysToSurvive = Math.floor(data.balance / dailyAverage);
-  }
 
   const estimatedBalance = data.balance - (remainingDays * dailyAverage);
   const netFlow = data.income - data.expense;
 
-  // Status
+  // logika baru
+  const incomeRatio = data.income > 0 ? data.expense / data.income : 0;
+  const burnRate = dailyAverage;
+  const safeDays = burnRate > 0 ? Math.floor(data.balance / burnRate) : 0;
+
+  // Status baru 
   let statusLabel = "";
   let statusColor = "";
   let statusAdvice = "";
-  const warningThreshold = data.balance * 0.3;
 
-  if (netFlow >= 0) {
-    statusLabel = "Surplus";
+  if (incomeRatio <= 0.7) {
+    statusLabel = "Aman";
     statusColor = "bg-green-50 text-green-600";
     statusAdvice = "Kondisi keuangan Anda sangat stabil. Pertahankan pola pengeluaran saat ini dan pertimbangkan untuk mengalokasikan dana lebih ke tabungan atau investasi.";
-  } else if (estimatedBalance <= 0 || estimatedBalance < warningThreshold) {
-    statusLabel = "Bahaya (Kritis)";
-    statusColor = "bg-red-50 text-red-600";
-    statusAdvice = "Peringatan: Estimasi saldo akhir Anda berada pada level kritis. Segera kurangi pengeluaran harian secara signifikan guna menghindari defisit total sebelum akhir bulan.";
+  } else if (incomeRatio >= 0.7 && incomeRatio < 1) {
+    statusLabel = "Waspada";
+    statusColor = "bg-red-50 text-orange-600";
+    statusAdvice = "Pengeluaran mulai mendekati pemasukan. Sebaiknya mulai mengurangi pengeluaran tidak penting.";
   } else {
-    statusLabel = "Waspada (Boros)";
-    statusColor = "bg-orange-50 text-orange-600";
-    statusAdvice = "Pengeluaran Anda mulai melampaui pemasukan bulan ini. Disarankan untuk meninjau kembali kategori pengeluaran non-prioritas agar saldo akhir Anda tetap terjaga.";
+    statusLabel = "Bahaya";
+    statusColor = "bg-orange-50 text-red-600";
+    statusAdvice = "Pengeluaran melebihi pemasukan! Segera kontrol keuangan Anda sebelum saldo habis.";
   }
 
   return (
@@ -99,7 +99,7 @@ export default function Prediksi() {
             Saldo Anda Bertahan Selama
           </h2>
           <div className="flex items-baseline gap-2">
-            <span className="text-5xl font-black">{daysToSurvive}</span>
+            <span className="text-5xl font-black">{safeDays}</span>
             <span className="text-xl font-bold">Hari Lagi</span>
           </div>
           <p className="text-[10px] mt-4 opacity-70 italic">
