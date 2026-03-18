@@ -161,6 +161,7 @@ export default function Dashboard({ searchQuery, setSearchQuery }) {
                 <div className="lg:col-span-12">
                   <TransactionList 
                     data={ showAll ? transactions : transactions.slice(0, 5)}
+                    onDelete={hapusTransaksi}
                   />
 
                   {/* tambahan tombol lihat semua */}
@@ -191,7 +192,7 @@ export default function Dashboard({ searchQuery, setSearchQuery }) {
               </div>
 
               <div className="lg:col-span-8">
-                <TransactionList data={filteredTransactions}/>
+                <TransactionList data={filteredTransactions} onDelete={hapusTransaksi} />
                 
                 {filteredTransactions.length === 0 && (
                   <motion.div 

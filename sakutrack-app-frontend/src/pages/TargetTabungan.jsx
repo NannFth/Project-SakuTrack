@@ -128,7 +128,7 @@ export default function TargetTabungan() {
 
   return (
     <>
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8 p-4">
         <header>
           <h1 className="text-3xl font-black text-slate-800 tracking-tight">Target Tabungan</h1>
           <p className="text-slate-400 font-medium text-sm">Langkah kecil untuk mimpi besar Anda.</p>
@@ -154,7 +154,7 @@ export default function TargetTabungan() {
         </div>
 
         {/* List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {savings.map((item) => {
             const persen = Math.min((item.currentAmount / item.targetAmount) * 100, 100);
 

@@ -45,9 +45,12 @@ export default function TransactionList({ data = [], onDelete }) {
 
                 {/* tombol sampah */}
               <button 
-                onClick={() => onDelete(item.id)}
+                onClick={() => {
+                  console.log("Klik hapus ID:", item.id);
+                  onDelete && onDelete(item.id);
+                }}
                 className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all flex-shrink-0"
-                title="Haapus Transaksi"
+                title="Hapus Transaksi"
               >
                 <Trash2 size={16} />
               </button>

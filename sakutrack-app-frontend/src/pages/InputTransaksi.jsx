@@ -1,7 +1,7 @@
+import { Utensils, Car, BookOpen, Gamepad2, Package, Wallet, Banknote, Gift, Briefcase, Coins } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DashboardLayout from "../layouts/DashboardLayout";
-import { ArrowLeft, Wallet, Tag, FileText, Calendar } from "lucide-react";
+import { ArrowLeft, Tag, FileText, Calendar } from "lucide-react";
 import { BASE_URL } from "../connection";
 
 export default function InputTransaksi() {
@@ -13,6 +13,8 @@ export default function InputTransaksi() {
   const [category, setCategory] = useState("Lainnya");
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
+  const [openKategori, setOpenKategori] = useState(false);
+
 
   // kategori dinamis
   const kategori = {
@@ -25,6 +27,7 @@ export default function InputTransaksi() {
     ],
 
     income: [
+      "Uang Harian",
       "Gaji",
       "Bonus",
       "Bulanan",
@@ -32,6 +35,24 @@ export default function InputTransaksi() {
       "Hadiah",
       "Lainnya"
     ]
+  };
+
+  // mapping icon
+  const categoryIcons = {
+    // expense
+    "Makanan/Minuman": <Utensils size={16} />,
+    "Transportasi": <Car size={16} />,
+    "Pendidikan": <BookOpen size={16} />,
+    "Hiburan": <Gamepad2 size={16} />,
+    "Lainnya": <Package size={16} />,
+
+    // income
+    "Uang Harian": <Wallet size={16} />,
+    "Gaji": <Briefcase size={16} />,
+    "Bonus": <Gift size={16} />,
+    "Bulanan": <Coins size={16} />,
+    "Freelance": <Banknote size={16} />,
+    "Hadiah": <Gift size={16} />,
   };
 
   const handleAmountChange = (e) => {
@@ -115,7 +136,7 @@ export default function InputTransaksi() {
             </button>
             <button
               type="button"
-              onClick={() => { setType("income"); setCategory("Bulanan"); }}
+              onClick={() => { setType("income"); setCategory("Uang Harian"); }}
               className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${type === "income" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
             >
               Pemasukan
@@ -153,17 +174,43 @@ export default function InputTransaksi() {
                 <Tag size={12} /> Kategori
               </label>
               {/* kategori dinamis */}
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full p-4 bg-slate-50 border border-transparent rounded-2xl focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-50 transition-all outline-none text-sm font-bold text-slate-600 appearance-none"
-              >
-                {kategori[type].map((item, index) => (
-                  <option key={index} value={item}>
-                  {item}
-                  </option>
-                ))}
-              </select>
+              
+              <div className="relative">
+                <div
+                  onClick={() => setOpenKategori(!openKategori)}
+                  className="w-full p-4 bg-slate-50 rounded-2xl cursor-pointer flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className={type === "income" ? "text-indigo-500" : "text-rose-500"}>
+                      {categoryIcons[category]}
+                    </span>
+                    <span className="text-sm font-bold text-slate-600">
+                      {category}
+                    </span>
+                  </div>
+                </div>
+
+                {/*dropdown*/}
+                {openKategori && (
+                  <div className="absolute z-10 w-full mt-2 bg-white border rounded-2xl shadow-lg overflow-hidden">
+                    {kategori[type].map((item, index) => (
+                      <div 
+                        key={index}
+                        onClick={() => {
+                          setCategory(item);
+                          setOpenKategori(false);
+                        }}
+                        className="flex items-center gap-2 px-4 py-3 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition-all"
+                      >
+                        <span className={type === "income" ? "text-indigo-500" : "text-rose-500"}>
+                          {categoryIcons[item]}
+                        </span>
+                        <span className="text-sm">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="space-y-1">
