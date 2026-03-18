@@ -1,77 +1,103 @@
-const { users } = require('../config/database');
+const pool = require('../config/database');
 
-//Login 
-const login = async (req, res) => {
+// Register
+const register = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { uid, email, name } = req.user;
 
-        if (!email || !password) {
-            return res.status(400).json({
-                success: false,
-                message: 'Email dan password wajib diisi'
+        const [existing] = await pool.execute(
+            'SELECT id FROM users WHERE firebase_uid = ?',
+            [uid]
+        );
+
+        if (existing.length > 0) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Pengguna sudah terdaftar dalam sistem' 
             });
         }
 
-        const user = users.find(u => u.email === email && u.password === password);
+        // Insert user
+        const [result] = await pool.execute(
+            'INSERT INTO users (firebase_uid, email, name) VALUES (?, ?, ?)',
+            [uid, email, name || 'User']
+        );
 
-        if (!user) {
-            return res.status(401).json({
-                success: false,
-                message: 'Email atau password salah'
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            message: 'Login berhasil',
-            data: {
-                userId: user.id,
-                username: user.username,
-                email: user.email
-            }
+        res.status(201).json({ 
+            success: true, 
+            message: 'Pendaftaran pengguna berhasil dilakukan',
+            data: { id: result.insertId, email, name } 
         });
     } catch (error) {
-        console.error(`[AuthError] login: ${error.message}`);
         res.status(500).json({ 
             success: false, 
-            message: 'Terjadi kesalahan pada server' 
+            message: 'Terjadi kesalahan pada server',
+            error: error.message 
         });
     }
 };
 
-//Profil
+// Login
+const login = async (req, res) => {
+    try {
+        const { uid } = req.user;
+
+        // Fetch user
+        const [rows] = await pool.execute(
+            'SELECT id, email, name FROM users WHERE firebase_uid = ?',
+            [uid]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Data pengguna tidak ditemukan' 
+            });
+        }
+
+        res.status(200).json({ 
+            success: true, 
+            message: 'Proses masuk berhasil',
+            data: rows[0] 
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            message: 'Terjadi kesalahan pada server',
+            error: error.message 
+        });
+    }
+};
+
+// Profile
 const getProfile = async (req, res) => {
     try {
-        const userId = req.headers.authorization;
+        const { uid } = req.user;
 
-        if (!userId) {
-            return res.status(401).json({
-                success: false,
-                message: 'Sesi tidak valid, silakan login kembali'
+        const [rows] = await pool.execute(
+            'SELECT id, email, name FROM users WHERE firebase_uid = ?',
+            [uid]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Profil tidak ditemukan' 
             });
         }
 
-        const user = users.find(u => u.id == userId);
-
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: 'User tidak ditemukan'
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            nama: user.username
+        res.status(200).json({ 
+            success: true, 
+            message: 'Data profil berhasil diambil',
+            data: rows[0] 
         });
-
     } catch (error) {
-        console.error(`[AuthError] getProfile: ${error.message}`);
-        res.status(500).json({
-            success: false,
-            message: 'Gagal mengambil data profil'
+        res.status(500).json({ 
+            success: false, 
+            message: 'Terjadi kesalahan pada server',
+            error: error.message 
         });
     }
 };
 
-module.exports = { login, getProfile };
+module.exports = { register, login, getProfile };

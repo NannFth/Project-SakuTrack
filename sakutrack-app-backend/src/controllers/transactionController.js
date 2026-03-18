@@ -1,120 +1,145 @@
-const { transactions } = require('../config/database');
+const pool = require('../config/database');
 
-// Ambil data
+// Fetch Data
 const getTransactions = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const userTransactions = transactions.filter((tx) => tx.userId == userId);
+    try {
+        const { uid } = req.user;
 
-    const sortedData = [...userTransactions].sort((a, b) => new Date(a.date) - new Date(b.date));
+        const [rows] = await pool.execute(
+            'SELECT * FROM transactions WHERE user_id = (SELECT id FROM users WHERE firebase_uid = ?) ORDER BY date ASC',
+            [uid]
+        );
 
-    const trendMap = sortedData.reduce((acc, tx) => {
-      const tgl = tx.date;
-      if (!acc[tgl]) acc[tgl] = { income: 0, expense: 0 };
-      
-      if (tx.type === 'income') acc[tgl].income += tx.amount;
-      else acc[tgl].expense += tx.amount;
-      
-      return acc;
-    }, {});
+        const trendMap = rows.reduce((acc, tx) => {
+            const dateStr = tx.date.toISOString().split('T')[0];
+            if (!acc[dateStr]) acc[dateStr] = { income: 0, expense: 0 };
+            
+            if (tx.type === 'income') acc[dateStr].income += parseFloat(tx.amount);
+            else acc[dateStr].expense += parseFloat(tx.amount);
+            
+            return acc;
+        }, {});
 
-    const labels = Object.keys(trendMap);
-    const incomeTrend = labels.map(t => trendMap[t].income);
-    const expenseTrend = labels.map(t => trendMap[t].expense);
+        const labels = Object.keys(trendMap);
+        const incomeTrend = labels.map(t => trendMap[t].income);
+        const expenseTrend = labels.map(t => trendMap[t].expense);
 
-    res.json({
-      success: true,
-      message: 'Daftar transaksi berhasil diambil',
-      data: userTransactions,
-      chartData: { labels, incomeTrend, expenseTrend }
-    });
-  } catch (error) {
-    console.error(`[Error] getTransactions: ${error.message}`);
-    res.status(500).json({ success: false, message: 'Terjadi kesalahan pada server' });
-  }
+        res.status(200).json({
+            success: true,
+            message: 'Daftar transaksi berhasil diambil',
+            data: rows,
+            chartData: { labels, incomeTrend, expenseTrend }
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            message: 'Terjadi kesalahan pada server saat mengambil data transaksi',
+            error: error.message 
+        });
+    }
 };
 
-// Tambah transaksi
+// Add Data
 const addTransaction = async (req, res) => {
-  try {
-    const { amount, type, category, description, date } = req.body;
+    try {
+        const { amount, type, category, description, date } = req.body;
+        const { uid } = req.user;
 
-    if (!amount || !type || !category || !description || !date) {
-      return res.status(400).json({ success: false, message: 'Data tidak lengkap' });
+        if (!amount || !type || !category || !date) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Informasi transaksi tidak lengkap' 
+            });
+        }
+
+        const [user] = await pool.execute('SELECT id FROM users WHERE firebase_uid = ?', [uid]);
+        const userId = user[0].id;
+
+        await pool.execute(
+            'INSERT INTO transactions (user_id, amount, type, category, description, date) VALUES (?, ?, ?, ?, ?, ?)',
+            [userId, amount, type, category, description || '', date]
+        );
+
+        res.status(201).json({ 
+            success: true, 
+            message: 'Transaksi berhasil ditambahkan' 
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            message: 'Gagal menambahkan data transaksi',
+            error: error.message 
+        });
     }
-
-    const newTransaction = {
-      id: transactions.length ? transactions[transactions.length - 1].id + 1 : 1,
-      userId: req.user.id,
-      amount: Number(amount),
-      type,
-      category,
-      description,
-      date
-    };
-
-    transactions.push(newTransaction);
-    res.status(201).json({ 
-      success: true, 
-      message: 'Transaksi berhasil ditambahkan', 
-      data: newTransaction 
-    });
-  } catch (error) {
-    console.error(`[Error] addTransaction: ${error.message}`);
-    res.status(500).json({ success: false, message: 'Terjadi kesalahan pada server' });
-  }
 };
 
-// Update transaksi
+// Update Data
 const updateTransaction = async (req, res) => {
-  try {
-    const id = parseInt(req.params.id);
-    const userId = req.user.id;
-    const { amount, type, category, description, date } = req.body;
-    
-    const idx = transactions.findIndex(tx => tx.id === id && tx.userId == userId);
+    try {
+        const { id } = req.params;
+        const { amount, type, category, description, date } = req.body;
+        const { uid } = req.user;
 
-    if (idx === -1) {
-      return res.status(404).json({ success: false, message: 'Transaksi tidak ditemukan' });
+        const [result] = await pool.execute(
+            `UPDATE transactions SET 
+                amount = COALESCE(?, amount), 
+                type = COALESCE(?, type), 
+                category = COALESCE(?, category), 
+                description = COALESCE(?, description), 
+                date = COALESCE(?, date) 
+            WHERE id = ? AND user_id = (SELECT id FROM users WHERE firebase_uid = ?)`,
+            [amount, type, category, description, date, id, uid]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Data transaksi tidak ditemukan atau akses ditolak' 
+            });
+        }
+
+        res.status(200).json({ 
+            success: true, 
+            message: 'Data transaksi berhasil diperbarui' 
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            message: 'Gagal memperbarui data transaksi',
+            error: error.message 
+        });
     }
-
-    transactions[idx] = {
-      ...transactions[idx],
-      amount: amount ? Number(amount) : transactions[idx].amount,
-      type: type || transactions[idx].type,
-      category: category || transactions[idx].category,
-      description: description || transactions[idx].description,
-      date: date || transactions[idx].date
-    };
-
-    res.json({ 
-      success: true, 
-      message: 'Transaksi berhasil diperbarui', 
-      data: transactions[idx] 
-    });
-  } catch (error) {
-    console.error(`[Error] updateTransaction: ${error.message}`);
-    res.status(500).json({ success: false, message: 'Terjadi kesalahan pada server' });
-  }
 };
 
-// Hapus transaksi
+// Delete Data
 const deleteTransaction = async (req, res) => {
-  try {
-    const id = parseInt(req.params.id);
-    const userId = req.user.id;
-    const idx = transactions.findIndex(tx => tx.id === id && tx.userId == userId);
+    try {
+        const { id } = req.params;
+        const { uid } = req.user;
 
-    if (idx === -1) {
-      return res.status(404).json({ success: false, message: 'Transaksi tidak ditemukan' });
+        const [result] = await pool.execute(
+            'DELETE FROM transactions WHERE id = ? AND user_id = (SELECT id FROM users WHERE firebase_uid = ?)',
+            [id, uid]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Data transaksi tidak ditemukan untuk dihapus' 
+            });
+        }
+
+        res.status(200).json({ 
+            success: true, 
+            message: 'Data transaksi berhasil dihapus' 
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            message: 'Gagal menghapus data transaksi',
+            error: error.message 
+        });
     }
-
-    transactions.splice(idx, 1);
-    res.json({ success: true, message: 'Transaksi berhasil dihapus' });
-  } catch (error) {
-    console.error(`[Error] deleteTransaction: ${error.message}`);
-    res.status(500).json({ success: false, message: 'Terjadi kesalahan pada server' });
-  }
 };
 
 module.exports = { getTransactions, addTransaction, updateTransaction, deleteTransaction };

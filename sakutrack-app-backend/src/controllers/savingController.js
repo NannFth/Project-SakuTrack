@@ -1,98 +1,128 @@
-const { savings } = require('../config/database');
+const pool = require('../config/database');
 
-// Ambil data
+// Fetch Data
 const getSavings = async (req, res) => {
     try {
-        const userId = req.user.id;
-        const data = savings.filter(s => s.userId === userId);
+        const { uid } = req.user;
 
-        res.json({
+        const [rows] = await pool.execute(
+            'SELECT * FROM savings WHERE user_id = (SELECT id FROM users WHERE firebase_uid = ?)',
+            [uid]
+        );
+
+        res.status(200).json({
             success: true,
             message: 'Data tabungan berhasil diambil',
-            data
+            data: rows
         });
     } catch (error) {
-        console.error(`[Error] getSavings: ${error.message}`);
-        res.status(500).json({ success: false, message: 'Terjadi kesalahan pada server' });
+        res.status(500).json({ 
+            success: false, 
+            message: 'Terjadi kesalahan saat mengambil data tabungan',
+            error: error.message 
+        });
     }
 };
 
-// Tambah tabungan
+// Add Data
 const addSaving = async (req, res) => {
     try {
         const { name, targetAmount, currentAmount, targetDate } = req.body;
+        const { uid } = req.user;
 
-        if (!name || !targetAmount || currentAmount === undefined || !targetDate) {
-            return res.status(400).json({ success: false, message: 'Data tidak lengkap' });
+        if (!name || !targetAmount || !targetDate) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Informasi tabungan tidak lengkap' 
+            });
         }
 
-        const newSaving = {
-            id: savings.length ? savings[savings.length - 1].id + 1 : 1,
-            userId: req.user.id,
-            name,
-            targetAmount: Number(targetAmount),
-            currentAmount: Number(currentAmount),
-            targetDate
-        };
+        const [user] = await pool.execute('SELECT id FROM users WHERE firebase_uid = ?', [uid]);
+        const userId = user[0].id;
 
-        savings.push(newSaving);
+        await pool.execute(
+            'INSERT INTO savings (user_id, name, target_amount, current_amount, target_date) VALUES (?, ?, ?, ?, ?)',
+            [userId, name, targetAmount, currentAmount || 0, targetDate]
+        );
+
         res.status(201).json({
             success: true,
-            message: 'Target tabungan berhasil dibuat',
-            data: newSaving
+            message: 'Target tabungan berhasil dibuat'
         });
     } catch (error) {
-        console.error(`[Error] addSaving: ${error.message}`);
-        res.status(500).json({ success: false, message: 'Gagal menambahkan data tabungan' });
+        res.status(500).json({ 
+            success: false, 
+            message: 'Gagal menambahkan data tabungan',
+            error: error.message 
+        });
     }
 };
 
-// Update tabungan
+// Update Data
 const updateSaving = async (req, res) => {
     try {
-        const id = parseInt(req.params.id);
+        const { id } = req.params;
         const { name, targetAmount, currentAmount, targetDate } = req.body;
+        const { uid } = req.user;
 
-        const index = savings.findIndex(s => s.id === id && s.userId === req.user.id);
+        const [result] = await pool.execute(
+            `UPDATE savings SET 
+                name = COALESCE(?, name), 
+                target_amount = COALESCE(?, target_amount), 
+                current_amount = COALESCE(?, current_amount), 
+                target_date = COALESCE(?, target_date) 
+            WHERE id = ? AND user_id = (SELECT id FROM users WHERE firebase_uid = ?)`,
+            [name, targetAmount, currentAmount, targetDate, id, uid]
+        );
 
-        if (index === -1) {
-            return res.status(404).json({ success: false, message: 'Data tabungan tidak ditemukan' });
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Data tabungan tidak ditemukan atau akses ditolak' 
+            });
         }
 
-        savings[index] = {
-            ...savings[index],
-            name: name || savings[index].name,
-            targetAmount: targetAmount ? Number(targetAmount) : savings[index].targetAmount,
-            currentAmount: currentAmount !== undefined ? Number(currentAmount) : savings[index].currentAmount,
-            targetDate: targetDate || savings[index].targetDate
-        };
-
-        res.json({ 
-            success: true, 
-            message: 'Data tabungan berhasil diperbarui', 
-            data: savings[index] 
+        res.status(200).json({
+            success: true,
+            message: 'Data tabungan berhasil diperbarui'
         });
     } catch (error) {
-        console.error(`[Error] updateSaving: ${error.message}`);
-        res.status(500).json({ success: false, message: 'Gagal memperbarui data' });
+        res.status(500).json({ 
+            success: false, 
+            message: 'Gagal memperbarui data tabungan',
+            error: error.message 
+        });
     }
 };
 
-// Hapus tabungan
+// Delete Data
 const deleteSaving = async (req, res) => {
     try {
-        const id = parseInt(req.params.id);
-        const index = savings.findIndex(s => s.id === id && s.userId === req.user.id);
+        const { id } = req.params;
+        const { uid } = req.user;
 
-        if (index === -1) {
-            return res.status(404).json({ success: false, message: 'Data tidak ditemukan' });
+        const [result] = await pool.execute(
+            'DELETE FROM savings WHERE id = ? AND user_id = (SELECT id FROM users WHERE firebase_uid = ?)',
+            [id, uid]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Data tidak ditemukan untuk dihapus' 
+            });
         }
 
-        savings.splice(index, 1);
-        res.json({ success: true, message: 'Data tabungan berhasil dihapus' });
+        res.status(200).json({
+            success: true,
+            message: 'Data tabungan berhasil dihapus'
+        });
     } catch (error) {
-        console.error(`[Error] deleteSaving: ${error.message}`);
-        res.status(500).json({ success: false, message: 'Gagal menghapus data' });
+        res.status(500).json({ 
+            success: false, 
+            message: 'Gagal menghapus data tabungan',
+            error: error.message 
+        });
     }
 };
 

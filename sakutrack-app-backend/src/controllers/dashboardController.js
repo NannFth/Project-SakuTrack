@@ -1,43 +1,69 @@
-const { transactions, savings } = require('../config/database');
+const pool = require('../config/database');
 
-const getDashboardData = (req, res) => {
+const getDashboardData = async (req, res) => {
     try {
-        const userId = req.user.id;
+        const { uid } = req.user;
 
-        // Ambil data 
-        const userTransactions = transactions.filter(t => t.userId === userId);
-        const userGoals = savings.filter(g => g.userId === userId);
+        // Get user
+        const [userRows] = await pool.execute(
+            'SELECT id FROM users WHERE firebase_uid = ?',
+            [uid]
+        );
 
-        const summary = userTransactions.reduce((acc, curr) => {
-            if (curr.type === 'income') {
-                acc.income += curr.amount;
+        if (userRows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Data pengguna tidak ditemukan'
+            });
+        }
+
+        const userId = userRows[0].id;
+
+        // Get transactions
+        const [transactions] = await pool.execute(
+            'SELECT amount, type, category FROM transactions WHERE user_id = ?',
+            [userId]
+        );
+
+        // Get savings
+        const [savings] = await pool.execute(
+            'SELECT * FROM savings WHERE user_id = ?',
+            [userId]
+        );
+
+        let totalIncome = 0;
+        let totalExpense = 0;
+        let expenseCategories = {};
+
+        for (const item of transactions) {
+            const amount = parseFloat(item.amount);
+            if (item.type === 'income') {
+                totalIncome += amount;
             } else {
-                acc.expense += curr.amount;
-                
-                if (!acc.categories[curr.category]) {
-                    acc.categories[curr.category] = 0;
+                totalExpense += amount;
+                if (!expenseCategories[item.category]) {
+                    expenseCategories[item.category] = 0;
                 }
-                acc.categories[curr.category] += curr.amount;
+                expenseCategories[item.category] += amount;
             }
-            return acc;
-        }, { income: 0, expense: 0, categories: {} });
+        }
 
         res.status(200).json({
             success: true,
             message: 'Data dashboard berhasil diambil',
             data: {
-                totalIncome: summary.income,
-                totalExpense: summary.expense,
-                balance: summary.income - summary.expense,
-                expenseBreakdown: summary.categories, 
-                activeGoals: userGoals
+                totalIncome,
+                totalExpense,
+                balance: totalIncome - totalExpense,
+                expenseBreakdown: expenseCategories,
+                activeGoals: savings
             }
         });
     } catch (error) {
-        console.error(`[DashboardError] getDashboardData: ${error.message}`);
         res.status(500).json({
             success: false,
-            message: 'Terjadi kesalahan pada server'
+            message: 'Terjadi kesalahan pada server',
+            error: error.message
         });
     }
 };

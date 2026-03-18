@@ -1,28 +1,28 @@
-const { users } = require('../config/database');
+const admin = require('../config/firebase');
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
 
-    if (!authHeader) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ 
             success: false, 
-            message: 'Akses ditolak, silakan login terlebih dahulu' 
+            message: 'Akses ditolak, token tidak ditemukan' 
         });
     }
+    
+    const token = authHeader.split(' ')[1];
 
-    const userId = parseInt(authHeader);
-    const user = users.find(u => u.id === userId);
-
-    if (!user) {
+    try {
+        const decodedToken = await admin.auth().verifyIdToken(token);
+        req.user = decodedToken;
+        next(); 
+    } catch (error) {
+        console.error('Firebase Auth Error:', error);
         return res.status(403).json({ 
             success: false, 
-            message: 'Sesi tidak valid atau user tidak ditemukan' 
+            message: 'Sesi tidak valid atau token kadaluwarsa' 
         });
     }
-
-    req.user = user;
-    
-    next();
 };
 
 module.exports = authMiddleware;
