@@ -1,68 +1,60 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { auth } from '../firebase';
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import connection from '../connection';
 
-export default function Login() {
+export default function Register() {
   const navigate = useNavigate();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Login Email
-  const handleLogin = async () => {
-    if (!email || !password) {
-      alert("Harap isi email dan password Anda.");
+  // Register Email
+  const handleRegister = async () => {
+    if (!name || !email || !password) {
+      alert("Harap isi semua kolom yang tersedia.");
       return;
     }
 
     setLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCred = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(userCred.user, { displayName: name });
 
-      const response = await connection.post('/auth/login'); 
-      
-      if (response.data.success) {
-        localStorage.setItem("userId", response.data.data.userId);
-        localStorage.setItem("user_nama", response.data.data.username);
-        
-        alert("Login berhasil. Selamat datang!");
-        navigate('/dashboard');
-      } else {
-        alert("Gagal memverifikasi data di server.");
-      }
+      await connection.post('/auth/register', { name, email });
+
+      alert("Pendaftaran berhasil. Silakan masuk ke akun Anda.");
+      navigate('/login');
     } catch (error) {
       console.error(error);
-      alert("Login gagal. Periksa kembali email atau password Anda.");
+      alert("Pendaftaran gagal. Silakan periksa kembali data Anda.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Login Google
+  // Register Google
   const handleGoogleLogin = async () => {
     setLoading(true);
     const provider = new GoogleAuthProvider();
 
     try {
-      await signInWithPopup(auth, provider);
-      
-      const response = await connection.post('/auth/login');
-      
-      if (response.data.success) {
-        localStorage.setItem("userId", response.data.data.userId);
-        localStorage.setItem("user_nama", response.data.data.username);
-        
-        alert("Login dengan Google berhasil.");
-        navigate('/dashboard');
-      } else {
-        alert("Gagal sinkronisasi data dengan server.");
-      }
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      await connection.post('/auth/register', { 
+        name: user.displayName, 
+        email: user.email 
+      });
+
+      alert("Pendaftaran dengan Google berhasil.");
+      navigate('/login');
     } catch (error) {
       console.error(error);
-      alert("Login dengan Google gagal. Silakan coba lagi.");
+      alert("Pendaftaran dengan Google gagal. Silakan coba lagi.");
     } finally {
       setLoading(false);
     }
@@ -78,12 +70,23 @@ export default function Login() {
           <div className="inline-block p-3 bg-indigo-50 rounded-xl mb-3">
             <h1 className="text-3xl font-black text-indigo-600 tracking-tighter">SakuTrack</h1>
           </div>
-          <h2 className="text-xl font-bold text-slate-800">Halo, Selamat Datang!</h2>
-          <p className="text-slate-400 text-sm mt-1">Kelola keuangan Anda, capai target Anda</p>
+          <h2 className="text-xl font-bold text-slate-800">Buat Akun Baru</h2>
+          <p className="text-slate-400 text-sm mt-1">Mulai kelola keuangan Anda hari ini</p>
         </div>
 
         {/* Input */}
         <div className="space-y-4">
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-500 ml-1">Nama Lengkap</label>
+            <input 
+              type="text" 
+              placeholder="Masukkan nama Anda" 
+              value={name} 
+              onChange={(e) => setName(e.target.value)} 
+              className="w-full p-3 bg-slate-50 border border-transparent rounded-xl focus:bg-white focus:border-indigo-100 focus:ring-2 focus:ring-indigo-50 transition-all outline-none text-sm" 
+            />
+          </div>
+
           <div className="space-y-1">
             <label className="text-xs font-bold text-slate-500 ml-1">Email</label>
             <input 
@@ -99,7 +102,7 @@ export default function Login() {
             <label className="text-xs font-bold text-slate-500 ml-1">Password</label>
             <input 
               type="password" 
-              placeholder="••••••••" 
+              placeholder="Minimal 6 karakter" 
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 
               className="w-full p-3 bg-slate-50 border border-transparent rounded-xl focus:bg-white focus:border-indigo-100 focus:ring-2 focus:ring-indigo-50 transition-all outline-none text-sm" 
@@ -107,12 +110,12 @@ export default function Login() {
           </div>
 
           <button
-            onClick={handleLogin}
+            onClick={handleRegister}
             disabled={loading}
             className={`w-full py-3 rounded-2xl font-bold text-sm transition-all shadow flex items-center justify-center gap-2 mt-4
               ${loading ? 'bg-slate-300 text-slate-500' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
           >
-            {loading ? 'Menghubungkan...' : 'Masuk ke Dashboard'}
+            {loading ? 'Memproses...' : 'Daftar Sekarang'}
           </button>
         </div>
 
@@ -135,14 +138,14 @@ export default function Login() {
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
           </svg>
-          Masuk dengan Google
+          Daftar dengan Google
         </button>
 
-        {/* Link Daftar */}
+        {/* Link Login */}
         <div className="mt-6 text-center text-sm">
-          <span className="text-slate-500">Belum punya akun? </span>
-          <Link to="/register" className="text-indigo-600 font-bold hover:underline">
-            Daftar di sini
+          <span className="text-slate-500">Sudah punya akun? </span>
+          <Link to="/login" className="text-indigo-600 font-bold hover:underline">
+            Masuk di sini
           </Link>
         </div>
 

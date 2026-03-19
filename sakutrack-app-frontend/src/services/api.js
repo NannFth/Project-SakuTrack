@@ -1,11 +1,11 @@
 import axios from 'axios';
 import { getAuth } from 'firebase/auth';
 
-const connection = axios.create({
-    baseURL: 'http://localhost:3000/api',
+const api = axios.create({
+    baseURL: 'http://13.215.250.150:3000/api',
 });
 
-connection.interceptors.request.use(async (config) => {
+api.interceptors.request.use(async (config) => {
     const auth = getAuth();
     const user = auth.currentUser;
 
@@ -18,4 +18,4 @@ connection.interceptors.request.use(async (config) => {
     return Promise.reject(error);
 });
 
-export default connection;
+export default api;
