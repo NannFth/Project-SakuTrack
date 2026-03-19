@@ -42,41 +42,68 @@ export default function DashboardLayout({ children, searchQuery, setSearchQuery 
 
   return (
     <div className="flex min-h-screen bg-slate-50">
-      {openMenu && (
+      {openMenu && openMenu !== "sidebar" && (
         <div 
           className="fixed inset-0 z-[40]"
           onClick={() => setOpenMenu(null)}
         ></div>
       )}
 
-      <aside className="w-64 fixed inset-y-0 left-0 z-50">
+      {/* sidebar dekstop */}
+      <aside className="hidden md:block w-64 fixed inset-y-0 left-0 z-50">
         {/*kirim ke sidebar*/}
         <Sidebar  user={user} />
       </aside>
 
-      <div className="flex-1 ml-64 flex flex-col">
-        
-        <header className="h-20 bg-white border-b sticky top-0 z-[50] px-8 flex items-center justify-between">
-          
-          <div className="relative w-96">
-            <span className="absolute inset-y-0 left-3 flex items-center text-slate-400">
-              <Search size={18} />
-            </span>
-            <input 
-              type="text" 
-              placeholder="Cari transaksi atau kategori..."
-              value={searchQuery} 
-              onChange={(e) => {
-                // Pencarian
-                if (setSearchQuery !== undefined && setSearchQuery !== null) {
-                  setSearchQuery(e.target.value);
-                }
-              }}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-200 outline-none text-sm"
-            />
-          </div>
+      {/* sidebar mobile */}
+      {openMenu === "sidebar" && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/30 z-40"
+            onClick={() => setOpenMenu(null)}
+          />
 
-          <div className="flex items-center gap-3 relative">
+          <aside className="fixed inset-y-0 left-0 w-64 bg-white z-50 transition-transform duration-300 flex flex-col pt-16 shadow-2xl">
+            <div className="flex-1 overflow-y-auto"></div>
+              <Sidebar user={user} />
+          </aside>
+        </>
+      )}
+
+      <div className="flex-1 md:ml-64 flex flex-col">
+        
+        <header className="h-16 md:h-20 bg-white border-b sticky top-0 z-[50] px-4 md:px-8 flex items-center gap-3">
+
+            {/*  tombol sidebar mobile */}
+            {/* kiri */}
+            <button 
+              onClick={() => setOpenMenu("sidebar")}
+              className="md:hidden p-2 rounded-lg hover:bg-slate-100"
+            >
+              ☰
+            </button>
+
+            {/* tengah */}
+            <div className="relative flex-1 max-w-xs sm:max-w-sm md:max-w-md">
+              <span className="absolute inset-y-0 left-3 flex items-center text-slate-400">
+                <Search size={18} />
+              </span>
+              <input
+                type="text" 
+                placeholder="Cari transaksi atau kategori..."
+                value={searchQuery} 
+                onChange={(e) => {
+                  if (setSearchQuery) {
+                    setSearchQuery(e.target.value);
+                  }
+                }}
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-200 outline-none text-sm"
+              />
+            </div>
+
+            {/* kanan */}
+            <div className="flex items-center gap-2 sm:gap-3 ml-auto relative">
+
             {/* notif */}
             <div className="relative">
               <button
@@ -88,7 +115,7 @@ export default function DashboardLayout({ children, searchQuery, setSearchQuery 
               </button>
 
               {openMenu === "notif" && (
-                <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-lg p-4 text-sm z-[60]">
+                <div className="absolute right-0 top-full mt-2 w-64 max-w-[90vw] bg-white shadow-lg rounded-lg p-4 text-sm z-[60]">
                   <h4 className="font-semibold text-sm mb-2 text-slate-800">Notifikasi</h4>
                   <div className="py-6 text-center text-slate-400">
                     <p className="text-slate-500">Belum ada notifikasi</p>
@@ -107,7 +134,7 @@ export default function DashboardLayout({ children, searchQuery, setSearchQuery 
               </button>
 
               {openMenu === "setting" && (
-                <div className="absolute right-0 mt-2 w-56 bg-white shadow-xl border border-slate-100 rounded-xl p-2 z-[60]">
+                <div className="absolute right-0 top-full mt-2 w-56 max-w-[90vw] bg-white shadow-xl border border-slate-100 rounded-xl p-2 z-[60]">
                   <button 
                     onClick={() => {
                       setOpenMenu(null);
@@ -153,7 +180,7 @@ export default function DashboardLayout({ children, searchQuery, setSearchQuery 
               </button>
 
               {openMenu === "profile" && (
-                <div className="absolute right-0 mt-2 w-64 bg-white shadow-xl border border-slate-100 rounded-xl p-4 z-[60]">
+                <div className="absolute right-0 top-full mt-2 w-64 max-w-[90vw] bg-white shadow-xl border border-slate-100 rounded-xl p-4 z-[60]">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 font-bold">
                       {inisial}
@@ -170,7 +197,7 @@ export default function DashboardLayout({ children, searchQuery, setSearchQuery 
           </div>
         </header>
 
-        <main className="p-8 relative z-0">
+        <main className="p-4 md:p-8 relative z-0">
           <div className="max-w-[1400px] mx-auto">
             {children}
           </div>
