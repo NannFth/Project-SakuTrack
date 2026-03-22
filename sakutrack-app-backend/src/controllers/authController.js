@@ -3,7 +3,8 @@ const pool = require('../config/database');
 // Register
 const register = async (req, res) => {
     try {
-        const { uid, email, name } = req.user;
+        const { uid, email } = req.user;
+        const { name } = req.body;
 
         const [existing] = await pool.execute(
             'SELECT id FROM users WHERE firebase_uid = ?',

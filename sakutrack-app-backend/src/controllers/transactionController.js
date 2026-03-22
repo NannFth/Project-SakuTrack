@@ -11,7 +11,12 @@ const getTransactions = async (req, res) => {
         );
 
         const trendMap = rows.reduce((acc, tx) => {
-            const dateStr = tx.date.toISOString().split('T')[0];
+            const d = new Date(tx.date);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${day}`; 
+
             if (!acc[dateStr]) acc[dateStr] = { income: 0, expense: 0 };
             
             if (tx.type === 'income') acc[dateStr].income += parseFloat(tx.amount);
