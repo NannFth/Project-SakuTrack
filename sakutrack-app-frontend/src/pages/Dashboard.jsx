@@ -153,7 +153,7 @@ export default function Dashboard({ searchQuery, setSearchQuery }) {
             <div className="lg:col-span-8">
               <TransactionList data={filteredTransactions} onDelete={deleteTransaction} />
               {filteredTransactions.length === 0 && (
-                <div className="flex flex-col items-center justify-center p-16 bg-white rounded-xl border border-dashed mt-6">
+                <div className="flex flex-col items-center justify-center p-16 bg-white rounded border border-dashed mt-6">
                    <SearchX size={40} className="text-slate-300 mb-3" />
                    <p className="text-slate-400 text-sm">Data transaksi tidak ditemukan.</p>
                 </div>
@@ -163,7 +163,7 @@ export default function Dashboard({ searchQuery, setSearchQuery }) {
         )}
       </AnimatePresence>
 
-      <Link to="/input-transaksi" className="md:hidden fixed bottom-8 right-8 bg-indigo-600 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-lg z-50">
+      <Link to="/input-transaksi" className="md:hidden fixed bottom-8 right-8 bg-indigo-600 text-white w-14 h-14 flex items-center justify-center rounded-full shadow z-50">
         <Plus size={28} />
       </Link>
     </div>

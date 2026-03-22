@@ -11,7 +11,7 @@ export default function Input({ type, value, onChange, placeholder }) {
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none transition"
+      className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:border-blue-500"
     />
   );
 }
