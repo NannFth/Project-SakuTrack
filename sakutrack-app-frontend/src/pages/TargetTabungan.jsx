@@ -45,7 +45,10 @@ export default function TargetTabungan() {
 
   // Validasi target 
   const selesaiTarget = (item) => {
-    if (item.currentAmount < item.targetAmount) {
+    const current = Number(item.currentAmount || item.current_amount || 0);
+    const target = Number(item.targetAmount || item.target_amount || 0);
+
+    if (current < target) {
       alert("Tabungan belum penuh nih, tetap semangat dan pantang menyerah ya!");
       return;
     }
@@ -81,12 +84,20 @@ export default function TargetTabungan() {
   };
 
   // Update Saldo
-  const updateSaldo = (id, saldoSekarang, nominalTambah) => {
-    const totalBaru = saldoSekarang + Number(nominalTambah);
+  const updateSaldo = (id, saldoSekarang, nominalTambah, item) => {
+    const totalBaru = Number(saldoSekarang) + Number(nominalTambah);
+    const tgl = item.targetDate || item.target_date || new Date().toISOString().split('T')[0];
 
-    connection.put(`/savings/${id}`, { currentAmount: totalBaru })
+    const dataLengkap = {
+      name: item.name,
+      targetAmount: Number(item.targetAmount || item.target_amount),
+      currentAmount: totalBaru,
+      targetDate: tgl
+    };
+
+    connection.put(`/savings/${id}`, dataLengkap)
       .then((res) => {
-        if (res.data.success === true) {
+        if (res.data.success === true || res.status === 200) {
           ambilData();
         }
       })
@@ -100,25 +111,25 @@ export default function TargetTabungan() {
     <>
       <div className="max-w-6xl mx-auto space-y-8 p-4">
         <header>
-          <h1 className="text-3xl font-black text-slate-800 tracking-tight">Target Tabungan</h1>
-          <p className="text-slate-400 font-medium text-sm">Langkah kecil untuk mimpi besar Anda.</p>
+          <h1 className="text-3xl font-bold text-slate-800">Target Tabungan</h1>
+          <p className="text-slate-500 text-sm mt-1">Langkah kecil untuk mimpi besar Anda.</p>
         </header>
 
         {/* Form Input Target */}
-        <div className="bg-white p-8 rounded-[24px] shadow-sm border border-slate-50">
-          <div className="flex items-center gap-3 mb-6 text-indigo-600">
+        <div className="bg-white p-6 rounded shadow border border-slate-200">
+          <div className="flex items-center gap-3 mb-6 text-slate-900">
             <Plus size={20} strokeWidth={3} />
-            <h2 className="font-bold uppercase tracking-widest text-xs">Tambah Target Baru</h2>
+            <h2 className="font-bold text-sm">Tambah Target Baru</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <input type="text" placeholder="Mau beli apa?" value={name} onChange={(e) => setName(e.target.value)} 
-              className="p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-sm font-medium" />
+              className="p-3 border border-slate-300 rounded focus:outline-none focus:border-slate-900 text-sm" />
             <input type="text" placeholder="Target Rp" value={formatRupiah(targetAmount)} onChange={(e) => { const raw = e.target.value.replace(/\D/g, ""); setTargetAmount(raw); }} 
-              className="p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-sm font-medium" />
+              className="p-3 border border-slate-300 rounded focus:outline-none focus:border-slate-900 text-sm" />
             <input type="text" placeholder="Saldo Awal Rp" value={formatRupiah(currentAmount)} onChange={(e) =>  { const raw = e.target.value.replace(/\D/g, ""); setCurrentAmount(raw); }} 
-              className="p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-sm font-medium" />
+              className="p-3 border border-slate-300 rounded focus:outline-none focus:border-slate-900 text-sm" />
           </div>
-          <button onClick={tambahTarget} className="w-full mt-4 bg-indigo-600 text-white p-4 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">
+          <button onClick={tambahTarget} className="w-full mt-4 bg-slate-900 text-white p-3 rounded font-bold hover:bg-slate-800">
             Simpan Target
           </button>
         </div>
@@ -126,53 +137,55 @@ export default function TargetTabungan() {
         {/* List Target */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {savings.map((item) => {
-            const persen = Math.min((item.currentAmount / item.targetAmount) * 100, 100);
+            const current = Number(item.currentAmount || item.current_amount || 0);
+            const target = Number(item.targetAmount || item.target_amount || 0);
+            const persen = target > 0 ? Math.min((current / target) * 100, 100) : 0;
 
             return (
-              <div key={item.id} className="bg-white p-6 rounded-2xl shadow-md border border-slate-50 space-y-4">
+              <div key={item.id} className="bg-white p-6 rounded shadow border border-slate-200 space-y-4">
                 <div className="flex justify-between items-start">
-                  <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+                  <div className="p-3 bg-slate-100 text-slate-900 rounded">
                     <Target size={24} />
                   </div>
 
                   <div className="flex gap-2 items-center">
                     <button 
                       onClick={() => selesaiTarget(item)}
-                      className={`p-1.5 rounded-full transition-all ${persen >= 100 ? 'text-emerald-500 hover:bg-emerald-50' : 'text-slate-200'}`}
+                      className={`p-1.5 rounded ${persen >= 100 ? 'text-emerald-600 hover:bg-emerald-50' : 'text-slate-300'}`}
                     >
                       <CheckCircle2 size={20} />
                     </button>
                     <button 
                       onClick={() => hapusTarget(item.id)}
-                      className="p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-all"
+                      className="p-1.5 text-rose-500 hover:bg-rose-50 rounded"
                     >
                       <Trash2 size={20} />
                     </button>
                     <div className="text-right ml-2">
-                      <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Progress</p>
-                      <p className="text-xl font-black text-indigo-600">{persen.toFixed(0)}%</p>
+                      <p className="text-xs font-bold text-slate-400">Progress</p>
+                      <p className="text-xl font-bold text-slate-900">{persen.toFixed(0)}%</p>
                     </div>
                   </div>
                 </div>
 
                 <div>
                   <h3 className="font-bold text-slate-800 text-lg">{item.name}</h3>
-                  <p className="text-xs text-slate-400 font-medium">
-                    {formatRupiah(item.currentAmount)} / {formatRupiah(item.targetAmount)}
+                  <p className="text-sm text-slate-500">
+                    {formatRupiah(current)} / {formatRupiah(target)}
                   </p>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-                  <div className="bg-indigo-500 h-full rounded-full transition-all" style={{ width: `${persen}%` }} />
+                <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                  <div className="bg-slate-900 h-full rounded-full transition-all" style={{ width: `${persen}%` }} />
                 </div>
 
                 {/* Input Tambah Saldo */}
-                <div className="pt-4 border-t border-slate-50 flex gap-2">
+                <div className="pt-4 border-t border-slate-200 flex gap-2">
                   <input 
                     type="text" 
                     placeholder="Tambah nominal..."
-                    className="flex-1 text-xs p-2 bg-slate-50 rounded-xl outline-none focus:ring-1 focus:ring-indigo-300"
+                    className="flex-1 text-sm p-2 border border-slate-300 rounded focus:outline-none focus:border-slate-900"
                     onChange={(e) => {
                       const raw = e.target.value.replace(/\D/g, "");
                       const formatted = raw ? "Rp " + new Intl.NumberFormat("id-ID").format(raw) : "";
@@ -182,13 +195,13 @@ export default function TargetTabungan() {
                       if (e.key === 'Enter') {
                         const rawValue = e.target.value.replace(/\D/g, "");
                         if (rawValue) {
-                          updateSaldo(item.id, item.currentAmount, rawValue);
+                          updateSaldo(item.id, current, rawValue, item);
                           e.target.value = ""; 
                         }
                       }
                     }}
                   />
-                  <div className="text-[10px] text-slate-300 italic flex items-center whitespace-nowrap">Enter untuk simpan</div>
+                  <div className="text-xs text-slate-400 italic flex items-center whitespace-nowrap">Enter untuk simpan</div>
                 </div>
               </div>
             );

@@ -3,32 +3,26 @@ import { ArrowUpRight, ArrowDownLeft, Trash2, Clock } from "lucide-react";
 export default function TransactionList({ data = [], onDelete }) {
   if (data.length === 0) {
     return (
-      <div className="bg-white p-6 rounded-xl border shadow-sm text-center">
-        <p className="text-slate-400 text-sm italic">Belum ada riwayat transaksi</p>
+      <div className="bg-white p-6 rounded border shadow text-center">
+        <p className="text-slate-500 text-sm italic">Belum ada riwayat transaksi</p>
       </div>
     );
   }
 
   // Urutan Transaksi
   const sortedTransactions = [...data].sort((a, b) => {
-    const dateA = new Date(a.date).getTime();
-    const dateB = new Date(b.date).getTime();
+    const inputA = new Date(a.created_at).getTime();
+    const inputB = new Date(b.created_at).getTime();
 
-    if (dateA !== dateB) {
-      return dateB - dateA;
-    }
-    
-    const createdA = new Date(a.created_at).getTime();
-    const createdB = new Date(b.created_at).getTime();
-    return createdB - createdA;
+    return inputB - inputA;
   });
 
   // UI
   return (
-    <div className="bg-white p-6 rounded-xl border shadow-sm h-full">
+    <div className="bg-white p-6 rounded border shadow h-full">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-semibold text-slate-800">Riwayat Transaksi</h2>
-        <span className="text-xs text-indigo-500 bg-indigo-50 px-2 py-1 rounded-lg font-medium">
+        <h2 className="text-lg font-bold text-slate-800">Riwayat Transaksi</h2>
+        <span className="text-xs text-slate-900 bg-slate-100 px-2 py-1 rounded font-bold">
           Terbaru
         </span>
       </div>
@@ -57,25 +51,26 @@ export default function TransactionList({ data = [], onDelete }) {
           });
 
           return (
-            <div key={item.id} className="grid grid-cols-[1fr_auto] items-center gap-4 border-b border-slate-50 pb-3 last:border-0 hover:bg-slate-50/50 transition-colors rounded-lg px-1">
+            <div key={item.id} className="grid grid-cols-[1fr_auto] items-center gap-4 border-b border-slate-200 pb-3 last:border-0 hover:bg-slate-50 rounded px-1">
               
               {/* Icon dan Keterangan */}
               <div className="flex items-center gap-3 overflow-hidden">
-                <div className={`p-2 rounded-lg flex-shrink-0 ${isIncome ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-500"}`}>
+                <div className={`p-2 rounded flex-shrink-0 ${isIncome ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"}`}>
                   {isIncome ? <ArrowUpRight size={16} /> : <ArrowDownLeft size={16} />}
                 </div>
                 
                 <div className="min-w-0">
-                  <p className="font-medium text-slate-800 text-sm truncate">{item.description}</p>
+                  <p className="font-bold text-slate-800 text-sm truncate">{item.description}</p>
                   
                   {/* Tanggal & Jam */}
-                  <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5">
+                  <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5">
                     <span>{formattedDate}</span>
                     
+                    {/* Jam */}
                     {isSameDay && (
                       <>
-                        <span className="w-1 h-1 bg-slate-200 rounded-full"></span>
-                        <div className="flex items-center gap-1 text-slate-400 font-medium">
+                        <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                        <div className="flex items-center gap-1 text-slate-500 font-bold">
                           <Clock size={10} />
                           <span>{formattedTime}</span>
                         </div>
@@ -87,13 +82,13 @@ export default function TransactionList({ data = [], onDelete }) {
 
               {/* Nominal & Tombol Hapus */}
               <div className="flex items-center justify-end gap-4">
-                <p className={`font-bold text-sm whitespace-nowrap ${isIncome ? "text-emerald-600" : "text-rose-500"}`}>
+                <p className={`font-bold text-sm whitespace-nowrap ${isIncome ? "text-emerald-600" : "text-rose-600"}`}>
                   {isIncome ? "+" : "-"} Rp {Number(item.amount).toLocaleString('id-ID')}
                 </p>
 
                 <button 
                   onClick={() => onDelete && onDelete(item.id)}
-                  className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all flex-shrink-0"
+                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded"
                   title="Hapus Transaksi"
                 >
                   <Trash2 size={16} />

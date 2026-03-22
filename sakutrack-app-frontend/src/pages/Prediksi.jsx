@@ -89,10 +89,10 @@ export default function Prediksi() {
       <div className="max-w-6xl mx-auto space-y-8 p-4">
         
         {/* Navigasi Bulan */}
-        <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+        <div className="flex items-center justify-between bg-white p-4 rounded border shadow-sm">
           <button 
             onClick={() => changeMonth(-1)} 
-            className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+            className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded transition-colors"
             title="Bulan Sebelumnya"
           >
             <ChevronLeft size={24} />
@@ -104,7 +104,7 @@ export default function Prediksi() {
           
           <button 
             onClick={() => changeMonth(1)} 
-            className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+            className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded transition-colors"
             title="Bulan Berikutnya"
           >
             <ChevronRight size={24} />
@@ -115,8 +115,8 @@ export default function Prediksi() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Data */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
-            <h2 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-4">Data Bulan Ini</h2>
+          <div className="bg-white p-6 rounded shadow-sm border border-slate-200 flex flex-col justify-between">
+            <h2 className="text-xs font-bold text-slate-500 mb-4">Data Bulan Ini</h2>
             <div className="space-y-4">
               <div className="flex justify-between text-sm">
                 <span className="text-slate-500">Rata-rata Pengeluaran/Hari</span>
@@ -130,34 +130,34 @@ export default function Prediksi() {
           </div>
 
           {/* Indikator Bertahan */}
-          <div className="bg-indigo-600 p-6 rounded-xl shadow-lg text-white text-center flex flex-col justify-center">
-            <h2 className="text-[10px] font-bold uppercase opacity-80 mb-2">Saku Bertahan Selama</h2>
+          <div className="bg-slate-900 p-6 rounded shadow text-white text-center flex flex-col justify-center">
+            <h2 className="text-xs font-bold opacity-80 mb-2">Saku Bertahan Selama</h2>
             <div className="flex justify-center items-baseline gap-1">
               <span className="text-5xl font-black">{safeDays}</span>
               <span className="text-lg font-bold">Hari</span>
             </div>
-            <p className="text-sm font-medium opacity-80 italic mt-1">
+            <p className="text-sm font-medium opacity-80 mt-1">
               {safeDays < remainingDays ? "Habis sebelum akhir bulan" : "Cukup sampai dapat bulanan"} 
             </p>
           </div>
 
           {/* Estimasi Saldo Akhir */}
-          <div className="md:col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center">
+          <div className="md:col-span-2 bg-white p-6 rounded border border-slate-200 shadow-sm flex justify-between items-center">
             <div>
-              <h2 className="text-[10px] font-bold text-slate-400 uppercase">Estimasi Saldo Akhir</h2>
-              <p className="text-2xl font-black text-slate-800 mt-1">
+              <h2 className="text-xs font-bold text-slate-500">Estimasi Saldo Akhir</h2>
+              <p className="text-2xl font-bold text-slate-800 mt-1">
                 Rp {Math.max(0, Math.round(estimatedBalance)).toLocaleString()}
               </p>
             </div>
-            <div className={`px-4 py-2 rounded-lg font-bold text-[10px] uppercase tracking-wide ${statusColor}`}>
+            <div className={`px-4 py-2 rounded font-bold text-xs ${statusColor}`}>
               {statusLabel}
             </div>
           </div>
 
           {/* Saran Action Plan */}
-          <div className="md:col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+          <div className="md:col-span-2 bg-white p-6 rounded border border-slate-200 shadow-sm">
             <p className="text-sm text-slate-600 leading-relaxed">{statusAdvice}</p>
-            <p className="text-sm font-bold text-indigo-600 mt-2">{actionPlan}</p>
+            <p className="text-sm font-bold text-slate-900 mt-2">{actionPlan}</p>
           </div>
         </div>
       </div>

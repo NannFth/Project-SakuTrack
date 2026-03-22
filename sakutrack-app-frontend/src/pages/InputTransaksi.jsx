@@ -7,11 +7,17 @@ import connection from "../connection";
 export default function InputTransaksi() {
   const navigate = useNavigate();
   
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const formattedToday = `${yyyy}-${mm}-${dd}`;
+
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState("expense");
   const [category, setCategory] = useState("Lainnya");
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(formattedToday);
   const [loading, setLoading] = useState(false);
   const [openKategori, setOpenKategori] = useState(false);
 
@@ -22,17 +28,17 @@ export default function InputTransaksi() {
   };
 
   const categoryIcons = {
-    "Makanan/Minuman": <Utensils size={16} />,
-    "Transportasi": <Car size={16} />,
-    "Pendidikan": <BookOpen size={16} />,
-    "Hiburan": <Gamepad2 size={16} />,
-    "Lainnya": <Package size={16} />,
-    "Uang Harian": <Wallet size={16} />,
-    "Gaji": <Briefcase size={16} />,
-    "Bonus": <Gift size={16} />,
-    "Bulanan": <Coins size={16} />,
-    "Freelance": <Banknote size={16} />,
-    "Hadiah": <Gift size={16} />,
+    "Makanan/Minuman": <Utensils size={18} />,
+    "Transportasi": <Car size={18} />,
+    "Pendidikan": <BookOpen size={18} />,
+    "Hiburan": <Gamepad2 size={18} />,
+    "Lainnya": <Package size={18} />,
+    "Uang Harian": <Wallet size={18} />,
+    "Gaji": <Briefcase size={18} />,
+    "Bonus": <Gift size={18} />,
+    "Bulanan": <Coins size={18} />,
+    "Freelance": <Banknote size={18} />,
+    "Hadiah": <Gift size={18} />,
   };
 
   const handleAmountChange = (e) => {
@@ -75,96 +81,98 @@ export default function InputTransaksi() {
 
   return (
     <>
-      <div className="max-w-2xl mx-auto">
-        <div className="flex items-center gap-4 mb-6">
-          <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
-            <ArrowLeft size={24} className="text-slate-600" />
+      <div className="max-w-3xl mx-auto py-2">
+        <div className="flex items-center gap-4 mb-7">
+          <button onClick={() => navigate(-1)} className="p-2.5 bg-white hover:bg-slate-100 rounded-lg shadow-sm border border-slate-300 transition-colors">
+            <ArrowLeft size={24} className="text-slate-800" />
           </button>
           <div>
-            <h1 className="text-3xl font-black text-slate-800 tracking-tight">Catat Transaksi</h1>
-            <p className="text-slate-400 font-medium text-sm">Masukan detail pengeluaran atau pemasukan Anda.</p>
+            <h1 className="text-3xl font-bold text-slate-900">Kelola Transaksi Harian</h1>
+            <p className="text-slate-500 text-base mt-0.5">Masukan detail transaksi Anda.</p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl shadow-md border border-slate-50 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-white p-7 rounded-xl shadow-md border border-slate-300 space-y-7">
           {/* Tipe */}
-          <div className="flex p-1 bg-slate-100 rounded-2xl">
+          <div className="flex p-1 bg-slate-100 rounded-lg gap-1.5">
             <button
               type="button"
               onClick={() => { setType("expense"); setCategory("Makanan/Minuman"); }}
-              className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${type === "expense" ? "bg-white text-rose-500 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+              className={`flex-1 py-3 rounded text-base font-bold transition-all ${type === "expense" ? "bg-white text-rose-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
             >
               Pengeluaran
             </button>
             <button
               type="button"
               onClick={() => { setType("income"); setCategory("Uang Harian"); }}
-              className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${type === "income" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+              className={`flex-1 py-3 rounded text-base font-bold transition-all ${type === "income" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
             >
               Pemasukan
             </button>
           </div>
 
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Tanggal */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 ml-1">
-                <Calendar size={12} /> Tanggal Transaksi
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-600 flex items-center gap-2 ml-1">
+                <Calendar size={14} /> Tanggal Transaksi
               </label>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full p-3 bg-slate-50 border border-transparent rounded-xl focus:bg-white focus:border-indigo-100 focus:ring-2 focus:ring-indigo-50 outline-none text-sm font-bold text-slate-600"
+                className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-slate-900 text-sm font-bold text-slate-800"
               />
             </div>
 
             {/* Nominal */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 ml-1">
-                <Wallet size={12} /> Nominal
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-600 flex items-center gap-2 ml-1">
+                <Wallet size={14} /> Nominal
               </label>
               <input
                 type="text"
                 placeholder="Rp 0"
                 value={amount}
                 onChange={handleAmountChange}
-                className="w-full p-3 bg-slate-50 border border-transparent rounded-xl focus:bg-white focus:border-indigo-100 focus:ring-2 focus:ring-indigo-50 outline-none text-lg font-bold text-slate-800"
+                className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-slate-900 text-xl font-bold text-slate-900"
               />
             </div>
+          </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Kategori */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 ml-1">
-                <Tag size={12} /> Kategori
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-600 flex items-center gap-2 ml-1">
+                <Tag size={14} /> Kategori
               </label>
               <div className="relative">
                 <div
                   onClick={() => setOpenKategori(!openKategori)}
-                  className="w-full p-4 bg-slate-50 rounded-2xl cursor-pointer flex items-center justify-between"
+                  className="w-full p-3 bg-white border border-slate-300 rounded-lg cursor-pointer flex items-center justify-between"
                 >
                   <div className="flex items-center gap-2">
-                    <span className={type === "income" ? "text-indigo-500" : "text-rose-500"}>
+                    <span className={type === "income" ? "text-emerald-600" : "text-rose-600"}>
                       {categoryIcons[category]}
                     </span>
-                    <span className="text-sm font-bold text-slate-600">{category}</span>
+                    <span className="text-sm font-bold text-slate-800">{category}</span>
                   </div>
                 </div>
 
                 {/* Scroller */}
                 {openKategori && (
-                  <div className="absolute z-10 w-full mt-2 bg-white border rounded-2xl shadow-lg overflow-hidden">
-                    <div className="max-h-[160px] overflow-y-auto">
+                  <div className="absolute z-10 w-full mt-1.5 bg-white border border-slate-300 rounded-lg shadow-lg overflow-hidden">
+                    <div className="max-h-[200px] overflow-y-auto">
                       {kategori[type].map((item, index) => (
                         <div 
                           key={index}
                           onClick={() => { setCategory(item); setOpenKategori(false); }}
-                          className="flex items-center gap-2 px-4 py-3 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition-all"
+                          className="flex items-center gap-2.5 px-4 py-3 hover:bg-slate-100 hover:text-slate-900 cursor-pointer transition-colors"
                         >
-                          <span className={type === "income" ? "text-indigo-500" : "text-rose-500"}>
+                          <span className={type === "income" ? "text-emerald-600" : "text-rose-600"}>
                             {categoryIcons[item]}
                           </span>
-                          <span className="text-sm">{item}</span>
+                          <span className="text-sm font-medium">{item}</span>
                         </div>
                       ))}
                     </div>
@@ -174,28 +182,30 @@ export default function InputTransaksi() {
             </div>
 
             {/* Catatan */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 ml-1">
-                <FileText size={12} /> Catatan
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-600 flex items-center gap-2 ml-1">
+                <FileText size={14} /> Catatan
               </label>
               <input
                 type="text"
                 placeholder="Contoh: Beli Kopi"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full p-3 bg-slate-50 border border-transparent rounded-xl focus:bg-white focus:border-indigo-100 focus:ring-2 focus:ring-indigo-50 outline-none text-sm"
+                className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-slate-900 text-sm"
               />
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full py-4 rounded-xl font-bold text-sm transition-all shadow flex items-center justify-center gap-2
-              ${loading ? 'bg-slate-200 text-slate-400' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
-          >
-            {loading ? 'Memproses...' : 'Simpan Transaksi'}
-          </button>
+          <div className="pt-4">
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full py-4 rounded-lg font-bold text-lg flex items-center justify-center gap-2
+                ${loading ? 'bg-slate-200 text-slate-400' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
+            >
+              {loading ? 'Memproses...' : 'Simpan Transaksi'}
+            </button>
+          </div>
         </form>
       </div>
     </>

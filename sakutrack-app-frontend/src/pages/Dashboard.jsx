@@ -42,7 +42,14 @@ export default function Dashboard({ searchQuery, setSearchQuery }) {
             const dateB = new Date(b.date).getTime();
             if (isNaN(dateA)) return 1;
             if (isNaN(dateB)) return -1;
-            return dateB - dateA;
+            
+            if (dateA !== dateB) {
+              return dateB - dateA;
+            }
+            
+            const createdA = new Date(a.created_at).getTime();
+            const createdB = new Date(b.created_at).getTime();
+            return createdB - createdA;
           });
 
           setTransactions(sortedData);
@@ -137,7 +144,7 @@ export default function Dashboard({ searchQuery, setSearchQuery }) {
                 />
                 {transactions.length > 5 && (
                   <div className="text-center mt-4">
-                    <button onClick={() => setShowAll(!showAll)} className="text-indigo-600 font-medium text-sm hover:underline mt-2">
+                    <button onClick={() => setShowAll(!showAll)} className="text-slate-900 font-bold text-sm hover:underline mt-2">
                       {showAll ? "Tampilkan Lebih Sedikit" : "Lihat Semua Transaksi"}
                     </button>
                   </div>
@@ -163,7 +170,7 @@ export default function Dashboard({ searchQuery, setSearchQuery }) {
         )}
       </AnimatePresence>
 
-      <Link to="/input-transaksi" className="md:hidden fixed bottom-8 right-8 bg-indigo-600 text-white w-14 h-14 flex items-center justify-center rounded-full shadow z-50">
+      <Link to="/input-transaksi" className="md:hidden fixed bottom-8 right-8 bg-slate-900 text-white w-14 h-14 flex items-center justify-center rounded-full shadow z-50">
         <Plus size={28} />
       </Link>
     </div>
