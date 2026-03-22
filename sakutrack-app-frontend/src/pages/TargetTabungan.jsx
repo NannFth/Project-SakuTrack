@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"; 
 import { Plus, Target, Trash2, CheckCircle2 } from "lucide-react";
-import { BASE_URL } from "../connection";
+import connection from "../connection";
 
 export default function TargetTabungan() {
   const [savings, setSavings] = useState([]);
@@ -8,23 +8,17 @@ export default function TargetTabungan() {
   const [targetAmount, setTargetAmount] = useState("");
   const [currentAmount, setCurrentAmount] = useState("");
 
-  // format rupiah
   const formatRupiah = (value) => {
     if (!value) return "";
     return "Rp " + new Intl.NumberFormat("id-ID").format(value);
   };
 
-  // Ambil Data
+  // Ambil data
   const ambilData = () => {
-    const kunci = localStorage.getItem("userId");
-    
-    fetch(`${BASE_URL}/savings`, {
-      headers: { "Authorization": kunci }
-    })
-      .then((res) => res.json())
-      .then((result) => {
-        if (result.success === true) {
-          setSavings(result.data);
+    connection.get('/savings')
+      .then((res) => {
+        if (res.data.success === true) {
+          setSavings(res.data.data);
         }
       })
       .catch((err) => {
@@ -36,25 +30,20 @@ export default function TargetTabungan() {
     ambilData();
   }, []);
 
-  //
+  // Hapus tabungan
   const hapusTarget = (id) => {
     if (window.confirm("Yakin mau hapus target tabungan ini?")) {
-      const kunci = localStorage.getItem("userId");
-      fetch(`${BASE_URL}/savings/${id}`, {
-        method: 'DELETE',
-        headers: { "Authorization": kunci}
-      })
-      .then((res) => res.json())
-      .then((result) => {
-        if (result.success === true) {
-          ambilData();
-        }
-      })
-      .catch((err) => console.log("Gagal hapus:", err));
+      connection.delete(`/savings/${id}`)
+        .then((res) => {
+          if (res.data.success === true) {
+            ambilData();
+          }
+        })
+        .catch((err) => console.log("Gagal hapus:", err));
     }
   };
 
-  // tandai selesai
+  // Validasi target 
   const selesaiTarget = (item) => {
     if (item.currentAmount < item.targetAmount) {
       alert("Tabungan belum penuh nih, tetap semangat dan pantang menyerah ya!");
@@ -62,7 +51,7 @@ export default function TargetTabungan() {
     }
     alert(`Selamat! Target "${item.name}" sudah tercapai!`);
   }
-  // Simpan Target
+
   const tambahTarget = () => {
     if (name === "" || targetAmount === "") {
       alert("Wajib isi nama dan target.");
@@ -70,25 +59,15 @@ export default function TargetTabungan() {
     }
 
     const tanggal = new Date().toISOString().split('T')[0];
-    const kunci = localStorage.getItem("userId");
 
-    fetch(`${BASE_URL}/savings`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': kunci 
-      },
-      body: JSON.stringify({
+    connection.post('/savings', {
         name,
-        // hapus titik
         targetAmount: Number(targetAmount),
         currentAmount: Number(currentAmount || 0),
         targetDate: tanggal
       })
-    })
-      .then((res) => res.json())
-      .then((result) => {
-        if (result.success === true) {
+      .then((res) => {
+        if (res.data.success === true) {
           ambilData();
           setName(""); 
           setTargetAmount(""); 
@@ -101,22 +80,13 @@ export default function TargetTabungan() {
       });
   };
 
-  // Tambah Saldo
+  // Update Saldo
   const updateSaldo = (id, saldoSekarang, nominalTambah) => {
-    const kunci = localStorage.getItem("userId");
     const totalBaru = saldoSekarang + Number(nominalTambah);
 
-    fetch(`${BASE_URL}/savings/${id}`, {
-      method: 'PUT',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': kunci 
-      },
-      body: JSON.stringify({ currentAmount: totalBaru })
-    })
-      .then((res) => res.json())
-      .then((result) => {
-        if (result.success === true) {
+    connection.put(`/savings/${id}`, { currentAmount: totalBaru })
+      .then((res) => {
+        if (res.data.success === true) {
           ambilData();
         }
       })
@@ -134,7 +104,7 @@ export default function TargetTabungan() {
           <p className="text-slate-400 font-medium text-sm">Langkah kecil untuk mimpi besar Anda.</p>
         </header>
 
-        {/* Input */}
+        {/* Form Input Target */}
         <div className="bg-white p-8 rounded-[24px] shadow-sm border border-slate-50">
           <div className="flex items-center gap-3 mb-6 text-indigo-600">
             <Plus size={20} strokeWidth={3} />
@@ -142,18 +112,18 @@ export default function TargetTabungan() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <input type="text" placeholder="Mau beli apa?" value={name} onChange={(e) => setName(e.target.value)} 
-              className="p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-sm" />
+              className="p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-sm font-medium" />
             <input type="text" placeholder="Target Rp" value={formatRupiah(targetAmount)} onChange={(e) => { const raw = e.target.value.replace(/\D/g, ""); setTargetAmount(raw); }} 
-              className="p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-sm" />
+              className="p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-sm font-medium" />
             <input type="text" placeholder="Saldo Awal Rp" value={formatRupiah(currentAmount)} onChange={(e) =>  { const raw = e.target.value.replace(/\D/g, ""); setCurrentAmount(raw); }} 
-              className="p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-sm" />
+              className="p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all text-sm font-medium" />
           </div>
           <button onClick={tambahTarget} className="w-full mt-4 bg-indigo-600 text-white p-4 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">
             Simpan Target
           </button>
         </div>
 
-        {/* List */}
+        {/* List Target */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {savings.map((item) => {
             const persen = Math.min((item.currentAmount / item.targetAmount) * 100, 100);
@@ -174,7 +144,7 @@ export default function TargetTabungan() {
                     </button>
                     <button 
                       onClick={() => hapusTarget(item.id)}
-                      className="p-1.5 text-rose-400 hover: text-rose-600 hover:bg-rose-50 rounded-full transition-all"
+                      className="p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-all"
                     >
                       <Trash2 size={20} />
                     </button>
@@ -192,15 +162,16 @@ export default function TargetTabungan() {
                   </p>
                 </div>
 
+                {/* Progress Bar */}
                 <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
                   <div className="bg-indigo-500 h-full rounded-full transition-all" style={{ width: `${persen}%` }} />
                 </div>
 
-                {/* Update */}
+                {/* Input Tambah Saldo */}
                 <div className="pt-4 border-t border-slate-50 flex gap-2">
                   <input 
                     type="text" 
-                    placeholder="Masukkan nominal tambahan..."
+                    placeholder="Tambah nominal..."
                     className="flex-1 text-xs p-2 bg-slate-50 rounded-xl outline-none focus:ring-1 focus:ring-indigo-300"
                     onChange={(e) => {
                       const raw = e.target.value.replace(/\D/g, "");
@@ -217,7 +188,7 @@ export default function TargetTabungan() {
                       }
                     }}
                   />
-                  <div className="text-[10px] text-slate-300 italic flex items-center whitespace-nowrap">Enter untuk nambah</div>
+                  <div className="text-[10px] text-slate-300 italic flex items-center whitespace-nowrap">Enter untuk simpan</div>
                 </div>
               </div>
             );

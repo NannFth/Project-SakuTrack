@@ -71,7 +71,7 @@ export default function Register() {
             <h1 className="text-3xl font-black text-indigo-600 tracking-tighter">SakuTrack</h1>
           </div>
           <h2 className="text-xl font-bold text-slate-800">Buat Akun Baru</h2>
-          <p className="text-slate-400 text-sm mt-1">Mulai kelola keuangan Anda hari ini</p>
+          <p className="text-slate-400 text-sm mt-1">Mulai kelola keuangan kamu hari ini!</p>
         </div>
 
         {/* Input */}

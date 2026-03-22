@@ -1,21 +1,36 @@
 import axios from 'axios';
-import { getAuth } from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 const connection = axios.create({
-    baseURL: 'http://localhost:3000/api',
+  baseURL: 'http://13.229.64.163:3000/api',
 });
 
-connection.interceptors.request.use(async (config) => {
+const getValidToken = () => {
+  return new Promise((resolve) => {
     const auth = getAuth();
-    const user = auth.currentUser;
-
-    if (user) {
-        const token = await user.getIdToken();
-        config.headers.Authorization = `Bearer ${token}`;
+    if (auth.currentUser) {
+      auth.currentUser.getIdToken().then(resolve);
+    } else {
+      // Refresh
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        unsubscribe();
+        if (user) {
+          const token = await user.getIdToken();
+          resolve(token);
+        } else {
+          resolve(null);
+        }
+      });
     }
-    return config;
-}, (error) => {
-    return Promise.reject(error);
+  });
+};
+
+connection.interceptors.request.use(async (config) => {
+  const token = await getValidToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 export default connection;

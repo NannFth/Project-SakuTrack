@@ -2,7 +2,7 @@ import { Utensils, Car, BookOpen, Gamepad2, Package, Wallet, Banknote, Gift, Bri
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Tag, FileText, Calendar } from "lucide-react";
-import { BASE_URL } from "../connection";
+import connection from "../connection";
 
 export default function InputTransaksi() {
   const navigate = useNavigate();
@@ -15,38 +15,18 @@ export default function InputTransaksi() {
   const [loading, setLoading] = useState(false);
   const [openKategori, setOpenKategori] = useState(false);
 
-
-  // kategori dinamis
+  // List Kategori
   const kategori = {
-    expense: [
-      "Makanan/Minuman",
-      "Transportasi",
-      "Pendidikan",
-      "Hiburan",
-      "Lainnya"
-    ],
-
-    income: [
-      "Uang Harian",
-      "Gaji",
-      "Bonus",
-      "Bulanan",
-      "Freelance",
-      "Hadiah",
-      "Lainnya"
-    ]
+    expense: ["Makanan/Minuman", "Transportasi", "Pendidikan", "Hiburan", "Lainnya"],
+    income: ["Uang Harian", "Gaji", "Bonus", "Bulanan", "Freelance", "Hadiah", "Lainnya"]
   };
 
-  // mapping icon
   const categoryIcons = {
-    // expense
     "Makanan/Minuman": <Utensils size={16} />,
     "Transportasi": <Car size={16} />,
     "Pendidikan": <BookOpen size={16} />,
     "Hiburan": <Gamepad2 size={16} />,
     "Lainnya": <Package size={16} />,
-
-    // income
     "Uang Harian": <Wallet size={16} />,
     "Gaji": <Briefcase size={16} />,
     "Bonus": <Gift size={16} />,
@@ -61,7 +41,6 @@ export default function InputTransaksi() {
     setAmount(formatted);
   };
 
-  // Simpan
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -71,50 +50,34 @@ export default function InputTransaksi() {
     }
 
     setLoading(true);
-
-    const kunci = localStorage.getItem("userId");
     const cleanAmount = Number(amount.replace(/[^0-9]/g, ""));
 
-    // Kirim Data
-    fetch(`${BASE_URL}/transactions`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': kunci
-      },
-      body: JSON.stringify({
+    connection.post('/transactions', {
         amount: cleanAmount,
         type: type,
         category: category,
         description: description,
         date: date
       })
-    })
-      .then((response) => response.json())
-      .then((result) => {
-        if (result.success === true) {
+      .then((res) => {
+        if (res.data.success) {
           navigate("/dashboard");
         } else {
-          alert(`Gagal menyimpan transaksi: ${result.message}`);
+          alert(`Gagal menyimpan: ${res.data.message}`);
         }
       })
       .catch((error) => {
-        console.log("Error server:", error);
+        console.error("Error server:", error);
         alert("Terjadi kesalahan pada sistem.");
       })
-      .finally(() => {
-        setLoading(false);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (
     <>
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
-          <button 
-            onClick={() => navigate(-1)}
-            className="p-2 hover:bg-slate-100 rounded-full transition-colors"
-          >
+          <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
             <ArrowLeft size={24} className="text-slate-600" />
           </button>
           <div>
@@ -123,9 +86,8 @@ export default function InputTransaksi() {
           </div>
         </div>
 
-        {/* Input */}
         <form onSubmit={handleSubmit} className="bg-white p-8 rounded-2xl shadow-md border border-slate-50 space-y-6">
-          
+          {/* Tipe */}
           <div className="flex p-1 bg-slate-100 rounded-2xl">
             <button
               type="button"
@@ -144,20 +106,22 @@ export default function InputTransaksi() {
           </div>
 
           <div className="space-y-4">
+            {/* Tanggal */}
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 ml-1">
                 <Calendar size={12} /> Tanggal Transaksi
               </label>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full p-3 bg-slate-50 border border-transparent rounded-xl focus:bg-white focus:border-indigo-100 focus:ring-2 focus:ring-indigo-50 transition-all outline-none text-sm font-bold text-slate-600"
+                className="w-full p-3 bg-slate-50 border border-transparent rounded-xl focus:bg-white focus:border-indigo-100 focus:ring-2 focus:ring-indigo-50 outline-none text-sm font-bold text-slate-600"
               />
             </div>
 
+            {/* Nominal */}
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 ml-1">
                 <Wallet size={12} /> Nominal
               </label>
               <input
@@ -165,16 +129,15 @@ export default function InputTransaksi() {
                 placeholder="Rp 0"
                 value={amount}
                 onChange={handleAmountChange}
-                className="w-full p-3 bg-slate-50 border border-transparent rounded-xl focus:bg-white focus:border-indigo-100 focus:ring-2 focus:ring-indigo-50 transition-all outline-none text-lg font-bold text-slate-800"
+                className="w-full p-3 bg-slate-50 border border-transparent rounded-xl focus:bg-white focus:border-indigo-100 focus:ring-2 focus:ring-indigo-50 outline-none text-lg font-bold text-slate-800"
               />
             </div>
 
+            {/* Kategori */}
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 ml-1">
                 <Tag size={12} /> Kategori
               </label>
-              {/* kategori dinamis */}
-              
               <div className="relative">
                 <div
                   onClick={() => setOpenKategori(!openKategori)}
@@ -184,37 +147,35 @@ export default function InputTransaksi() {
                     <span className={type === "income" ? "text-indigo-500" : "text-rose-500"}>
                       {categoryIcons[category]}
                     </span>
-                    <span className="text-sm font-bold text-slate-600">
-                      {category}
-                    </span>
+                    <span className="text-sm font-bold text-slate-600">{category}</span>
                   </div>
                 </div>
 
-                {/*dropdown*/}
+                {/* Scroller */}
                 {openKategori && (
                   <div className="absolute z-10 w-full mt-2 bg-white border rounded-2xl shadow-lg overflow-hidden">
-                    {kategori[type].map((item, index) => (
-                      <div 
-                        key={index}
-                        onClick={() => {
-                          setCategory(item);
-                          setOpenKategori(false);
-                        }}
-                        className="flex items-center gap-2 px-4 py-3 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition-all"
-                      >
-                        <span className={type === "income" ? "text-indigo-500" : "text-rose-500"}>
-                          {categoryIcons[item]}
-                        </span>
-                        <span className="text-sm">{item}</span>
-                      </div>
-                    ))}
+                    <div className="max-h-[160px] overflow-y-auto">
+                      {kategori[type].map((item, index) => (
+                        <div 
+                          key={index}
+                          onClick={() => { setCategory(item); setOpenKategori(false); }}
+                          className="flex items-center gap-2 px-4 py-3 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer transition-all"
+                        >
+                          <span className={type === "income" ? "text-indigo-500" : "text-rose-500"}>
+                            {categoryIcons[item]}
+                          </span>
+                          <span className="text-sm">{item}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
             </div>
 
+            {/* Catatan */}
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 ml-1">
                 <FileText size={12} /> Catatan
               </label>
               <input
@@ -222,7 +183,7 @@ export default function InputTransaksi() {
                 placeholder="Contoh: Beli Kopi"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full p-3 bg-slate-50 border border-transparent rounded-xl focus:bg-white focus:border-indigo-100 focus:ring-2 focus:ring-indigo-50 transition-all outline-none text-sm"
+                className="w-full p-3 bg-slate-50 border border-transparent rounded-xl focus:bg-white focus:border-indigo-100 focus:ring-2 focus:ring-indigo-50 outline-none text-sm"
               />
             </div>
           </div>
@@ -233,11 +194,7 @@ export default function InputTransaksi() {
             className={`w-full py-4 rounded-xl font-bold text-sm transition-all shadow flex items-center justify-center gap-2
               ${loading ? 'bg-slate-200 text-slate-400' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
           >
-            {loading ? 'Memproses...' : (
-              <>
-                Simpan Transaksi
-              </>
-            )}
+            {loading ? 'Memproses...' : 'Simpan Transaksi'}
           </button>
         </form>
       </div>

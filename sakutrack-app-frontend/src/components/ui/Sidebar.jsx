@@ -2,12 +2,10 @@ import React from "react";
 import { LayoutDashboard, Wallet, Target, User, LogOut, TrendingUp } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-// terima props user
 export default function Sidebar({ user }){
   const location = useLocation();
   const navigate = useNavigate();
 
-  // logika inisial
   const inisial = user?.nama ? user.nama[0].toUpperCase() : "U"
 
   // Navigasi

@@ -22,11 +22,11 @@ export default function CategoryChart({ transactions = [] }) {
       {
         data: dataValues,
         backgroundColor: [
-          "#4F46E5", // Indigo
-          "#F43F5E", // Rose (pengekuaran besar)
-          "#FBBF24", // Amber (kebutuhan)
-          "#8B5CF6", // violet
-          "#0EA5E9" // sky blue
+          "#4F46E5", 
+          "#F43F5E", 
+          "#FBBF24", 
+          "#8B5CF6", 
+          "#0EA5E9" 
         ],
         borderWidth: 0,
         hoverOffset: 10,

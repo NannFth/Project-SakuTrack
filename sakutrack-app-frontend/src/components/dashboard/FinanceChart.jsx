@@ -13,16 +13,30 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
-export default function FinanceChart({ pemasukan_tren = [], pengeluaran_tren = [], label_waktu = [] }) {
+export default function FinanceChart({ incomeTrend = [], expenseTrend = [], timeLabels = [] }) {
 
-  const isDataEmpty = pemasukan_tren.length === 0 && pengeluaran_tren.length === 0;
+  const formattedLabels = (timeLabels || []).map(label => {
+    if (!label) return "";
+    const parts = String(label).split('-');
+    if (parts.length < 3) return label;
+
+    const [year, month, day] = parts;
+    const dateObj = new Date(year, month - 1, day);
+    
+    return dateObj.toLocaleDateString('id-ID', { 
+      day: '2-digit', 
+      month: 'short' 
+    });
+  });
+
+  const isDataEmpty = incomeTrend.length === 0 && expenseTrend.length === 0;
 
   const data = {
-    labels: label_waktu,
+    labels: formattedLabels,
     datasets: [
       {
         label: "Pemasukan",
-        data: pemasukan_tren,
+        data: incomeTrend,
         borderColor: "#10b981",
         backgroundColor: "rgba(16, 185, 129, 0.05)",
         fill: true, 
@@ -34,7 +48,7 @@ export default function FinanceChart({ pemasukan_tren = [], pengeluaran_tren = [
       },
       {
         label: "Pengeluaran",
-        data: pengeluaran_tren, 
+        data: expenseTrend, 
         borderColor: "#ef4444", 
         backgroundColor: "rgba(239, 68, 68, 0.05)",
         fill: true,
@@ -47,7 +61,7 @@ export default function FinanceChart({ pemasukan_tren = [], pengeluaran_tren = [
     ],
   };
       
-  // Pengaturan Grafik
+  // Konfigurasi Grafik
   const options = {
     responsive: true,
     maintainAspectRatio: false, 
@@ -108,7 +122,7 @@ export default function FinanceChart({ pemasukan_tren = [], pengeluaran_tren = [
       <div className="h-[300px]">
         {isDataEmpty ? (
           <div className="h-full flex items-center justify-center border border-dashed rounded-lg">
-            <p className="text-slate-400 text-sm italic">Data tren kosong</p>
+            <p className="text-slate-400 text-sm italic">Data tren tidak tersedia</p>
           </div>
         ) : (
           <Line data={data} options={options} />

@@ -15,12 +15,12 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        {/* auth */}
+        {/* Auth */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
-        {/* main app */}
+        {/* App */}
         <Route path="/dashboard" element={<DashboardLayout searchQuery={searchQuery} setSearchQuery={setSearchQuery}><Dashboard searchQuery={searchQuery} setSearchQuery={setSearchQuery} /></DashboardLayout> } />
         <Route path="/input-transaksi" element={<DashboardLayout searchQuery={searchQuery} setSearchQuery={setSearchQuery}><InputTransaksi /></DashboardLayout>} />
         <Route path="/target-tabungan" element={<DashboardLayout searchQuery={searchQuery} setSearchQuery={setSearchQuery}><TargetTabungan /></DashboardLayout>} />

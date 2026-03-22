@@ -79,7 +79,7 @@ export default function Login() {
             <h1 className="text-3xl font-black text-indigo-600 tracking-tighter">SakuTrack</h1>
           </div>
           <h2 className="text-xl font-bold text-slate-800">Halo, Selamat Datang!</h2>
-          <p className="text-slate-400 text-sm mt-1">Kelola keuangan Anda, capai target Anda</p>
+          <p className="text-slate-400 text-sm mt-1">Kelola Uangmu, Capai Targetmu!</p>
         </div>
 
         {/* Input */}
