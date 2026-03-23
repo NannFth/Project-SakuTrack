@@ -25,7 +25,7 @@ export default function CategoryChart({ transactions = [] }) {
           "#4F46E5", 
           "#F43F5E", 
           "#FBBF24", 
-          "#8B5CF6", 
+          "#5cf6a4", 
           "#0EA5E9" 
         ],
         borderWidth: 0,

@@ -111,7 +111,7 @@ export default function Prediksi() {
           </button>
         </div>
 
-        <h1 className="text-3xl font-bold text-slate-800">Prediksi Keuangan</h1>
+        <h1 className="text-3xl font-bold text-slate-800">Proyeksi Keuangan</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Data */}
