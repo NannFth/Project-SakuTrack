@@ -1,12 +1,12 @@
 const pool = require('../config/database');
 
-// Fetch Data
+// Ambil Data
 const getTransactions = async (req, res) => {
     try {
         const { uid } = req.user;
 
         const [rows] = await pool.execute(
-            'SELECT * FROM transactions WHERE user_id = (SELECT id FROM users WHERE firebase_uid = ?) ORDER BY date DESC, id DESC',
+            'SELECT * FROM transactions WHERE user_id = (SELECT id FROM users WHERE firebase_uid = ?) ORDER BY created_at DESC',
             [uid]
         );
 
@@ -25,7 +25,8 @@ const getTransactions = async (req, res) => {
             return acc;
         }, {});
 
-        const labels = Object.keys(trendMap);
+        // Grafik
+        const labels = Object.keys(trendMap).sort(); 
         const incomeTrend = labels.map(t => trendMap[t].income);
         const expenseTrend = labels.map(t => trendMap[t].expense);
 
@@ -38,13 +39,13 @@ const getTransactions = async (req, res) => {
     } catch (error) {
         res.status(500).json({ 
             success: false, 
-            message: 'Terjadi kesalahan pada server saat mengambil data transaksi',
+            message: 'Error server',
             error: error.message 
         });
     }
 };
 
-// Add Data
+// Tambah Transaksi
 const addTransaction = async (req, res) => {
     try {
         const { amount, type, category, description, date } = req.body;
@@ -53,13 +54,14 @@ const addTransaction = async (req, res) => {
         if (!amount || !type || !category || !date) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Informasi transaksi tidak lengkap' 
+                message: 'Data tidak lengkap' 
             });
         }
 
         const [user] = await pool.execute('SELECT id FROM users WHERE firebase_uid = ?', [uid]);
         const userId = user[0].id;
 
+        // Simpan Data
         await pool.execute(
             'INSERT INTO transactions (user_id, amount, type, category, description, date) VALUES (?, ?, ?, ?, ?, ?)',
             [userId, amount, type, category, description || '', date]
@@ -67,24 +69,25 @@ const addTransaction = async (req, res) => {
 
         res.status(201).json({ 
             success: true, 
-            message: 'Transaksi berhasil ditambahkan' 
+            message: 'Berhasil ditambah' 
         });
     } catch (error) {
         res.status(500).json({ 
             success: false, 
-            message: 'Gagal menambahkan data transaksi',
+            message: 'Gagal tambah',
             error: error.message 
         });
     }
 };
 
-// Update Data
+// Update Transaksi
 const updateTransaction = async (req, res) => {
     try {
         const { id } = req.params;
         const { amount, type, category, description, date } = req.body;
         const { uid } = req.user;
 
+        // Update Database
         const [result] = await pool.execute(
             `UPDATE transactions SET 
                 amount = COALESCE(?, amount), 
@@ -99,29 +102,30 @@ const updateTransaction = async (req, res) => {
         if (result.affectedRows === 0) {
             return res.status(404).json({ 
                 success: false, 
-                message: 'Data transaksi tidak ditemukan atau akses ditolak' 
+                message: 'Data tidak ditemukan' 
             });
         }
 
         res.status(200).json({ 
             success: true, 
-            message: 'Data transaksi berhasil diperbarui' 
+            message: 'Berhasil update' 
         });
     } catch (error) {
         res.status(500).json({ 
             success: false, 
-            message: 'Gagal memperbarui data transaksi',
+            message: 'Gagal update',
             error: error.message 
         });
     }
 };
 
-// Delete Data
+// Hapus Transaksi
 const deleteTransaction = async (req, res) => {
     try {
         const { id } = req.params;
         const { uid } = req.user;
 
+        // Hapus Data
         const [result] = await pool.execute(
             'DELETE FROM transactions WHERE id = ? AND user_id = (SELECT id FROM users WHERE firebase_uid = ?)',
             [id, uid]
@@ -130,18 +134,18 @@ const deleteTransaction = async (req, res) => {
         if (result.affectedRows === 0) {
             return res.status(404).json({ 
                 success: false, 
-                message: 'Data transaksi tidak ditemukan untuk dihapus' 
+                message: 'Data tidak ditemukan' 
             });
         }
 
         res.status(200).json({ 
             success: true, 
-            message: 'Data transaksi berhasil dihapus' 
+            message: 'Berhasil hapus' 
         });
     } catch (error) {
         res.status(500).json({ 
             success: false, 
-            message: 'Gagal menghapus data transaksi',
+            message: 'Gagal hapus',
             error: error.message 
         });
     }
