@@ -124,7 +124,9 @@ export default function FinanceChart({ incomeTrend = [], expenseTrend = [], time
       <div className="h-[300px]">
         {isDataEmpty ? (
           <div className="h-full flex items-center justify-center border border-dashed border-slate-200 rounded">
-            <p className="text-slate-400 text-sm italic">Data tren tidak tersedia</p>
+            <p className="text-slate-400 text-sm italic">
+              Belum ada data tren di bulan {new Date(2026, (new URLSearchParams(window.location.search).get("month") || new Date().getMonth() + 1) - 1).toLocaleString('id-ID', { month: 'long' })}
+            </p>
           </div>
         ) : (
           <Line data={data} options={options} />

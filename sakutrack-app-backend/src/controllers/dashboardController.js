@@ -34,6 +34,12 @@ const getDashboardData = async (req, res) => {
             [userId]
         );
 
+        const activeSavings = savings.filter(item => {
+            const current = parseFloat(item.current_amount || item.currentAmount || 0);
+            const target = parseFloat(item.target_amount || item.targetAmount || 0);
+            return current < target;
+        });
+
         let totalIncome = 0;
         let totalExpense = 0;
         let expenseCategories = {};
@@ -59,7 +65,7 @@ const getDashboardData = async (req, res) => {
                 totalExpense,
                 balance: totalIncome - totalExpense,
                 expenseBreakdown: expenseCategories,
-                activeGoals: savings
+                activeGoals: activeSavings
             }
         });
     } catch (error) {
