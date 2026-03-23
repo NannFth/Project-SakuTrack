@@ -173,7 +173,6 @@ export default function Login() {
                 ${loading ? 'bg-slate-300 text-slate-500' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
             >
               {loading ? '...' : 'Masuk Sekarang'}
-              <ArrowRight size={14} />
             </button>
           </div>
 

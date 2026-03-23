@@ -35,26 +35,9 @@ export default function Dashboard({ searchQuery, setSearchQuery }) {
         const result = res.data;
         if (result.success) {
           const originalData = result.data || [];
+          setTransactions(originalData);
           
-          // Mengurutkan transaksi
-          const sortedData = [...originalData].sort((a, b) => {
-            const dateA = new Date(a.date).getTime();
-            const dateB = new Date(b.date).getTime();
-            if (isNaN(dateA)) return 1;
-            if (isNaN(dateB)) return -1;
-            
-            if (dateA !== dateB) {
-              return dateB - dateA;
-            }
-            
-            const createdA = new Date(a.created_at).getTime();
-            const createdB = new Date(b.created_at).getTime();
-            return createdB - createdA;
-          });
-
-          setTransactions(sortedData);
-          
-          // Sinkronisasi data 
+          // Grafik
           if (result.chartData) {
             setChartData({
               labels: result.chartData.labels ? result.chartData.labels.map(l => l.split('T')[0]) : [],
