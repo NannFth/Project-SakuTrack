@@ -152,17 +152,26 @@ export default function TargetTabungan() {
             const target = Number(item.targetAmount || item.target_amount || 0);
             const persen = target > 0 ? Math.min((current / target) * 100, 100) : 0;
 
+            const isSelesai = persen >= 100;
+
             return (
-              <div key={item.id} className="bg-white p-6 rounded shadow border border-slate-200 space-y-4">
+              <div 
+                key={item.id}
+                  className={`p-6 rounded shadow border transition-all space-y-4 ${
+                    isSelesai
+                      ? 'bg-emerald-50/50 border-emerald-200'
+                      : 'bg-white border-slate-200'
+                  }`} 
+              >
                 <div className="flex justify-between items-start">
-                  <div className="p-3 bg-slate-100 text-slate-900 rounded">
+                  <div className={`p-3 rounded ${isSelesai ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-900'}`}>
                     <Target size={24} />
                   </div>
 
                   <div className="flex gap-2 items-center">
                     <button 
                       onClick={() => selesaiTarget(item)}
-                      className={`p-1.5 rounded ${persen >= 100 ? 'text-emerald-600 hover:bg-emerald-50' : 'text-slate-300'}`}
+                      className={`p-1.5 rounded ${isSelesai ? 'text-emerald-600 hover:bg-emerald-100' : 'text-slate-300'}`}
                     >
                       <CheckCircle2 size={20} />
                     </button>
@@ -174,13 +183,21 @@ export default function TargetTabungan() {
                     </button>
                     <div className="text-right ml-2">
                       <p className="text-xs font-bold text-slate-400">Progress</p>
-                      <p className="text-xl font-bold text-slate-900">{persen.toFixed(0)}%</p>
+                      <p className={`text-xl font-bold ${isSelesai ? 'text-emerald-600' : 'text-slate-900'}`}>{persen.toFixed(0)}%</p>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="font-bold text-slate-800 text-lg">{item.name}</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-slate-800 text-lg">{item.name}</h3>
+                    {isSelesai && (
+                      <span className="bg-emerald-600 text-white text-[10px] px-2 py-0.5 rounded full uppercase tracking-wider font-bold">
+                        Selesai
+                      </span>
+                    )}
+                  </div>
+
                   <p className="text-sm text-slate-500">
                     {formatRupiah(current)} / {formatRupiah(target)}
                   </p>
@@ -188,7 +205,7 @@ export default function TargetTabungan() {
 
                 {/* Progress Bar */}
                 <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
-                  <div className="bg-slate-900 h-full rounded-full transition-all" style={{ width: `${persen}%` }} />
+                  <div className={`h-full rounded-full transition-all ${isSelesai ? 'bg-emerald-500' : 'bg-slate-900'}`} style={{ width: `${persen}%` }} />
                 </div>
 
                 {/* Input Tambah Saldo */}
