@@ -31,13 +31,13 @@ export default function DashboardLayout({ children, searchQuery, setSearchQuery 
   useEffect(() => {
     connection.get('/auth/profile')
       .then((res) => {
-        const data = res.data;
-        const currentName = data.name || localStorage.getItem("user_nama");
+        const profile = res.data.data; 
+        const currentName = profile?.name || localStorage.getItem("user_nama");
         
         if (currentName) {
           setUser({
             name: currentName,
-            email: data.email || "",
+            email: profile?.email || "",
           });
           localStorage.setItem("user_nama", currentName);
         }
@@ -122,12 +122,6 @@ export default function DashboardLayout({ children, searchQuery, setSearchQuery 
                   </button>
                   {openMenu === "setting" && (
                     <div className="absolute right-0 top-full mt-2 w-48 bg-white shadow border rounded p-2 z-[60]">
-                      <button onClick={() => navigate("/login")}
-                        className="flex items-center gap-2 w-full text-left hover:bg-slate-100 p-2 rounded text-sm text-slate-700">
-                        <UserPlus size={16} />
-                        <span>Tambah Akun</span>
-                      </button>
-                      <hr className="my-1 border-slate-200" />
                       <button onClick={() => { localStorage.clear(); navigate("/"); }}
                         className="flex items-center gap-2 w-full text-left hover:bg-slate-100 p-2 rounded text-sm text-red-600">
                         <LogOut size={16} />

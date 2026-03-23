@@ -1,7 +1,7 @@
 import { Utensils, Car, BookOpen, Gamepad2, Package, Wallet, Banknote, Gift, Briefcase, Coins } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Tag, FileText, Calendar } from "lucide-react";
+import { Tag, FileText, Calendar } from "lucide-react";
 import connection from "../connection";
 
 export default function InputTransaksi() {
@@ -21,12 +21,13 @@ export default function InputTransaksi() {
   const [loading, setLoading] = useState(false);
   const [openKategori, setOpenKategori] = useState(false);
 
-  // List Kategori
+  // Data Kategori
   const kategori = {
     expense: ["Makanan/Minuman", "Transportasi", "Pendidikan", "Hiburan", "Lainnya"],
     income: ["Uang Harian", "Gaji", "Bonus", "Bulanan", "Freelance", "Hadiah", "Lainnya"]
   };
 
+  // Icon
   const categoryIcons = {
     "Makanan/Minuman": <Utensils size={18} />,
     "Transportasi": <Car size={18} />,
@@ -47,6 +48,7 @@ export default function InputTransaksi() {
     setAmount(formatted);
   };
 
+  // Kirim Data
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -81,53 +83,51 @@ export default function InputTransaksi() {
 
   return (
     <>
-      <div className="max-w-3xl mx-auto py-2">
-        <div className="flex items-center gap-4 mb-7">
-          <button onClick={() => navigate(-1)} className="p-2.5 bg-white hover:bg-slate-100 rounded-lg shadow-sm border border-slate-300 transition-colors">
-            <ArrowLeft size={24} className="text-slate-800" />
-          </button>
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">Kelola Transaksi Harian</h1>
-            <p className="text-slate-500 text-base mt-0.5">Masukan detail transaksi Anda.</p>
-          </div>
+      <div className="max-w-6xl mx-auto space-y-8 p-4">
+        
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800">Kelola Transaksi</h1>
+          <p className="text-slate-500 text-sm mt-1">Masukan detail transaksi Anda.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white p-7 rounded-xl shadow-md border border-slate-300 space-y-7">
-          {/* Tipe */}
-          <div className="flex p-1 bg-slate-100 rounded-lg gap-1.5">
+        {/* Form Utama */}
+        <form onSubmit={handleSubmit} className="bg-white p-6 rounded border border-slate-200 shadow-sm space-y-8">
+          
+          {/* Tipe Transaksi */}
+          <div className="flex p-1 bg-slate-100 rounded border border-slate-200 gap-1">
             <button
               type="button"
-              onClick={() => { setType("expense"); setCategory("Makanan/Minuman"); }}
-              className={`flex-1 py-3 rounded text-base font-bold transition-all ${type === "expense" ? "bg-white text-rose-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+              onClick={() => { setType("expense"); setCategory("Makanan/Minuman"); setOpenKategori(false); }}
+              className={`flex-1 py-3 rounded font-bold text-sm transition-colors ${type === "expense" ? "bg-white text-rose-600 shadow-sm border border-rose-100" : "text-slate-500 hover:text-slate-700"}`}
             >
               Pengeluaran
             </button>
             <button
               type="button"
-              onClick={() => { setType("income"); setCategory("Uang Harian"); }}
-              className={`flex-1 py-3 rounded text-base font-bold transition-all ${type === "income" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+              onClick={() => { setType("income"); setCategory("Uang Harian"); setOpenKategori(false); }}
+              className={`flex-1 py-3 rounded font-bold text-sm transition-colors ${type === "income" ? "bg-white text-emerald-600 shadow-sm border border-emerald-100" : "text-slate-500 hover:text-slate-700"}`}
             >
               Pemasukan
             </button>
           </div>
 
+          {/* Input */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Tanggal */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600 flex items-center gap-2 ml-1">
-                <Calendar size={14} /> Tanggal Transaksi
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                <Calendar size={14} /> Tanggal
               </label>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-slate-900 text-sm font-bold text-slate-800"
+                className="w-full p-3 border border-slate-200 rounded focus:outline-none focus:border-slate-900 text-sm font-bold text-slate-800"
               />
             </div>
 
-            {/* Nominal */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600 flex items-center gap-2 ml-1">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
                 <Wallet size={14} /> Nominal
               </label>
               <input
@@ -135,21 +135,18 @@ export default function InputTransaksi() {
                 placeholder="Rp 0"
                 value={amount}
                 onChange={handleAmountChange}
-                className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-slate-900 text-xl font-bold text-slate-900"
+                className={`w-full p-3 border border-slate-200 rounded focus:outline-none focus:border-slate-900 text-xl font-bold ${type === "income" ? "text-emerald-600" : "text-rose-600"}`}
               />
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Kategori */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600 flex items-center gap-2 ml-1">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
                 <Tag size={14} /> Kategori
               </label>
               <div className="relative">
                 <div
                   onClick={() => setOpenKategori(!openKategori)}
-                  className="w-full p-3 bg-white border border-slate-300 rounded-lg cursor-pointer flex items-center justify-between"
+                  className="w-full p-3 bg-white border border-slate-200 rounded cursor-pointer flex items-center justify-between"
                 >
                   <div className="flex items-center gap-2">
                     <span className={type === "income" ? "text-emerald-600" : "text-rose-600"}>
@@ -157,22 +154,23 @@ export default function InputTransaksi() {
                     </span>
                     <span className="text-sm font-bold text-slate-800">{category}</span>
                   </div>
+                  <span className="text-slate-400 text-xs">{openKategori ? "▲" : "▼"}</span>
                 </div>
 
-                {/* Scroller */}
+                {/* Kategori */}
                 {openKategori && (
-                  <div className="absolute z-10 w-full mt-1.5 bg-white border border-slate-300 rounded-lg shadow-lg overflow-hidden">
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded shadow-md overflow-hidden">
                     <div className="max-h-[200px] overflow-y-auto">
                       {kategori[type].map((item, index) => (
                         <div 
                           key={index}
                           onClick={() => { setCategory(item); setOpenKategori(false); }}
-                          className="flex items-center gap-2.5 px-4 py-3 hover:bg-slate-100 hover:text-slate-900 cursor-pointer transition-colors"
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0"
                         >
                           <span className={type === "income" ? "text-emerald-600" : "text-rose-600"}>
                             {categoryIcons[item]}
                           </span>
-                          <span className="text-sm font-medium">{item}</span>
+                          <span className="text-sm font-bold text-slate-700">{item}</span>
                         </div>
                       ))}
                     </div>
@@ -181,9 +179,8 @@ export default function InputTransaksi() {
               </div>
             </div>
 
-            {/* Catatan */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600 flex items-center gap-2 ml-1">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
                 <FileText size={14} /> Catatan
               </label>
               <input
@@ -191,16 +188,17 @@ export default function InputTransaksi() {
                 placeholder="Contoh: Beli Kopi"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:border-slate-900 text-sm"
+                className="w-full p-3 border border-slate-200 rounded focus:outline-none focus:border-slate-900 text-sm font-medium"
               />
             </div>
           </div>
 
+          {/* Tombol Simpan */}
           <div className="pt-4">
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-4 rounded-lg font-bold text-lg flex items-center justify-center gap-2
+              className={`w-full py-4 rounded font-bold text-base shadow-sm flex items-center justify-center gap-2
                 ${loading ? 'bg-slate-200 text-slate-400' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
             >
               {loading ? 'Memproses...' : 'Simpan Transaksi'}

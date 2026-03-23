@@ -15,6 +15,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 export default function FinanceChart({ incomeTrend = [], expenseTrend = [], timeLabels = [] }) {
 
+  // Label
   const formattedLabels = (timeLabels || []).map(label => {
     if (!label) return "";
     const parts = String(label).split('-');
@@ -31,6 +32,7 @@ export default function FinanceChart({ incomeTrend = [], expenseTrend = [], time
 
   const isDataEmpty = incomeTrend.length === 0 && expenseTrend.length === 0;
 
+  // Data Grafik
   const data = {
     labels: formattedLabels,
     datasets: [
@@ -61,7 +63,7 @@ export default function FinanceChart({ incomeTrend = [], expenseTrend = [], time
     ],
   };
       
-  // Konfigurasi Grafik
+  // Konfigurasi
   const options = {
     responsive: true,
     maintainAspectRatio: false, 
@@ -110,18 +112,18 @@ export default function FinanceChart({ incomeTrend = [], expenseTrend = [], time
     }
   };
 
-  // UI
+  // UI 
   return (
-    <div className="bg-white p-6 rounded-xl border shadow-sm h-full">
+    <div className="bg-white p-6 rounded border border-slate-200 shadow-sm h-full min-h-[400px]">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-slate-800">
+        <h2 className="text-lg font-bold text-slate-800">
           Tren Arus Kas
         </h2>
       </div>
 
       <div className="h-[300px]">
         {isDataEmpty ? (
-          <div className="h-full flex items-center justify-center border border-dashed rounded-lg">
+          <div className="h-full flex items-center justify-center border border-dashed border-slate-200 rounded">
             <p className="text-slate-400 text-sm italic">Data tren tidak tersedia</p>
           </div>
         ) : (

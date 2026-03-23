@@ -10,12 +10,7 @@ export default function TransactionList({ data = [], onDelete }) {
   }
 
   // Urutan Transaksi
-  const sortedTransactions = [...data].sort((a, b) => {
-    const inputA = new Date(a.created_at).getTime();
-    const inputB = new Date(b.created_at).getTime();
-
-    return inputB - inputA;
-  });
+  const sortedTransactions = data;
 
   // UI
   return (
