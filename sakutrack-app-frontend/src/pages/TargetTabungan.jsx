@@ -7,6 +7,7 @@ export default function TargetTabungan() {
   const [name, setName] = useState("");
   const [targetAmount, setTargetAmount] = useState("");
   const [currentAmount, setCurrentAmount] = useState("");
+  const [inputSaldo, setInputSaldo] = useState({});
 
   const formatRupiah = (value) => {
     if (!value) return "";
@@ -85,24 +86,34 @@ export default function TargetTabungan() {
 
   // Update Saldo
   const updateSaldo = (id, saldoSekarang, nominalTambah, item) => {
-    const totalBaru = Number(saldoSekarang) + Number(nominalTambah);
-    const tgl = item.targetDate || item.target_date || new Date().toISOString().split('T')[0];
+    const tambah = Number(nominalTambah);
+
+    if(!tambah || tambah <= 0) {
+      alert("Nominal tidak valid");
+      return;
+    }
+
+    const totalBaru = Number(saldoSekarang) + tambah;
 
     const dataLengkap = {
-      name: item.name,
-      targetAmount: Number(item.targetAmount || item.target_amount),
+      name: item.name || "",
+      targetAmount: Number(item.targetAmount || item.target_amount || 0),
       currentAmount: totalBaru,
-      targetDate: tgl
+      targetDate: (item.targetDate || item.target_date || "").split("T")[0]
     };
 
     connection.put(`/savings/${id}`, dataLengkap)
       .then((res) => {
+        console.log("RES:", res.data);
+
         if (res.data.success === true || res.status === 200) {
           ambilData();
+        } else {
+          alert("Update gagal dari server");
         }
       })
       .catch((err) => {
-        console.log("Gagal update:", err);
+        console.log("ERROR UPDATE:", err.response?.data || err.message);
         alert("Gagal memperbarui saldo.");
       });
   };
@@ -185,18 +196,28 @@ export default function TargetTabungan() {
                   <input 
                     type="text" 
                     placeholder="Tambah nominal..."
+                    value={inputSaldo[item.id] ? formatRupiah(inputSaldo[item.id]) : ""}
                     className="flex-1 text-sm p-2 border border-slate-300 rounded focus:outline-none focus:border-slate-900"
                     onChange={(e) => {
                       const raw = e.target.value.replace(/\D/g, "");
-                      const formatted = raw ? "Rp " + new Intl.NumberFormat("id-ID").format(raw) : "";
-                      e.target.value = formatted;
+
+                      setInputSaldo((prev) => ({
+                        ...prev,
+                        [item.id]: raw
+                      }));
                     }}
+
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
-                        const rawValue = e.target.value.replace(/\D/g, "");
+                        e.preventDefault();
+                        const rawValue = inputSaldo[item.id];
                         if (rawValue) {
                           updateSaldo(item.id, current, rawValue, item);
-                          e.target.value = ""; 
+                          
+                          setInputSaldo((prev) => ({
+                            ...prev,
+                            [item.id]: ""
+                          }));
                         }
                       }
                     }}
