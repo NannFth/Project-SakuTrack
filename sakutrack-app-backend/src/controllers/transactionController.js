@@ -6,7 +6,7 @@ const getTransactions = async (req, res) => {
         const { uid } = req.user;
 
         const [rows] = await pool.execute(
-            'SELECT * FROM transactions WHERE user_id = (SELECT id FROM users WHERE firebase_uid = ?) ORDER BY date ASC',
+            'SELECT * FROM transactions WHERE user_id = (SELECT id FROM users WHERE firebase_uid = ?) ORDER BY date DESC, id DESC',
             [uid]
         );
 

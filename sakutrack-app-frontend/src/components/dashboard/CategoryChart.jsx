@@ -1,35 +1,45 @@
+import { useMemo } from 'react'; 
 import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function CategoryChart({ transactions = [] }) {
-  const categoryTotals = {};
 
-  // Filter
-  transactions.filter((t) => t.type === "expense").forEach((t) => {
-    const { category, amount } = t;
-    categoryTotals[category] = (categoryTotals[category] || 0) + amount;
-  });
+  // Data
+  const { labels, dataValues } = useMemo(() => {
+    const categoryTotals = {};
 
-  const labels = Object.keys(categoryTotals);
-  const dataValues = Object.values(categoryTotals);
+    transactions
+      .filter((t) => t.type === "expense")
+      .forEach((t) => {
+        const category = t.category ? t.category.trim().toLowerCase() : "lainnya";
+        const amount = parseFloat(t.amount) || 0;
+        categoryTotals[category] = (categoryTotals[category] || 0) + amount;
+      });
 
-  // Konfigurasi Chart
+    return {
+      labels: Object.keys(categoryTotals).map(cat => cat.charAt(0).toUpperCase() + cat.slice(1)),
+      dataValues: Object.values(categoryTotals)
+    };
+  }, [transactions]);
+
+  // Warna
+  const generateColors = (num) => {
+    const baseColors = ["#4F46E5", "#F43F5E", "#FBBF24", "#5cf69a", "#0EA5E9", "#10B981", "#6366F1"];
+    return Array.from({ length: num }, (_, i) => baseColors[i % baseColors.length]);
+  };
+
+  // Chart
   const data = {
     labels: labels,
     datasets: [
       {
         data: dataValues,
-        backgroundColor: [
-          "#4F46E5", 
-          "#F43F5E", 
-          "#FBBF24", 
-          "#5cf6a4", 
-          "#0EA5E9" 
-        ],
-        borderWidth: 0,
-        hoverOffset: 10,
+        backgroundColor: generateColors(labels.length),
+        borderWidth: 2,
+        borderColor: "#ffffff",
+        hoverOffset: 15,
       },
     ],
   };
@@ -42,41 +52,40 @@ export default function CategoryChart({ transactions = [] }) {
         position: 'bottom',
         labels: {
           usePointStyle: true,
-          padding: 20,
-          font: { 
-            size: 11,
-            family: "'Plus Jakarta Sans', sans-serif",
-          }
+          padding: 15,
+          font: { size: 10, family: "sans-serif" }
         }
       },
       tooltip: {
         backgroundColor: "#1e293b",
         padding: 10,
+        callbacks: {
+          label: (context) => ` Rp ${context.raw.toLocaleString('id-ID')}`
+        }
       }
     },
-    cutout: "75%",
+    cutout: "70%",
   };
 
-  // Tampilan
+  // UI
   return (
-    <div className="bg-white p-6 rounded-xl border shadow-sm h-full">
-      <h2 className="text-xl font-semibold text-slate-800 mb-8">
-        Analisis Pengeluaran
-      </h2>
+    <div className="bg-white p-6 rounded border border-slate-200 shadow-sm h-full min-h-[400px]">
+      <h2 className="text-lg font-bold text-slate-800 mb-6">Analisis Pengeluaran</h2>
       
-      <div className="h-[280px] relative">
+      <div className="h-[280px] relative mt-4">
         {dataValues.length === 0 ? (
-          <div className="h-full flex items-center justify-center border-dashed rounded-lg">
-            <p className="text-slate-400 text-sm italic">Belum ada data pengeluaran</p>
+          <div className="h-full flex items-center justify-center border border-dashed border-slate-200 rounded">
+            <p className="text-slate-400 text-xs italic">Belum ada data pengeluaran</p>
           </div>
         ) : (
           <>
             <Doughnut data={data} options={options} />
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Kategori</span>
-              <span className="text-2xl font-bold text-slate-800">
-                {dataValues.length} 
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total</span>
+              <span className="text-2xl font-black text-slate-800">
+                {labels.length}
               </span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase">Kategori</span>
             </div>
           </>
         )}

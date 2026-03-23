@@ -101,4 +101,35 @@ const getProfile = async (req, res) => {
     }
 };
 
-module.exports = { register, login, getProfile };
+// Update Profile
+const updateProfile = async (req, res) => {
+    try {
+        const { uid } = req.user;
+        const { name } = req.body;
+
+        if (!name) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Nama tidak boleh kosong' 
+            });
+        }
+
+        const [result] = await pool.execute(
+            'UPDATE users SET name = ? WHERE firebase_uid = ?',
+            [name, uid]
+        );
+
+        res.status(200).json({ 
+            success: true, 
+            message: 'Profil berhasil diperbarui' 
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            message: 'Terjadi kesalahan pada server',
+            error: error.message 
+        });
+    }
+};
+
+module.exports = { register, login, getProfile, updateProfile };
