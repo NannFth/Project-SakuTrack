@@ -20,6 +20,7 @@ export default function InputTransaksi() {
   const [date, setDate] = useState(formattedToday);
   const [loading, setLoading] = useState(false);
   const [openKategori, setOpenKategori] = useState(false);
+  const [jenis, setJenis] = useState("kebutuhan");
 
   // Data Kategori
   const kategori = {
@@ -65,7 +66,8 @@ export default function InputTransaksi() {
         type: type,
         category: category,
         description: description,
-        date: date
+        date: date,
+        jenis: jenis
       })
       .then((res) => {
         if (res.data.success) {
@@ -105,7 +107,7 @@ export default function InputTransaksi() {
             </button>
             <button
               type="button"
-              onClick={() => { setType("income"); setCategory("Uang Harian"); setOpenKategori(false); }}
+              onClick={() => { setType("income"); setCategory("Uang Harian"); setOpenKategori(false); setJenis("kebutuhan"); }}
               className={`flex-1 py-3 rounded font-bold text-sm transition-colors ${type === "income" ? "bg-white text-emerald-600 shadow-sm border border-emerald-100" : "text-slate-500 hover:text-slate-700"}`}
             >
               Pemasukan
@@ -114,6 +116,23 @@ export default function InputTransaksi() {
 
           {/* Input */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {type === "expense" && (
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  Jenis
+                </label>
+
+                <select
+                  value={jenis}
+                  onChange={(e) => setJenis(e.target.value)}
+                  className="w-full p-3 border border-slate-200 rounded text-sm font-bold text-slate-700"
+                >
+                  <option value="kebutuhan">Kebutuhan</option>
+                  <option value="keinginan">Keinginan</option>
+                </select>
+              </div>
+            )}
+            
             <div className="space-y-2">
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
                 <Calendar size={14} /> Tanggal

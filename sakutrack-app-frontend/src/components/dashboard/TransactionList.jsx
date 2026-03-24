@@ -24,6 +24,8 @@ export default function TransactionList({ data = [], onDelete }) {
       <div className="space-y-4">
         {sortedTransactions.map((item) => {
           const isIncome = item.type === "income";
+
+          console.log("DATA ITEM:", item);
           
           const transactionDate = new Date(item.date);
           const createdAtDate = new Date(item.created_at);
@@ -58,7 +60,25 @@ export default function TransactionList({ data = [], onDelete }) {
                   
                   {/* Tanggal & Jam */}
                   <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5">
-                    <span className="font-semibold capitalize text-slate-600">{item.category || "Lainnya"}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold capitalize text-slate-600">
+                        {item.category || "Lainnya"}
+                      </span>
+
+                        <span 
+                          className={`text-[10px] px-2 py-0.5 rounded-full font-bold
+                            ${
+                              item.jenis === "kebutuhan"
+                              ? "bg-blue-100 text-blue-600"
+                              : item.jenis === "keinginan"
+                              ? "bg-purple-100 text-purple-600"
+                              : "bg-gray-100 text-gray-500"
+                            }`}
+                        >
+                          {item.jenis || "Tidak ada"}
+                        </span>
+                    </div>
+
                     <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
                     <span>{formattedDate}</span>
                     {isSameDay && (
