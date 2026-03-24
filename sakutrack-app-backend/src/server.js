@@ -10,11 +10,13 @@ const authRoutes = require('./routes/authRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
 const savingRoutes = require('./routes/savingRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/savings', savingRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.get('/', (req, res) => {
   res.status(200).send('API SakuTrack is running...');
