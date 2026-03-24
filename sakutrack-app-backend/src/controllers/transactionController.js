@@ -6,7 +6,7 @@ const getTransactions = async (req, res) => {
         const { uid } = req.user;
 
         const [rows] = await pool.execute(
-            'SELECT * FROM transactions WHERE user_id = (SELECT id FROM users WHERE firebase_uid = ?) ORDER BY created_at DESC',
+            'SELECT *, IFNULL(jenis, "") as jenis FROM transactions WHERE user_id = (SELECT id FROM users WHERE firebase_uid = ?) ORDER BY created_at DESC',
             [uid]
         );
 
@@ -49,6 +49,7 @@ const getTransactions = async (req, res) => {
 const addTransaction = async (req, res) => {
     try {
         const { amount, type, category, description, date, jenis } = req.body;
+        const finalJenis = type === "expense" ? jenis : null;
         const { uid } = req.user;
 
         if (!amount || !type || !category || !date) {
@@ -67,7 +68,7 @@ const addTransaction = async (req, res) => {
         // Simpan Data
         await pool.execute(
             'INSERT INTO transactions (user_id, amount, type, category, description, date, jenis) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [userId, amount, type, category, description || '', date, jenis]
+            [userId, amount, type, category, description || '', date, finalJenis]
         );
 
         // Notifikasi Pengeluaran
@@ -262,7 +263,7 @@ const addTransaction = async (req, res) => {
 const updateTransaction = async (req, res) => {
     try {
         const { id } = req.params;
-        const { amount, type, category, description, date } = req.body;
+        const { amount, type, category, description, date, jenis } = req.body;
         const { uid } = req.user;
 
         // Update Database
@@ -272,9 +273,10 @@ const updateTransaction = async (req, res) => {
                 type = COALESCE(?, type), 
                 category = COALESCE(?, category), 
                 description = COALESCE(?, description), 
-                date = COALESCE(?, date) 
+                date = COALESCE(?, date),
+                jenis = COALESCE(?, jenis)
             WHERE id = ? AND user_id = (SELECT id FROM users WHERE firebase_uid = ?)`,
-            [amount, type, category, description, date, id, uid]
+            [amount, type, category, description, date, jenis, id, uid]
         );
 
         if (result.affectedRows === 0) {
