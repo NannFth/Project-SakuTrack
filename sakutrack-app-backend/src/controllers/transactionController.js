@@ -59,6 +59,7 @@ const addTransaction = async (req, res) => {
         }
 
         const [user] = await pool.execute('SELECT id FROM users WHERE firebase_uid = ?', [uid]);
+        if (user.length === 0) return res.status(404).json({ success: false, message: 'User tidak ditemukan' });
         const userId = user[0].id;
 
         // Simpan Data
@@ -66,6 +67,181 @@ const addTransaction = async (req, res) => {
             'INSERT INTO transactions (user_id, amount, type, category, description, date, jenis) VALUES (?, ?, ?, ?, ?, ?, ?)',
             [userId, amount, type, category, description || '', date, jenis]
         );
+
+        // Notifikasi Pengeluaran
+        if (type === 'expense') {
+            const d = new Date(date);
+            const currentMonth = d.getMonth() + 1;
+            const currentYear = d.getFullYear();
+            const [stats] = await pool.execute(
+                `SELECT 
+                    SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as totalIncome,
+                    SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as totalExpense
+                 FROM transactions 
+                 WHERE user_id = ? AND MONTH(date) = ? AND YEAR(date) = ?`,
+                [userId, currentMonth, currentYear]
+            );
+
+            const totalIncome = Number(stats[0].totalIncome || 0);
+            const totalExpense = Number(stats[0].totalExpense || 0);
+            const expenseAmount = Number(amount);
+
+            if (totalIncome > 0) {
+                // Peringatan Bulanan
+                const percentage = (totalExpense / totalIncome) * 100;
+                const previousExpense = totalExpense - expenseAmount;
+                const previousPercentage = (previousExpense / totalIncome) * 100;
+
+                if (percentage >= 90 && previousPercentage < 90) {
+                    await pool.execute(
+                        `INSERT INTO notifications (user_id, title, message, type, is_read) 
+                         VALUES (?, ?, ?, ?, 0)`,
+                        [
+                            userId, 
+                            'Peringatan Saldo Bulanan', 
+                            `Perhatian, total pengeluaran Anda bulan ini telah mencapai ${percentage.toFixed(0)}% dari total pemasukan. Harap kendalikan pengeluaran Anda.`, 
+                            'alert'
+                        ]
+                    );
+                }
+
+                // Peringatan Batas Aman Harian
+                const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+                const dailyBudgetLimit = totalIncome / daysInMonth;
+
+                const [dailyStats] = await pool.execute(
+                    `SELECT SUM(amount) as dailyExpense 
+                     FROM transactions 
+                     WHERE user_id = ? AND type = 'expense' AND DATE(date) = DATE(?)`,
+                    [userId, date]
+                );
+                
+                const dailyExpense = Number(dailyStats[0].dailyExpense || 0);
+                const previousDailyExpense = dailyExpense - expenseAmount;
+
+                if (dailyExpense >= (0.8 * dailyBudgetLimit) && previousDailyExpense < (0.8 * dailyBudgetLimit)) {
+                    await pool.execute(
+                        `INSERT INTO notifications (user_id, title, message, type, is_read) 
+                         VALUES (?, ?, ?, ?, 0)`,
+                        [
+                            userId, 
+                            'Peringatan Anggaran Harian', 
+                            'Perhatian, pengeluaran Anda hari ini sudah mendekati batas aman harian yang disarankan. Harap lebih bijak dalam bertransaksi.', 
+                            'warning'
+                        ]
+                    );
+                }
+            }
+
+            // Peringatan Pengeluaran Abnormal
+            const [avgStats] = await pool.execute(
+                `SELECT AVG(amount) as avgExpense 
+                 FROM transactions 
+                 WHERE user_id = ? AND type = 'expense' AND id != LAST_INSERT_ID()`,
+                [userId]
+            );
+            
+            const avgExpense = Number(avgStats[0].avgExpense || 0);
+            
+            if (avgExpense > 0 && expenseAmount >= 100000 && expenseAmount > (avgExpense * 3)) {
+                const formattedAmount = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(expenseAmount);
+                await pool.execute(
+                    `INSERT INTO notifications (user_id, title, message, type, is_read) 
+                     VALUES (?, ?, ?, ?, 0)`,
+                    [
+                        userId, 
+                        'Peringatan Transaksi Abnormal', 
+                        `Pengeluaran sebesar ${formattedAmount} baru saja dicatat. Angka ini terpantau jauh di atas rata-rata pengeluaran normal Anda. Harap berhati-hati.`, 
+                        'alert'
+                    ]
+                );
+            }
+
+            // Peringatan Kategori Bocor
+            const lastMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+            const yearOfLastMonth = currentMonth === 1 ? currentYear - 1 : currentYear;
+
+            const [currentCatStats] = await pool.execute(
+                `SELECT SUM(amount) as total 
+                 FROM transactions 
+                 WHERE user_id = ? AND type = 'expense' AND category = ? AND MONTH(date) = ? AND YEAR(date) = ?`,
+                [userId, category, currentMonth, currentYear]
+            );
+            const currentCatTotal = Number(currentCatStats[0].total || 0);
+            const previousCatTotal = currentCatTotal - expenseAmount;
+
+            const [lastCatStats] = await pool.execute(
+                `SELECT SUM(amount) as total 
+                 FROM transactions 
+                 WHERE user_id = ? AND type = 'expense' AND category = ? AND MONTH(date) = ? AND YEAR(date) = ?`,
+                [userId, category, lastMonth, yearOfLastMonth]
+            );
+            const lastCatTotal = Number(lastCatStats[0].total || 0);
+
+            if (lastCatTotal >= 100000 && previousCatTotal <= lastCatTotal && currentCatTotal > lastCatTotal) {
+                await pool.execute(
+                    `INSERT INTO notifications (user_id, title, message, type, is_read) 
+                     VALUES (?, ?, ?, ?, 0)`,
+                    [
+                        userId, 
+                        'Peringatan Lonjakan Kategori', 
+                        `Pengeluaran Anda untuk kategori '${category}' bulan ini telah melampaui total pengeluaran di bulan sebelumnya. Harap evaluasi kembali alokasi dana Anda.`, 
+                        'warning'
+                    ]
+                );
+            }
+        }
+
+        // Streak Pencatatan
+        const [todayTxs] = await pool.execute(
+            `SELECT COUNT(id) as count FROM transactions WHERE user_id = ? AND DATE(date) = DATE(?)`,
+            [userId, date]
+        );
+
+        if (todayTxs[0].count === 1) {
+            const [pastDates] = await pool.execute(
+                `SELECT DISTINCT DATE(date) as logDate 
+                 FROM transactions 
+                 WHERE user_id = ? AND DATE(date) <= DATE(?) 
+                 ORDER BY logDate DESC LIMIT 31`,
+                [userId, date]
+            );
+
+            let streak = 0;
+            let targetDateStr = new Date(date).toISOString().split('T')[0];
+            let currentDateObj = new Date(targetDateStr);
+            currentDateObj.setHours(0, 0, 0, 0);
+
+            for (let i = 0; i < pastDates.length; i++) {
+                let logDateStr = new Date(pastDates[i].logDate).toISOString().split('T')[0];
+                let logDateObj = new Date(logDateStr);
+                logDateObj.setHours(0, 0, 0, 0);
+                
+                let expectedDate = new Date(currentDateObj);
+                expectedDate.setDate(expectedDate.getDate() - streak);
+                expectedDate.setHours(0, 0, 0, 0);
+                
+                if (logDateObj.getTime() === expectedDate.getTime()) {
+                    streak++;
+                } else {
+                    break;
+                }
+            }
+
+            if (streak === 3 || streak === 7 || streak === 30) {
+                let milestoneStr = streak === 30 ? '1 bulan' : `${streak} hari`;
+                await pool.execute(
+                    `INSERT INTO notifications (user_id, title, message, type, is_read) 
+                     VALUES (?, ?, ?, ?, 0)`,
+                    [
+                        userId, 
+                        'Apresiasi Pencatatan', 
+                        `Luar biasa! Anda telah konsisten mencatat aktivitas keuangan selama ${milestoneStr} berturut-turut. Pertahankan kebiasaan baik ini untuk mencapai target finansial Anda.`, 
+                        'success'
+                    ]
+                );
+            }
+        }
 
         res.status(201).json({ 
             success: true, 
