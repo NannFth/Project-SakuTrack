@@ -65,18 +65,21 @@ export default function TransactionList({ data = [], onDelete }) {
                         {item.category || "Lainnya"}
                       </span>
 
+                      {item.type === "expense" && item.jenis && item.jenis !== "" && (
                         <span 
                           className={`text-[10px] px-2 py-0.5 rounded-full font-bold
                             ${
-                              item.jenis === "kebutuhan"
+                              item.jenis === "Kebutuhan"
                               ? "bg-blue-100 text-blue-600"
-                              : item.jenis === "keinginan"
+                              : item.jenis === "Keinginan"
                               ? "bg-purple-100 text-purple-600"
                               : "bg-gray-100 text-gray-500"
                             }`}
                         >
-                          {item.jenis || "Tidak ada"}
+                          {item.jenis}
                         </span>
+                      )}
+
                     </div>
 
                     <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
