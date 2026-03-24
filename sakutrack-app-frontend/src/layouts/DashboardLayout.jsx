@@ -3,6 +3,12 @@ import Sidebar from "../components/ui/Sidebar";
 import { Search, Bell, Settings, LogOut, Calendar } from "lucide-react";
 import connection from "../connection";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { io } from "socket.io-client";
+import toast, { Toaster } from "react-hot-toast";
+import { messaging } from "../firebase";
+import { getToken } from "firebase/messaging";
+
+const socket = io("http://13.229.64.163:3000");
 
 export default function DashboardLayout({ children, searchQuery, setSearchQuery }) {
   const navigate = useNavigate();
@@ -12,6 +18,7 @@ export default function DashboardLayout({ children, searchQuery, setSearchQuery 
   const currentMonth = searchParams.get("month") || String(now.getMonth() + 1);
 
   const [user, setUser] = useState({ 
+    id: null,
     name: localStorage.getItem("user_nama") || "", 
     email: "" 
   });
@@ -47,8 +54,9 @@ export default function DashboardLayout({ children, searchQuery, setSearchQuery 
         const profile = res.data.data; 
         const currentName = profile?.name || localStorage.getItem("user_nama");
         if (currentName) {
-          setUser({ name: currentName, email: profile?.email || "" });
+          setUser({ id: profile.id, name: currentName, email: profile?.email || "" });
           localStorage.setItem("user_nama", currentName);
+          socket.emit("join", profile.id);
         }
       })
       .catch((error) => console.log("Profil error:", error));
@@ -67,7 +75,48 @@ export default function DashboardLayout({ children, searchQuery, setSearchQuery 
 
   useEffect(() => {
     fetchNotifications();
+
+    socket.on("new_notification", (data) => {
+      fetchNotifications();
+      toast(data.message, {
+        icon: data.type === 'success' ? '🎉' : '⚠️',
+        duration: 5000,
+        position: 'top-right',
+        style: {
+          borderRadius: '10px',
+          background: '#0f172a',
+          color: '#fff',
+          fontSize: '14px',
+          fontWeight: 'bold'
+        },
+      });
+    });
+
+    return () => socket.off("new_notification");
   }, []);
+
+  // Firebase Cloud Messaging
+  useEffect(() => {
+    const setupFCM = async () => {
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+          const token = await getToken(messaging, { 
+            vapidKey: "BEj_5ubshBYkb2UcMd20vHTgpx2muHxd-xbAX3xlrcY7k9eF9LujyR1jwn9woZbjfpqt7li8lhmYC8unbzIYJ84" 
+          });
+
+          if (token) {
+            console.log("FCM Token didapat:", token);
+            await connection.post('/auth/save-token', { fcm_token: token });
+          }
+        }
+      } catch (error) {
+        console.log("FCM Error:", error);
+      }
+    };
+
+    if (user.id) setupFCM();
+  }, [user.id]);
 
   const markAsRead = (id, isRead) => {
     if (isRead) return;
@@ -96,6 +145,7 @@ export default function DashboardLayout({ children, searchQuery, setSearchQuery 
 
   return (
     <div className="flex min-h-screen bg-slate-200">
+      <Toaster />
       {openMenu && openMenu !== "sidebar" && (
         <div className="fixed inset-0 z-[40]" onClick={() => setOpenMenu(null)}></div>
       )}
@@ -161,7 +211,9 @@ export default function DashboardLayout({ children, searchQuery, setSearchQuery 
                     className={`relative p-2 rounded ${openMenu === 'notif' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-200'}`}>
                     <Bell size={20} />
                     {unreadCount > 0 && (
-                      <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                      <span className="absolute -top-1 -right-1 flex items-center justify-center bg-red-600 text-white text-[10px] font-bold px-1 rounded-full border-2 border-slate-100 min-w-[18px] h-[18px]">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
                     )}
                   </button>
                   

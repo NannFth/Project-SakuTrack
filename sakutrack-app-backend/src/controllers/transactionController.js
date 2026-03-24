@@ -62,6 +62,8 @@ const addTransaction = async (req, res) => {
         if (user.length === 0) return res.status(404).json({ success: false, message: 'User tidak ditemukan' });
         const userId = user[0].id;
 
+        const io = req.app.get('socketio');
+
         // Simpan Data
         await pool.execute(
             'INSERT INTO transactions (user_id, amount, type, category, description, date, jenis) VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -93,16 +95,16 @@ const addTransaction = async (req, res) => {
                 const previousPercentage = (previousExpense / totalIncome) * 100;
 
                 if (percentage >= 90 && previousPercentage < 90) {
+                    const title = 'Peringatan Saldo Bulanan';
+                    const message = `Perhatian, total pengeluaran Anda bulan ini telah mencapai ${percentage.toFixed(0)}% dari total pemasukan. Harap kendalikan pengeluaran Anda.`;
+                    
                     await pool.execute(
                         `INSERT INTO notifications (user_id, title, message, type, is_read) 
                          VALUES (?, ?, ?, ?, 0)`,
-                        [
-                            userId, 
-                            'Peringatan Saldo Bulanan', 
-                            `Perhatian, total pengeluaran Anda bulan ini telah mencapai ${percentage.toFixed(0)}% dari total pemasukan. Harap kendalikan pengeluaran Anda.`, 
-                            'alert'
-                        ]
+                        [userId, title, message, 'alert']
                     );
+
+                    if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'alert' });
                 }
 
                 // Peringatan Batas Aman Harian
@@ -120,16 +122,16 @@ const addTransaction = async (req, res) => {
                 const previousDailyExpense = dailyExpense - expenseAmount;
 
                 if (dailyExpense >= (0.8 * dailyBudgetLimit) && previousDailyExpense < (0.8 * dailyBudgetLimit)) {
+                    const title = 'Peringatan Anggaran Harian';
+                    const message = 'Perhatian, pengeluaran Anda hari ini sudah mendekati batas aman harian yang disarankan. Harap lebih bijak dalam bertransaksi.';
+                    
                     await pool.execute(
                         `INSERT INTO notifications (user_id, title, message, type, is_read) 
                          VALUES (?, ?, ?, ?, 0)`,
-                        [
-                            userId, 
-                            'Peringatan Anggaran Harian', 
-                            'Perhatian, pengeluaran Anda hari ini sudah mendekati batas aman harian yang disarankan. Harap lebih bijak dalam bertransaksi.', 
-                            'warning'
-                        ]
+                        [userId, title, message, 'warning']
                     );
+
+                    if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'warning' });
                 }
             }
 
@@ -145,16 +147,16 @@ const addTransaction = async (req, res) => {
             
             if (avgExpense > 0 && expenseAmount >= 100000 && expenseAmount > (avgExpense * 3)) {
                 const formattedAmount = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(expenseAmount);
+                const title = 'Peringatan Transaksi Abnormal';
+                const message = `Pengeluaran sebesar ${formattedAmount} baru saja dicatat. Angka ini terpantau jauh di atas rata-rata pengeluaran normal Anda. Harap berhati-hati.`;
+                
                 await pool.execute(
                     `INSERT INTO notifications (user_id, title, message, type, is_read) 
                      VALUES (?, ?, ?, ?, 0)`,
-                    [
-                        userId, 
-                        'Peringatan Transaksi Abnormal', 
-                        `Pengeluaran sebesar ${formattedAmount} baru saja dicatat. Angka ini terpantau jauh di atas rata-rata pengeluaran normal Anda. Harap berhati-hati.`, 
-                        'alert'
-                    ]
+                    [userId, title, message, 'alert']
                 );
+
+                if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'alert' });
             }
 
             // Peringatan Kategori Bocor
@@ -179,16 +181,16 @@ const addTransaction = async (req, res) => {
             const lastCatTotal = Number(lastCatStats[0].total || 0);
 
             if (lastCatTotal >= 100000 && previousCatTotal <= lastCatTotal && currentCatTotal > lastCatTotal) {
+                const title = 'Peringatan Lonjakan Kategori';
+                const message = `Pengeluaran Anda untuk kategori '${category}' bulan ini telah melampaui total pengeluaran di bulan sebelumnya. Harap evaluasi kembali alokasi dana Anda.`;
+                
                 await pool.execute(
                     `INSERT INTO notifications (user_id, title, message, type, is_read) 
                      VALUES (?, ?, ?, ?, 0)`,
-                    [
-                        userId, 
-                        'Peringatan Lonjakan Kategori', 
-                        `Pengeluaran Anda untuk kategori '${category}' bulan ini telah melampaui total pengeluaran di bulan sebelumnya. Harap evaluasi kembali alokasi dana Anda.`, 
-                        'warning'
-                    ]
+                    [userId, title, message, 'warning']
                 );
+
+                if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'warning' });
             }
         }
 
@@ -230,16 +232,16 @@ const addTransaction = async (req, res) => {
 
             if (streak === 3 || streak === 7 || streak === 30) {
                 let milestoneStr = streak === 30 ? '1 bulan' : `${streak} hari`;
+                const title = 'Apresiasi Pencatatan';
+                const message = `Luar biasa! Anda telah konsisten mencatat aktivitas keuangan selama ${milestoneStr} berturut-turut. Pertahankan kebiasaan baik ini untuk mencapai target finansial Anda.`;
+                
                 await pool.execute(
                     `INSERT INTO notifications (user_id, title, message, type, is_read) 
                      VALUES (?, ?, ?, ?, 0)`,
-                    [
-                        userId, 
-                        'Apresiasi Pencatatan', 
-                        `Luar biasa! Anda telah konsisten mencatat aktivitas keuangan selama ${milestoneStr} berturut-turut. Pertahankan kebiasaan baik ini untuk mencapai target finansial Anda.`, 
-                        'success'
-                    ]
+                    [userId, title, message, 'success']
                 );
+
+                if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'success' });
             }
         }
 
