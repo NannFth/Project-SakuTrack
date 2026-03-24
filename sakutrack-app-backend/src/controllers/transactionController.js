@@ -48,7 +48,7 @@ const getTransactions = async (req, res) => {
 // Tambah Transaksi
 const addTransaction = async (req, res) => {
     try {
-        const { amount, type, category, description, date } = req.body;
+        const { amount, type, category, description, date, jenis } = req.body;
         const { uid } = req.user;
 
         if (!amount || !type || !category || !date) {
@@ -63,8 +63,8 @@ const addTransaction = async (req, res) => {
 
         // Simpan Data
         await pool.execute(
-            'INSERT INTO transactions (user_id, amount, type, category, description, date) VALUES (?, ?, ?, ?, ?, ?)',
-            [userId, amount, type, category, description || '', date]
+            'INSERT INTO transactions (user_id, amount, type, category, description, date, jenis) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [userId, amount, type, category, description || '', date, jenis]
         );
 
         res.status(201).json({ 
