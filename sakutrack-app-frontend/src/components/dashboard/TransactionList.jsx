@@ -68,9 +68,9 @@ export default function TransactionList({ data = [], onDelete }) {
                         <span 
                           className={`text-[10px] px-2 py-0.5 rounded-full font-bold
                             ${
-                              item.jenis === "Kebutuhan"
+                              item.jenis === "kebutuhan"
                               ? "bg-blue-100 text-blue-600"
-                              : item.jenis === "Keinginan"
+                              : item.jenis === "keinginan"
                               ? "bg-purple-100 text-purple-600"
                               : "bg-gray-100 text-gray-500"
                             }`}
