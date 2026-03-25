@@ -16,7 +16,7 @@ export default function InputTransaksi() {
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState("expense");
-  const [category, setCategory] = useState("Lainnya");
+  const [category, setCategory] = useState("Makanan/Minuman");
   const [date, setDate] = useState(formattedToday);
   const [loading, setLoading] = useState(false);
   const [openKategori, setOpenKategori] = useState(false);
