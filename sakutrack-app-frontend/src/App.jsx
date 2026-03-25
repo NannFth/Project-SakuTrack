@@ -6,6 +6,7 @@ import InputTransaksi from './pages/InputTransaksi';
 import TargetTabungan from './pages/TargetTabungan';
 import Prediksi from './pages/Prediksi';
 import Profil from './pages/Profil';
+import Wishlist from './pages/Wishlist';
 import DashboardLayout from './layouts/DashboardLayout';
 import { useState } from 'react';
 
@@ -26,6 +27,7 @@ const App = () => {
         <Route path="/target-tabungan" element={<DashboardLayout searchQuery={searchQuery} setSearchQuery={setSearchQuery}><TargetTabungan /></DashboardLayout>} />
         <Route path="/prediksi" element={<DashboardLayout searchQuery={searchQuery} setSearchQuery={setSearchQuery}><Prediksi /></DashboardLayout>} />
         <Route path="/profil" element={<DashboardLayout searchQuery={searchQuery} setSearchQuery={setSearchQuery}><Profil /></DashboardLayout>} />
+        <Route path="/wishlist" element={<DashboardLayout searchQuery={searchQuery} setSearchQuery={setSearchQuery}><Wishlist /></DashboardLayout>} />
       </Routes>
     </Router>
   );
