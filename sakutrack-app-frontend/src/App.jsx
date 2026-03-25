@@ -34,7 +34,7 @@ const App = () => {
           console.log("Mencoba Join Room untuk User ID:", profile.id);
           setUser({ id: profile.id, name: profile.name, email: profile.email });
           localStorage.setItem("user_nama", profile.name);
-          socket.emit("join", `user_${profile.id}`);
+          socket.emit("join", profile.id);
         }
       })
       .catch((err) => console.log("Profil global error:", err));
