@@ -9,7 +9,6 @@ export default function TransactionList({ data = [], onDelete }) {
     );
   }
 
-  // Urutan Transaksi
   const sortedTransactions = data;
 
   // UI
@@ -25,6 +24,8 @@ export default function TransactionList({ data = [], onDelete }) {
       <div className="space-y-4">
         {sortedTransactions.map((item) => {
           const isIncome = item.type === "income";
+
+          console.log("DATA ITEM:", item);
           
           const transactionDate = new Date(item.date);
           const createdAtDate = new Date(item.created_at);
@@ -48,7 +49,7 @@ export default function TransactionList({ data = [], onDelete }) {
           return (
             <div key={item.id} className="grid grid-cols-[1fr_auto] items-center gap-4 border-b border-slate-200 pb-3 last:border-0 hover:bg-slate-50 rounded px-1">
               
-              {/* Icon dan Keterangan */}
+              {/* Keterangan */}
               <div className="flex items-center gap-3 overflow-hidden">
                 <div className={`p-2 rounded flex-shrink-0 ${isIncome ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"}`}>
                   {isIncome ? <ArrowUpRight size={16} /> : <ArrowDownLeft size={16} />}
@@ -59,9 +60,30 @@ export default function TransactionList({ data = [], onDelete }) {
                   
                   {/* Tanggal & Jam */}
                   <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold capitalize text-slate-600">
+                        {item.category || "Lainnya"}
+                      </span>
+
+                      {item.type === "expense" && item.jenis && item.jenis !== "" && (
+                        <span 
+                          className={`text-[10px] px-2 py-0.5 rounded-full font-bold
+                            ${
+                              item.jenis === "Kebutuhan"
+                              ? "bg-blue-100 text-blue-600"
+                              : item.jenis === "Keinginan"
+                              ? "bg-purple-100 text-purple-600"
+                              : "bg-gray-100 text-gray-500"
+                            }`}
+                        >
+                          {item.jenis}
+                        </span>
+                      )}
+
+                    </div>
+
+                    <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
                     <span>{formattedDate}</span>
-                    
-                    {/* Jam */}
                     {isSameDay && (
                       <>
                         <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
@@ -75,7 +97,7 @@ export default function TransactionList({ data = [], onDelete }) {
                 </div>
               </div>
 
-              {/* Nominal & Tombol Hapus */}
+              {/* Nominal & Hapus */}
               <div className="flex items-center justify-end gap-4">
                 <p className={`font-bold text-sm whitespace-nowrap ${isIncome ? "text-emerald-600" : "text-rose-600"}`}>
                   {isIncome ? "+" : "-"} Rp {Number(item.amount).toLocaleString('id-ID')}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion'; 
 import BalanceCard from "../components/dashboard/BalanceCard";
 import FinanceChart from "../components/dashboard/FinanceChart";
@@ -9,6 +10,12 @@ import { Plus, SearchX } from "lucide-react";
 import connection from "../connection";
 
 export default function Dashboard({ searchQuery, setSearchQuery }) {
+  const [searchParams] = useSearchParams();
+  
+  // Parameter Waktu
+  const month = parseInt(searchParams.get("month") || (new Date().getMonth() + 1));
+  const year = parseInt(searchParams.get("year") || new Date().getFullYear());
+
   const [dashboardData, setDashboardData] = useState({
     totalIncome: 0, 
     totalExpense: 0, 
@@ -20,41 +27,21 @@ export default function Dashboard({ searchQuery, setSearchQuery }) {
   const [chartData, setChartData] = useState({ labels: [], incomeTrend: [], expenseTrend: [] });
   const [showAll, setShowAll] = useState(false);
 
-  // Ambil Data
+  // Fetch Data
   const fetchData = () => {
-    connection.get('/dashboard')
+    // Data Dashboard
+    connection.get(`/dashboard?month=${month}&year=${year}`)
       .then((res) => {
-        if (res.data.success) {
-          setDashboardData(res.data.data);
-        }
+        if (res.data.success) setDashboardData(res.data.data);
       })
-      .catch((err) => console.log("Failed to load dashboard:", err));
+      .catch((err) => console.log("Dashboard error:", err));
 
+    // Data Transaksi
     connection.get('/transactions')
       .then((res) => {
         const result = res.data;
         if (result.success) {
-          const originalData = result.data || [];
-          
-          // Mengurutkan transaksi
-          const sortedData = [...originalData].sort((a, b) => {
-            const dateA = new Date(a.date).getTime();
-            const dateB = new Date(b.date).getTime();
-            if (isNaN(dateA)) return 1;
-            if (isNaN(dateB)) return -1;
-            
-            if (dateA !== dateB) {
-              return dateB - dateA;
-            }
-            
-            const createdA = new Date(a.created_at).getTime();
-            const createdB = new Date(b.created_at).getTime();
-            return createdB - createdA;
-          });
-
-          setTransactions(sortedData);
-          
-          // Sinkronisasi data 
+          setTransactions(result.data || []);
           if (result.chartData) {
             setChartData({
               labels: result.chartData.labels ? result.chartData.labels.map(l => l.split('T')[0]) : [],
@@ -64,28 +51,45 @@ export default function Dashboard({ searchQuery, setSearchQuery }) {
           }
         }
       })
-      .catch((err) => console.log("Failed to load transactions:", err));
+      .catch((err) => console.log("Transaksi error:", err));
   };
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [month, year]); 
+
+  // Filter Bulan
+  const transactionsBulanIni = transactions.filter(t => {
+    const d = new Date(t.date);
+    return (d.getMonth() + 1) === month && d.getFullYear() === year;
+  });
+
+  // Filter Grafik
+  const filteredChart = {
+    labels: [],
+    incomeTrend: [],
+    expenseTrend: []
+  };
+
+  chartData.labels.forEach((label, i) => {
+    const [y, m] = label.split('-').map(Number);
+    if (y === year && m === month) {
+      filteredChart.labels.push(label);
+      filteredChart.incomeTrend.push(chartData.incomeTrend[i]);
+      filteredChart.expenseTrend.push(chartData.expenseTrend[i]);
+    }
+  });
 
   // Hapus
   const deleteTransaction = async (id) => {
-    if (window.confirm("Yakin ingin menghapus riwayat transaksi ini?")) {
+    if (window.confirm("Yakin hapus?")) {
       try {
         const res = await connection.delete(`/transactions/${id}`);
-        if (res.data.success) {
-          fetchData();
-        }
-      } catch (err) {
-        console.error("Failed to delete:", err);
-      }
+        if (res.data.success) fetchData();
+      } catch (err) { console.error(err); }
     } 
   };
 
-  // Pencarian
   const query = searchQuery ? searchQuery.toLowerCase() : "";
   const filteredTransactions = transactions.filter((item) => {
     const desc = (item.description || "").toLowerCase();
@@ -95,9 +99,9 @@ export default function Dashboard({ searchQuery, setSearchQuery }) {
 
   const isSearching = searchQuery && searchQuery.trim() !== "";
 
-  // UI
   return (
     <div className="max-w-[1400px] mx-auto space-y-8 pb-10">
+      {/* Header Info */}
       <div className="flex justify-between items-end">
         <div>
           <motion.h1 
@@ -117,7 +121,6 @@ export default function Dashboard({ searchQuery, setSearchQuery }) {
       <AnimatePresence mode="wait">
         {!isSearching ? (
           <motion.div key="normal" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
-            {/* Ringkasan */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <BalanceCard title="Total Saldo" amount={dashboardData.balance} />
               <BalanceCard title="Pemasukan" amount={dashboardData.totalIncome} />
@@ -125,24 +128,24 @@ export default function Dashboard({ searchQuery, setSearchQuery }) {
               <BalanceCard title="Target Aktif" amount={dashboardData.activeGoals.length} />
             </div>
 
-            {/* Grafik dan Tabel */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               <div className="lg:col-span-8">
                 <FinanceChart 
-                  incomeTrend={chartData.incomeTrend} 
-                  expenseTrend={chartData.expenseTrend} 
-                  timeLabels={chartData.labels} 
+                  incomeTrend={filteredChart.incomeTrend} 
+                  expenseTrend={filteredChart.expenseTrend} 
+                  timeLabels={filteredChart.labels} 
                 />
               </div>
               <div className="lg:col-span-4">
-                <CategoryChart transactions={transactions} />
+                <CategoryChart transactions={transactionsBulanIni} />
               </div>
               <div className="lg:col-span-12">
                 <TransactionList 
-                  data={showAll ? transactions : transactions.slice(0, 5)}
+                  data={showAll ? transactionsBulanIni : transactionsBulanIni.slice(0, 5)}
                   onDelete={deleteTransaction}
+                  currentMonth={month}
                 />
-                {transactions.length > 5 && (
+                {transactionsBulanIni.length > 5 && (
                   <div className="text-center mt-4">
                     <button onClick={() => setShowAll(!showAll)} className="text-slate-900 font-bold text-sm hover:underline mt-2">
                       {showAll ? "Tampilkan Lebih Sedikit" : "Lihat Semua Transaksi"}
@@ -159,12 +162,6 @@ export default function Dashboard({ searchQuery, setSearchQuery }) {
             </div>
             <div className="lg:col-span-8">
               <TransactionList data={filteredTransactions} onDelete={deleteTransaction} />
-              {filteredTransactions.length === 0 && (
-                <div className="flex flex-col items-center justify-center p-16 bg-white rounded border border-dashed mt-6">
-                   <SearchX size={40} className="text-slate-300 mb-3" />
-                   <p className="text-slate-400 text-sm">Data transaksi tidak ditemukan.</p>
-                </div>
-              )}
             </div>
           </motion.div>
         )}

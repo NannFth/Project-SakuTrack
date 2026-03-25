@@ -5,9 +5,18 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function CategoryChart({ transactions = [] }) {
+  // warna kategori
+  const CATEGORY_COLORS = {
+    "makanan/minuman": "#FBBF24",
+    "belanja": "#F472B6",
+    "transportasi": "#0EA5E9",
+    "pendidikan": "#4F46E5",
+    "hiburan": "#F43F5E",
+    "lainnya": "#94A3B8"
+  };
 
   // Data
-  const { labels, dataValues } = useMemo(() => {
+  const { labels, dataValues, backgroundColors } = useMemo(() => {
     const categoryTotals = {};
 
     transactions
@@ -18,17 +27,19 @@ export default function CategoryChart({ transactions = [] }) {
         categoryTotals[category] = (categoryTotals[category] || 0) + amount;
       });
 
+    const keys = Object.keys(categoryTotals);
+
     return {
-      labels: Object.keys(categoryTotals).map(cat => cat.charAt(0).toUpperCase() + cat.slice(1)),
-      dataValues: Object.values(categoryTotals)
+      labels: keys.map(cat =>
+        cat.split('/')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join('/')
+      ),
+      dataValues: Object.values(categoryTotals),
+      backgroundColors: keys.map(cat => CATEGORY_COLORS[cat] || "#CBD5E1")
     };
   }, [transactions]);
 
-  // Warna
-  const generateColors = (num) => {
-    const baseColors = ["#4F46E5", "#F43F5E", "#FBBF24", "#5cf69a", "#0EA5E9", "#10B981", "#6366F1"];
-    return Array.from({ length: num }, (_, i) => baseColors[i % baseColors.length]);
-  };
 
   // Chart
   const data = {
@@ -36,7 +47,7 @@ export default function CategoryChart({ transactions = [] }) {
     datasets: [
       {
         data: dataValues,
-        backgroundColor: generateColors(labels.length),
+        backgroundColor: backgroundColors,
         borderWidth: 2,
         borderColor: "#ffffff",
         hoverOffset: 15,

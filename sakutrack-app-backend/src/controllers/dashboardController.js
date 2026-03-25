@@ -3,8 +3,9 @@ const pool = require('../config/database');
 const getDashboardData = async (req, res) => {
     try {
         const { uid } = req.user;
+        const { month, year } = req.query;
 
-        // Get user
+        // Ambil Data
         const [userRows] = await pool.execute(
             'SELECT id FROM users WHERE firebase_uid = ?',
             [uid]
@@ -19,17 +20,25 @@ const getDashboardData = async (req, res) => {
 
         const userId = userRows[0].id;
 
-        // Get transactions
         const [transactions] = await pool.execute(
-            'SELECT amount, type, category FROM transactions WHERE user_id = ?',
-            [userId]
+            `SELECT amount, type, category, date FROM transactions 
+             WHERE user_id = ? 
+             AND MONTH(date) = ? 
+             AND YEAR(date) = ?`,
+            [userId, month, year]
         );
 
-        // Get savings
+        // Ambil Tabungan
         const [savings] = await pool.execute(
             'SELECT * FROM savings WHERE user_id = ?',
             [userId]
         );
+
+        const activeSavings = savings.filter(item => {
+            const current = parseFloat(item.current_amount || item.currentAmount || 0);
+            const target = parseFloat(item.target_amount || item.targetAmount || 0);
+            return current < target;
+        });
 
         let totalIncome = 0;
         let totalExpense = 0;
@@ -56,7 +65,7 @@ const getDashboardData = async (req, res) => {
                 totalExpense,
                 balance: totalIncome - totalExpense,
                 expenseBreakdown: expenseCategories,
-                activeGoals: savings
+                activeGoals: activeSavings
             }
         });
     } catch (error) {
