@@ -7,13 +7,15 @@ export default function Popup({ socket }) {
     if (!socket) return;
 
     socket.on("new_notification", (data) => {
+      console.log("Paket PopUp Diterima", data);
+
       toast.custom((t) => (
         <div
           className={`${
-            t.visible ? 'animate-enter' : 'animate-leave'
+            t.visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
           } max-w-2xl w-full bg-slate-900 shadow-2xl rounded-xl border-l-4 ${
             data.type === 'success' ? 'border-green-500' : (data.type === 'alert' ? 'border-red-500' : 'border-yellow-500')
-          } pointer-events-auto flex ring-1 ring-black ring-opacity-5 transition-all duration-300`}
+          } pointer-events-auto flex ring-1 ring-black ring-opacity-5 transition-all duration-500 ease-out transform`}
         >
           <div className="flex-1 w-0 p-4">
             <div className="flex items-center">
