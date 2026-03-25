@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Menambahkan garis pinggir tipis agar tombol putih tidak menyatu dengan background */
+.force-show-text {
+  border: 2px solid #e2e8f0 !important; /* Warna abu-abu tipis (slate-200) */
+  color: black !important;
+  font-weight: bold !important;
+  transition: all 0.2s ease;
+}
+
+/* Efek sedikit menggelap saat kursor di atas tombol */
+.force-show-text:hover {
+  background-color: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+}
+
 /* Reset */
 
 * {
