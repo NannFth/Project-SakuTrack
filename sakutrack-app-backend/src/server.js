@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('./config/firebase');
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -8,7 +9,7 @@ const cors = require('cors');
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:3000"],
+    origin: ["http://localhost:5173", "http://localhost:3000", "http://13.229.64.163"],
     methods: ["GET", "POST", "PUT", "DELETE"]
   }
 });
@@ -49,7 +50,7 @@ app.get('/', (req, res) => {
   res.status(200).send('API SakuTrack is running with Real-time Support...');
 });
 
-startCronJobs();
+startCronJobs(io);
 
 const port = process.env.PORT || 3000;
 const host = process.env.NODE_ENV !== 'production' ? 'localhost' : '0.0.0.0';
