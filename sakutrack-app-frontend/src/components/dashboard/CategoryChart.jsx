@@ -8,6 +8,7 @@ export default function CategoryChart({ transactions = [] }) {
   // warna kategori
   const CATEGORY_COLORS = {
     "makanan/minuman": "#FBBF24",
+    "belanja": "#F472B6",
     "transportasi": "#0EA5E9",
     "pendidikan": "#4F46E5",
     "hiburan": "#F43F5E",
