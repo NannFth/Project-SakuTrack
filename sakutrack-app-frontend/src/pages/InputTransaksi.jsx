@@ -1,4 +1,4 @@
-import { Utensils, Car, BookOpen, Gamepad2, Package, Wallet, Banknote, Gift, Briefcase, Coins } from 'lucide-react';
+import { Utensils, ShoppingBag, Car, BookOpen, Gamepad2, Package, Wallet, Banknote, Gift, Briefcase, Coins } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tag, FileText, Calendar } from "lucide-react";
@@ -24,13 +24,14 @@ export default function InputTransaksi() {
 
   // Data Kategori
   const kategori = {
-    expense: ["Makanan/Minuman", "Transportasi", "Pendidikan", "Hiburan", "Lainnya"],
+    expense: ["Makanan/Minuman", "Belanja", "Transportasi", "Pendidikan", "Hiburan", "Lainnya"],
     income: ["Uang Harian", "Gaji", "Bonus", "Bulanan", "Freelance", "Hadiah", "Lainnya"]
   };
 
   // Icon
   const categoryIcons = {
     "Makanan/Minuman": <Utensils size={18} />,
+    "Belanja": <ShoppingBag size={18} />,
     "Transportasi": <Car size={18} />,
     "Pendidikan": <BookOpen size={18} />,
     "Hiburan": <Gamepad2 size={18} />,
@@ -204,7 +205,7 @@ export default function InputTransaksi() {
               </label>
               <input
                 type="text"
-                placeholder="Contoh: Beli Kopi"
+                placeholder={type === "expense" ? "Contoh: Beli kopi" : "Contoh: Uang saku"}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full p-3 border border-slate-200 rounded focus:outline-none focus:border-slate-900 text-sm font-medium"
