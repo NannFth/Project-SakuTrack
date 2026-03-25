@@ -272,7 +272,6 @@ const updateTransaction = async (req, res) => {
         const { amount, type, category, description, date, jenis } = req.body;
         const { uid } = req.user;
 
-        // Update Database
         const [result] = await pool.execute(
             `UPDATE transactions SET 
                 amount = COALESCE(?, amount), 
@@ -311,7 +310,6 @@ const deleteTransaction = async (req, res) => {
         const { id } = req.params;
         const { uid } = req.user;
 
-        // Hapus Data
         const [result] = await pool.execute(
             'DELETE FROM transactions WHERE id = ? AND user_id = (SELECT id FROM users WHERE firebase_uid = ?)',
             [id, uid]
