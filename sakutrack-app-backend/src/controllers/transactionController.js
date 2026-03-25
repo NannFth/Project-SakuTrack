@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const { sendPushNotification } = require('../services/notificationService');
 
 // Ambil Data
 const getTransactions = async (req, res) => {
@@ -106,6 +107,7 @@ const addTransaction = async (req, res) => {
                     );
 
                     if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'alert' });
+                    sendPushNotification(userId, title, message);
                 }
 
                 // Peringatan Batas Aman Harian
@@ -133,6 +135,7 @@ const addTransaction = async (req, res) => {
                     );
 
                     if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'warning' });
+                    sendPushNotification(userId, title, message);
                 }
             }
 
@@ -158,6 +161,7 @@ const addTransaction = async (req, res) => {
                 );
 
                 if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'alert' });
+                sendPushNotification(userId, title, message);
             }
 
             // Peringatan Kategori Bocor
@@ -192,6 +196,7 @@ const addTransaction = async (req, res) => {
                 );
 
                 if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'warning' });
+                sendPushNotification(userId, title, message);
             }
         }
 
@@ -243,6 +248,7 @@ const addTransaction = async (req, res) => {
                 );
 
                 if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'success' });
+                sendPushNotification(userId, title, message);
             }
         }
 
