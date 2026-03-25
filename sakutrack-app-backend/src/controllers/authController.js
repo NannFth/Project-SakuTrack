@@ -132,4 +132,35 @@ const updateProfile = async (req, res) => {
     }
 };
 
-module.exports = { register, login, getProfile, updateProfile };
+// Token Notif
+const saveToken = async (req, res) => {
+    try {
+        const { uid } = req.user;
+        const { fcm_token } = req.body;
+
+        if (!fcm_token) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Token tidak ditemukan' 
+            });
+        }
+
+        await pool.execute(
+            'UPDATE users SET fcm_token = ? WHERE firebase_uid = ?',
+            [fcm_token, uid]
+        );
+
+        res.status(200).json({ 
+            success: true, 
+            message: 'Token berhasil disimpan' 
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            message: 'Terjadi kesalahan pada server',
+            error: error.message 
+        });
+    }
+};
+
+module.exports = { register, login, getProfile, updateProfile, saveToken };
