@@ -99,7 +99,9 @@ export default function TargetTabungan() {
       name: item.name || "",
       targetAmount: Number(item.targetAmount || item.target_amount || 0),
       currentAmount: totalBaru,
-      targetDate: (item.targetDate || item.target_date || "").split("T")[0]
+      targetDate: item.targetDate || item.target_date 
+        ? (item.targetDate || item.target_date).split("T")[0]
+        : new Date().toISOString().split("T")[0]
     };
 
     connection.put(`/savings/${id}`, dataLengkap)
@@ -116,6 +118,54 @@ export default function TargetTabungan() {
         console.log("ERROR UPDATE:", err.response?.data || err.message);
         alert("Gagal memperbarui saldo.");
       });
+  };
+
+  // estimasi target tercapai
+  const hitungEstimasi = (item) => {
+    const current = Number(item.currentAmount || item.current_amount || 0);
+    const target = Number(item.targetAmount || item.target_amount || 0);
+
+    if (target <= 0) return null;
+    if (current >= target) return "Target sudah tercapai";
+
+    const createdRaw = item.targetDate || item.target_date || item.createdAt || item.created_at;
+    if (!createdRaw) return null;
+
+    const createdDate = createdRaw ? new Date(createdRaw) : new Date();
+
+    if (isNaN(createdDate.getTime())) {
+      console.error("Format tanggal salah untuk item:", item.name);
+      return null;
+    }
+
+    const today = new Date();
+
+    // selisih hari
+    const diffInMs = today - createdDate;
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+    const selisihHari = Math.max(diffInDays, 1);
+
+    if (current <= 0) return "Yuk, mulai menabung untuk lihat estimasi!";
+
+    // rata rata tabungan perhari
+    const rataPerHari = current / selisihHari;
+
+    if (rataPerHari <= 0) return "Yuk, tambah lagi saldonya!";
+
+    const sisa = target - current;
+    const estimasiHari = Math.ceil(sisa / rataPerHari);
+
+    const tanggalSelesai = new Date();
+    tanggalSelesai.setDate(tanggalSelesai.getDate() + estimasiHari);
+
+    return {
+      hari: estimasiHari,
+      tanggal: tanggalSelesai.toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      })
+    };
   };
 
   return (
@@ -148,6 +198,7 @@ export default function TargetTabungan() {
         {/* List Target */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {savings.map((item) => {
+            console.log("Cek Data Item:", item.name, "Tanggal:", item.targetDate || item.target_date);
             const current = Number(item.currentAmount || item.current_amount || 0);
             const target = Number(item.targetAmount || item.target_amount || 0);
             const persen = target > 0 ? Math.min((current / target) * 100, 100) : 0;
@@ -201,6 +252,33 @@ export default function TargetTabungan() {
                   <p className="text-sm text-slate-500">
                     {formatRupiah(current)} / {formatRupiah(target)}
                   </p>
+
+                  <div className="min-h-[20px]">
+                    {(() => {
+                      if (isSelesai) return null;
+
+                      const estimasi = hitungEstimasi(item);
+                      if (!estimasi) return null;
+
+                      if (typeof estimasi === "string") {  
+                        return (
+                          <p className="text-xs text-emerald-600 mt-1 font-bold uppercase tracking-wide bg-emerald-50 px-2 py-0.5 rounded w-fit">
+                            {estimasi}
+                          </p>
+                        );
+                      }
+
+                      return (
+                        <p className="text-xs mt-1 leading-relaxed bg-blue-50 text-blue-700 px-2 py-1 rounded-md border border-blue-100 w-fit">
+                          <span className="opacity-80">Estimasi:</span>
+                          <span className="font-extrabold ml-1 underline decoration-blue-300">
+                            {estimasi.hari} hari
+                          </span> lagi
+                          <span className="text-[10px] ml-1 opacity-70">({estimasi.tanggal})</span>
+                        </p>
+                      );
+                    })()}
+                  </div>
                 </div>
 
                 {/* Progress Bar */}
@@ -212,9 +290,12 @@ export default function TargetTabungan() {
                 <div className="pt-4 border-t border-slate-200 flex gap-2">
                   <input 
                     type="text" 
-                    placeholder="Tambah nominal..."
-                    value={inputSaldo[item.id] ? formatRupiah(inputSaldo[item.id]) : ""}
-                    className="flex-1 text-sm p-2 border border-slate-300 rounded focus:outline-none focus:border-slate-900"
+                    placeholder={isSelesai ? "Target sudah tercapai!" : "Tambah nominal..."}
+                    value={isSelesai ? "" : (inputSaldo[item.id] ? formatRupiah(inputSaldo[item.id]) : "")}
+                    disabled={isSelesai}
+                    className={`flex-1 text-sm p-2 border border-slate-300 rounded focus:outline-none focus:border-slate-900 ${
+                      isSelesai ? "bg-emerald-50 border-emerald-200 text-emerald-600 font-bold placeholder:text-emerald-600 text-center" : ""
+                    }`}
                     onChange={(e) => {
                       const raw = e.target.value.replace(/\D/g, "");
 
@@ -239,7 +320,11 @@ export default function TargetTabungan() {
                       }
                     }}
                   />
-                  <div className="text-xs text-slate-400 italic flex items-center whitespace-nowrap">Enter untuk simpan</div>
+                  {!isSelesai && (
+                    <div className="text-xs text-slate-400 italic flex items-center whitespace-nowrap">
+                      Enter untuk simpan
+                    </div>
+                  )}
                 </div>
               </div>
             );
