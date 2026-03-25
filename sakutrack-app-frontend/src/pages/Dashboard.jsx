@@ -1,3 +1,4 @@
+import DailyGreeting from '../components/dashboard/DailyGreeting';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion'; 
@@ -121,6 +122,13 @@ export default function Dashboard({ searchQuery, setSearchQuery }) {
       <AnimatePresence mode="wait">
         {!isSearching ? (
           <motion.div key="normal" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
+            
+            {/* TAMBAHAN: Daily Greeting & Budget Limit Reminder */}
+            <DailyGreeting 
+              totalExpense={dashboardData.totalExpense} 
+              dailyLimit={100000} 
+            />
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <BalanceCard title="Total Saldo" amount={dashboardData.balance} />
               <BalanceCard title="Pemasukan" amount={dashboardData.totalIncome} />
