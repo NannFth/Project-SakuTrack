@@ -106,8 +106,10 @@ const addTransaction = async (req, res) => {
                         [userId, title, message, 'alert']
                     );
 
-                    if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'alert' });
-                    sendPushNotification(userId, title, message);
+                    try {
+                        if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'alert' });
+                        sendPushNotification(userId, title, message);
+                    } catch (err) { console.error("Notif Error:", err.message); }
                 }
 
                 // Peringatan Batas Aman Harian
@@ -134,8 +136,10 @@ const addTransaction = async (req, res) => {
                         [userId, title, message, 'warning']
                     );
 
-                    if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'warning' });
-                    sendPushNotification(userId, title, message);
+                    try {
+                        if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'warning' });
+                        sendPushNotification(userId, title, message);
+                    } catch (err) { console.error("Notif Error:", err.message); }
                 }
             }
 
@@ -160,8 +164,10 @@ const addTransaction = async (req, res) => {
                     [userId, title, message, 'alert']
                 );
 
-                if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'alert' });
-                sendPushNotification(userId, title, message);
+                try {
+                    if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'alert' });
+                    sendPushNotification(userId, title, message);
+                } catch (err) { console.error("Notif Error:", err.message); }
             }
 
             // Peringatan Kategori Bocor
@@ -195,8 +201,10 @@ const addTransaction = async (req, res) => {
                     [userId, title, message, 'warning']
                 );
 
-                if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'warning' });
-                sendPushNotification(userId, title, message);
+                try {
+                    if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'warning' });
+                    sendPushNotification(userId, title, message);
+                } catch (err) { console.error("Notif Error:", err.message); }
             }
         }
 
@@ -247,8 +255,10 @@ const addTransaction = async (req, res) => {
                     [userId, title, message, 'success']
                 );
 
-                if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'success' });
-                sendPushNotification(userId, title, message);
+                try {
+                    if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'success' });
+                    sendPushNotification(userId, title, message);
+                } catch (err) { console.error("Notif Error:", err.message); }
             }
         }
 
