@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const { sendPushNotification } = require('../services/notificationService');
 
 // Ambil Data
 const getTransactions = async (req, res) => {
@@ -96,8 +97,8 @@ const addTransaction = async (req, res) => {
                 const previousPercentage = (previousExpense / totalIncome) * 100;
 
                 if (percentage >= 90 && previousPercentage < 90) {
-                    const title = 'Peringatan Saldo Bulanan';
-                    const message = `Perhatian, total pengeluaran Anda bulan ini telah mencapai ${percentage.toFixed(0)}% dari total pemasukan. Harap kendalikan pengeluaran Anda.`;
+                    const title = '⚠️ Ambang Batas Pengeluaran Bulanan';
+                    const message = `Perhatian, total pengeluaran Anda telah mencapai ${percentage.toFixed(0)}% dari pemasukan bulan ini. Mohon pertimbangkan kembali prioritas belanja Anda agar tetap sesuai rencana.`;
                     
                     await pool.execute(
                         `INSERT INTO notifications (user_id, title, message, type, is_read) 
@@ -105,7 +106,10 @@ const addTransaction = async (req, res) => {
                         [userId, title, message, 'alert']
                     );
 
-                    if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'alert' });
+                    try {
+                        if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'alert' });
+                        sendPushNotification(userId, title, message);
+                    } catch (err) { console.error("Notif Error:", err.message); }
                 }
 
                 // Peringatan Batas Aman Harian
@@ -123,8 +127,8 @@ const addTransaction = async (req, res) => {
                 const previousDailyExpense = dailyExpense - expenseAmount;
 
                 if (dailyExpense >= (0.8 * dailyBudgetLimit) && previousDailyExpense < (0.8 * dailyBudgetLimit)) {
-                    const title = 'Peringatan Anggaran Harian';
-                    const message = 'Perhatian, pengeluaran Anda hari ini sudah mendekati batas aman harian yang disarankan. Harap lebih bijak dalam bertransaksi.';
+                    const title = '📢 Batas Aman Anggaran Harian';
+                    const message = 'Pengeluaran Anda hari ini hampir mencapai batas harian yang disarankan. Mohon kelola sisa anggaran hari ini dengan lebih bijak.';
                     
                     await pool.execute(
                         `INSERT INTO notifications (user_id, title, message, type, is_read) 
@@ -132,7 +136,10 @@ const addTransaction = async (req, res) => {
                         [userId, title, message, 'warning']
                     );
 
-                    if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'warning' });
+                    try {
+                        if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'warning' });
+                        sendPushNotification(userId, title, message);
+                    } catch (err) { console.error("Notif Error:", err.message); }
                 }
             }
 
@@ -148,8 +155,8 @@ const addTransaction = async (req, res) => {
             
             if (avgExpense > 0 && expenseAmount >= 100000 && expenseAmount > (avgExpense * 3)) {
                 const formattedAmount = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(expenseAmount);
-                const title = 'Peringatan Transaksi Abnormal';
-                const message = `Pengeluaran sebesar ${formattedAmount} baru saja dicatat. Angka ini terpantau jauh di atas rata-rata pengeluaran normal Anda. Harap berhati-hati.`;
+                const title = '🚨 Peringatan Transaksi Tidak Biasa';
+                const message = `Transaksi sebesar ${formattedAmount} telah dicatat. Nilai ini berada di atas rata-rata pengeluaran normal Anda. Harap tinjau kembali untuk memastikan keakuratan data.`;
                 
                 await pool.execute(
                     `INSERT INTO notifications (user_id, title, message, type, is_read) 
@@ -157,7 +164,10 @@ const addTransaction = async (req, res) => {
                     [userId, title, message, 'alert']
                 );
 
-                if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'alert' });
+                try {
+                    if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'alert' });
+                    sendPushNotification(userId, title, message);
+                } catch (err) { console.error("Notif Error:", err.message); }
             }
 
             // Peringatan Kategori Bocor
@@ -182,8 +192,8 @@ const addTransaction = async (req, res) => {
             const lastCatTotal = Number(lastCatStats[0].total || 0);
 
             if (lastCatTotal >= 100000 && previousCatTotal <= lastCatTotal && currentCatTotal > lastCatTotal) {
-                const title = 'Peringatan Lonjakan Kategori';
-                const message = `Pengeluaran Anda untuk kategori '${category}' bulan ini telah melampaui total pengeluaran di bulan sebelumnya. Harap evaluasi kembali alokasi dana Anda.`;
+                const title = '📉 Analisis Lonjakan Kategori';
+                const message = `Total pengeluaran pada kategori "${category}" telah melampaui jumlah bulan lalu. Mohon evaluasi kembali alokasi anggaran pada kategori ini.`;
                 
                 await pool.execute(
                     `INSERT INTO notifications (user_id, title, message, type, is_read) 
@@ -191,7 +201,10 @@ const addTransaction = async (req, res) => {
                     [userId, title, message, 'warning']
                 );
 
-                if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'warning' });
+                try {
+                    if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'warning' });
+                    sendPushNotification(userId, title, message);
+                } catch (err) { console.error("Notif Error:", err.message); }
             }
         }
 
@@ -233,8 +246,8 @@ const addTransaction = async (req, res) => {
 
             if (streak === 3 || streak === 7 || streak === 30) {
                 let milestoneStr = streak === 30 ? '1 bulan' : `${streak} hari`;
-                const title = 'Apresiasi Pencatatan';
-                const message = `Luar biasa! Anda telah konsisten mencatat aktivitas keuangan selama ${milestoneStr} berturut-turut. Pertahankan kebiasaan baik ini untuk mencapai target finansial Anda.`;
+                const title = '⭐ Apresiasi Konsistensi Keuangan';
+                const message = `Luar biasa! Anda telah konsisten mencatat aktivitas keuangan selama ${milestoneStr} berturut-turut. Pertahankan disiplin ini demi kesehatan finansial yang lebih baik.`;
                 
                 await pool.execute(
                     `INSERT INTO notifications (user_id, title, message, type, is_read) 
@@ -242,7 +255,10 @@ const addTransaction = async (req, res) => {
                     [userId, title, message, 'success']
                 );
 
-                if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'success' });
+                try {
+                    if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'success' });
+                    sendPushNotification(userId, title, message);
+                } catch (err) { console.error("Notif Error:", err.message); }
             }
         }
 
@@ -266,7 +282,6 @@ const updateTransaction = async (req, res) => {
         const { amount, type, category, description, date, jenis } = req.body;
         const { uid } = req.user;
 
-        // Update Database
         const [result] = await pool.execute(
             `UPDATE transactions SET 
                 amount = COALESCE(?, amount), 
@@ -305,7 +320,6 @@ const deleteTransaction = async (req, res) => {
         const { id } = req.params;
         const { uid } = req.user;
 
-        // Hapus Data
         const [result] = await pool.execute(
             'DELETE FROM transactions WHERE id = ? AND user_id = (SELECT id FROM users WHERE firebase_uid = ?)',
             [id, uid]
