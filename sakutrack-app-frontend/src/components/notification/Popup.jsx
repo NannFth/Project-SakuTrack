@@ -5,14 +5,14 @@ import { X } from "lucide-react";
 export default function Popup({ socket }) {
   useEffect(() => {
     if (!socket) {
-      console.log("Popup: Socket tidak tereteksi");
+      console.log("Popup: Socket tidak terdeteksi");
       return;
     }
 
     console.log("Popup: Listener aktif");
 
-    socket.on("new_notification", (data) => {
-      console.log("Paket Diterima:", data);
+    const handleNewNotification = (data) => {
+      console.log("Popup: Paket diterima:", data);
 
       const getMeta = (type) => {
         switch (type) {
@@ -30,19 +30,19 @@ export default function Popup({ socket }) {
         <div
           className={`${
             t.visible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-4 scale-95'
-          } max-w-2xl w-full bg-slate-900 text-white shadow-2xl rounded-xl border border-slate-700 pointer-events-auto flex transition-all duration-500 transform z-[99999] mt-5`}
+          } max-w-md w-full bg-slate-900 text-white shadow-2xl rounded-xl border border-slate-700 pointer-events-auto flex transition-all duration-500 transform z-[99999] mt-5`}
         >
           <div className="flex-1 flex items-center p-4">
             <div className="text-3xl mr-5 shrink-0">
               {icon}
             </div>
             
-            <div className="flex flex-col min-w-0">
+            <div className="flex flex-col min-w-0 text-left">
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
                 {label}
               </p>
               <p className="text-sm font-bold text-white truncate">
-                {data.title.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2700}-\u{27BF}]/gu, '').trim()}
+                {data.title ? data.title.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2700}-\u{27BF}]/gu, '').trim() : 'Notifikasi'}
               </p>
               <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
                 {data.message}
@@ -58,14 +58,17 @@ export default function Popup({ socket }) {
           </button>
         </div>
       ), {
+        id: `notif-${Date.now()}`,
         position: 'top-center',
-        duration: 10000, 
+        duration: 8000, 
       });
-    });
+    };
+
+    socket.on("new_notification", handleNewNotification);
 
     return () => {
-      socket.off("new_notification");
-      console.log("🔌 Popup: Listener dimatikan (unmounted)");
+      socket.off("new_notification", handleNewNotification);
+      console.log("Popup: Listener dimatikan");
     };
   }, [socket]);
 

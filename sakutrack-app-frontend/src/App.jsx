@@ -17,7 +17,10 @@ import RekomendasiKeuangan from './pages/RekomendasiKeuangan';
 import DashboardLayout from './layouts/DashboardLayout';
 import Popup from "./components/notification/Popup";
 
-const socket = io("http://13.229.64.163:3000");
+const socket = io("http://13.229.64.163:3000", {
+  transports: ["websocket"],
+  reconnection: true
+});
 
 const App = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -38,7 +41,11 @@ const App = () => {
           localStorage.setItem("user_nama", profile.name);
           
           if (socket.connected) {
-            socket.emit("join", profile.id);
+            socket.emit("join", String(profile.id));
+          } else {
+            socket.once("connect", () => {
+              socket.emit("join", String(profile.id));
+            });
           }
         }
       })
@@ -50,7 +57,7 @@ const App = () => {
 
     const handleReconnect = () => {
       console.log("Socket reconnected! Memastikan masuk ulang ke Room ID:", user.id);
-      socket.emit("join", user.id);
+      socket.emit("join", String(user.id));
     };
 
     socket.on("connect", handleReconnect);

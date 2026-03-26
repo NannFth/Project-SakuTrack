@@ -97,13 +97,13 @@ const addTransaction = async (req, res) => {
                 const previousPercentage = (previousExpense / totalIncome) * 100;
 
                 if (percentage >= 90 && previousPercentage < 90) {
-                    const title = '⚠️ Ambang Batas Pengeluaran Bulanan';
+                    const title = '⚠️ Batas Aman Pengeluaran Bulanan';
                     const message = `Perhatian, total pengeluaran Anda telah mencapai ${percentage.toFixed(0)}% dari pemasukan bulan ini. Mohon pertimbangkan kembali prioritas belanja Anda agar tetap sesuai rencana.`;
                     
                     await pool.execute(
                         `INSERT INTO notifications (user_id, title, message, type, is_read) 
                          VALUES (?, ?, ?, ?, 0)`,
-                        [userId, title, message, 'alert']
+                        [userId, title, message, 'warning']
                     );
 
                     if (io) io.to(String(userId)).emit('new_notification', { title, message, type: 'alert' });
@@ -125,7 +125,7 @@ const addTransaction = async (req, res) => {
                 const previousDailyExpense = dailyExpense - expenseAmount;
 
                 if (dailyExpense >= (0.8 * dailyBudgetLimit) && previousDailyExpense < (0.8 * dailyBudgetLimit)) {
-                    const title = '📢 Batas Aman Anggaran Harian';
+                    const title = '⚠️ Batas Aman Anggaran Harian';
                     const message = 'Pengeluaran Anda hari ini hampir mencapai batas harian yang disarankan. Mohon kelola sisa anggaran hari ini dengan lebih bijak.';
                     
                     await pool.execute(
@@ -151,7 +151,7 @@ const addTransaction = async (req, res) => {
             
             if (avgExpense > 0 && expenseAmount >= 100000 && expenseAmount > (avgExpense * 3)) {
                 const formattedAmount = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(expenseAmount);
-                const title = '🚨 Peringatan Transaksi Tidak Biasa';
+                const title = '🚨 Transaksi Tidak Biasa';
                 const message = `Transaksi sebesar ${formattedAmount} telah dicatat. Nilai ini berada di atas rata-rata pengeluaran normal Anda. Harap tinjau kembali untuk memastikan keakuratan data.`;
                 
                 await pool.execute(
@@ -192,7 +192,7 @@ const addTransaction = async (req, res) => {
                 await pool.execute(
                     `INSERT INTO notifications (user_id, title, message, type, is_read) 
                      VALUES (?, ?, ?, ?, 0)`,
-                    [userId, title, message, 'warning']
+                    [userId, title, message, 'alert']
                 );
 
                 if (io) io.to(String(userId)).emit('new_notification', { title, message, type: 'warning' });
