@@ -110,7 +110,7 @@ const updateSaving = async (req, res) => {
                     [userId, title, message, 'success']
                 );
 
-                if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'success' });
+                if (io) io.to(String(userId)).emit('new_notification', { title, message, type: 'success' });
                 sendPushNotification(userId, title, message);
             } 
             
@@ -139,7 +139,7 @@ const updateSaving = async (req, res) => {
                     [userId, title, message, 'info']
                 );
 
-                if (io) io.to(`user_${userId}`).emit('new_notification', { title, message, type: 'info' });
+                if (io) io.to(String(userId)).emit('new_notification', { title, message, type: 'info' });
                 sendPushNotification(userId, title, message);
             }
         }

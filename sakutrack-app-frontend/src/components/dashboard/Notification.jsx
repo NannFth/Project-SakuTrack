@@ -24,26 +24,21 @@ export default function Notification({ userId, socket }) {
     if (socket) {
       socket.on("new_notification", (data) => {
         console.log("Sinyal masuk ke lonceng:", data);
+        
+        fetchNotifications();
+      });
 
-        const manualNotif = {
-          id: Date.now(),
-          title: data.title,
-          message: data.message,
-          type: data.type || 'info',
-          is_read: 0,
-          created_at: new Date().toISOString()
-        };
-
-        setNotifications(prev => [manualNotif, ...prev]);
-        setUnreadCount(prev => prev + 1);
-        setTimeout(() => {
-          fetchNotifications();
-        }, 2000);
+      socket.on("notifications_updated", () => {
+        console.log("Status notifikasi berubah, mereload...");
+        fetchNotifications();
       });
     }
 
     return () => {
-      if (socket) socket.off("new_notification");
+      if (socket) {
+        socket.off("new_notification");
+        socket.off("notifications_updated");
+      }
     };
   }, [socket]);
 

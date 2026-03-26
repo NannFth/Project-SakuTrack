@@ -51,11 +51,14 @@ const markAsRead = async (req, res) => {
         if (userRows.length === 0) return res.status(404).json({ success: false });
 
         const userId = userRows[0].id;
+        const io = req.app.get('socketio');
 
         await pool.execute(
             'UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?',
             [id, userId]
         );
+
+        if (io) io.to(String(userId)).emit('notifications_updated');
 
         res.status(200).json({ success: true, message: 'Notif dibaca' });
     } catch (error) {
@@ -77,11 +80,14 @@ const markAllAsRead = async (req, res) => {
         if (userRows.length === 0) return res.status(404).json({ success: false });
 
         const userId = userRows[0].id;
+        const io = req.app.get('socketio');
 
         await pool.execute(
             'UPDATE notifications SET is_read = 1 WHERE user_id = ? AND is_read = 0',
             [userId]
         );
+
+        if (io) io.to(String(userId)).emit('notifications_updated');
 
         res.status(200).json({ success: true, message: 'Semua notif dibaca' });
     } catch (error) {
