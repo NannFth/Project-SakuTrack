@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Bell } from "lucide-react";
 import connection from "../../connection";
-import toast from "react-hot-toast";
 
 export default function Notification({ userId, socket }) {
   const [notifications, setNotifications] = useState([]);
@@ -25,18 +24,6 @@ export default function Notification({ userId, socket }) {
     if (socket) {
       socket.on("new_notification", (data) => {
         fetchNotifications();
-        toast(data.message, {
-          icon: data.type === 'success' ? '🎉' : '⚠️',
-          duration: 5000,
-          position: 'top-right',
-          style: {
-            borderRadius: '10px',
-            background: '#0f172a',
-            color: '#fff',
-            fontSize: '14px',
-            fontWeight: 'bold'
-          },
-        });
       });
     }
 
@@ -77,7 +64,7 @@ export default function Notification({ userId, socket }) {
         )}
       </button>
 
-      {/* Dropdown Notifikasi */}
+      {/* Notifikasi */}
       {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)}></div>
