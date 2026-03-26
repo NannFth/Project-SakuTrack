@@ -137,7 +137,7 @@ export default function Prediksi() {
           </button>
         </div>
 
-        <h1 className="text-3xl font-bold text-slate-800">Prediksi Keuangan</h1>
+        <h1 className="text-3xl font-bold text-slate-800">Proyeksi Keuangan</h1>
 
         {!data.hasTransaction ? (
           <div className="bg-slate-50 border-2 border-dashed border-slate-200 p-12 rounded-xl text-center">

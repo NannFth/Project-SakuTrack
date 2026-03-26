@@ -21,6 +21,8 @@ export default function Notification({ userId, socket }) {
   useEffect(() => {
     fetchNotifications();
 
+    window.addEventListener("new-notification-received", fetchNotifications);
+
     if (socket) {
       socket.on("new_notification", (data) => {
         console.log("Sinyal masuk ke lonceng:", data);
@@ -35,6 +37,8 @@ export default function Notification({ userId, socket }) {
     }
 
     return () => {
+      window.removeEventListener("new-notification-received", fetchNotifications);
+      
       if (socket) {
         socket.off("new_notification");
         socket.off("notifications_updated");

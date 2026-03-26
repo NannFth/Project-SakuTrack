@@ -28,22 +28,41 @@ const transactionRoutes = require('./routes/transactionRoutes');
 const savingRoutes = require('./routes/savingRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
-
 const { startCronJobs } = require('./services/cronService');
+const usersOnline = new Map();
 
-io.on('connection', (socket) => {
-  console.log('Seseorang terkoneksi ke sistem real-time:', socket.id);
+io.on("connection", (socket) => {
+  socket.on("join", (userData) => {
+    const userId = typeof userData === 'object' ? userData.id : userData;
+    const userName = userData.name || "Unknown User";
+    
+    usersOnline.set(socket.id, { userId, userName, time: new Date().toLocaleTimeString() });
 
-  socket.on('join', (userId) => {
-    if (userId) {
-      socket.join(String(userId));
-      console.log(`User dengan ID ${userId} berhasil bergabung ke room: ${userId}`);
+    console.log(`\n[+] ONLINE: ${userName} (ID: ${userId})`);
+    console.log(`Total Online: ${usersOnline.size} user`);
+  });
+
+  socket.on("disconnect", () => {
+    const user = usersOnline.get(socket.id);
+    if (user) {
+      console.log(`\n[-] OFFLINE: ${user.userName} (ID: ${user.userId})`);
+      usersOnline.delete(socket.id);
+      console.log(`Total Online: ${usersOnline.size} user`);
     }
   });
+});
 
-  socket.on('disconnect', () => {
-    console.log('Koneksi real-time terputus.');
-  });
+process.stdin.on('data', (data) => {
+  const input = data.toString().trim();
+  if (input === 'list') {
+    console.log("\n=== DAFTAR USER ONLINE SAAT INI ===");
+    if (usersOnline.size === 0) {
+      console.log("Tidak Ada User Yang Terkoneksi");
+    } else {
+      console.table(Array.from(usersOnline.values()));
+    }
+    console.log("===================================\n");
+  }
 });
 
 app.use('/api/auth', authRoutes);

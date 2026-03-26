@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { io } from "socket.io-client";
-import { Toaster } from "react-hot-toast";
+import { Toaster, toast } from "react-hot-toast"; 
 import { messaging } from "./firebase";
-import { getToken } from "firebase/messaging";
+import { getToken, onMessage } from "firebase/messaging";
 import connection from "./connection";
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -30,7 +30,7 @@ const App = () => {
     email: "" 
   });
 
-  // Ambil Profil & Socket
+  // Profil & Soket
   useEffect(() => {
     connection.get('/auth/profile')
       .then((res) => {
@@ -41,10 +41,10 @@ const App = () => {
           localStorage.setItem("user_nama", profile.name);
           
           if (socket.connected) {
-            socket.emit("join", String(profile.id));
+            socket.emit("join", { id: profile.id, name: profile.name });
           } else {
             socket.once("connect", () => {
-              socket.emit("join", String(profile.id));
+              socket.emit("join", { id: profile.id, name: profile.name });
             });
           }
         }
@@ -67,12 +67,12 @@ const App = () => {
     };
   }, [user.id]);
 
-  // Firebase Cloud Mesaging
+  // Firebase Cloud Messaging
   useEffect(() => {
     const setupFCM = async () => {
       try {
         const permission = await Notification.requestPermission();
-        if (permission === "granted") {
+        if (permission === "granted" && user.id) {
           const token = await getToken(messaging, { 
             vapidKey: "BEj_5ubshBYkb2UcMd20vHTgpx2muHxd-xbAX3xlrcY7k9eF9LujyR1jwn9woZbjfpqt7li8lhmYC8unbzIYJ84" 
           });
@@ -86,9 +86,72 @@ const App = () => {
         console.log("FCM Global Error:", error);
       }
     };
-
-    if (user.id) setupFCM();
+    setupFCM();
   }, [user.id]);
+
+  // Listener Notif
+  useEffect(() => {
+    const unsubscribe = onMessage(messaging, (payload) => {
+      if (payload.data?.isManual !== "true") return;
+
+      const category = payload.data?.category || 'info';
+      
+      const styles = {
+        alert: { icon: "🚨", color: "text-red-500", label: "BAHAYA" },
+        warning: { icon: "⚠️", color: "text-yellow-500", label: "PERINGATAN" },
+        info: { icon: "🔔", color: "text-blue-400", label: "INFO" }
+      };
+
+      const s = styles[category] || styles.info;
+
+      window.dispatchEvent(new Event("new-notification-received"));
+
+      toast.custom((t) => (
+        <div className={`${
+            t.visible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-4 scale-95'
+          } max-w-md w-full bg-[#1e293b] shadow-2xl rounded-xl pointer-events-auto flex border border-slate-700/50 transition-all duration-500 transform z-[99999] mt-5`}>
+          <div className="flex-1 w-0 p-5">
+            <div className="flex items-center">
+              
+              {/* Ikon */} 
+              <div className="flex-shrink-0 text-3xl">
+                {s.icon}
+              </div>
+              
+              {/* Teks */}
+              <div className="ml-5 flex-1">
+                <div className="flex justify-between items-start">
+                  <div>
+                    {/* Kategori */}
+                    <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${s.color} mb-1`}>
+                        {s.label}
+                    </p>
+                    {/* Judul Notif */}
+                    <p className="text-[15px] font-bold text-white leading-tight">
+                      {payload.data?.title || "SakuTrack Info"}
+                    </p>
+                  </div>
+
+                  <button 
+                    onClick={() => toast.dismiss(t.id)} 
+                    className="ml-4 text-slate-500 hover:text-white transition-colors"
+                  >
+                    <span className="text-xl leading-none">×</span>
+                  </button>
+                </div>
+                {/* Isi */}
+                <p className="mt-2 text-[13px] text-slate-400 font-medium leading-relaxed">
+                  {payload.data?.message}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ), { duration: 10000, position: 'top-center' });
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   return (
     <Router>
@@ -96,12 +159,10 @@ const App = () => {
       <Popup socket={socket} />
 
       <Routes>
-        {/* Auth */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
-        {/* App */}
         <Route path="/dashboard" element={
           <DashboardLayout user={user} socket={socket} searchQuery={searchQuery} setSearchQuery={setSearchQuery}>
             <Dashboard searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
