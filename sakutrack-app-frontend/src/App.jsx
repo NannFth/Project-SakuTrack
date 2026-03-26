@@ -13,6 +13,7 @@ import TargetTabungan from './pages/TargetTabungan';
 import Prediksi from './pages/Prediksi';
 import Profil from './pages/Profil';
 import Wishlist from './pages/Wishlist';
+import RekomendasiKeuangan from './pages/RekomendasiKeuangan';
 import DashboardLayout from './layouts/DashboardLayout';
 import Popup from "./components/notification/Popup";
 
@@ -115,6 +116,12 @@ const App = () => {
         <Route path="/wishlist" element={
           <DashboardLayout user={user} socket={socket} searchQuery={searchQuery} setSearchQuery={setSearchQuery}>
             <Wishlist />
+          </DashboardLayout>
+        } />
+
+        <Route path="/rekomendasi-keuangan" element={
+          <DashboardLayout user={user} socket={socket} searchQuery={searchQuery} setSearchQuery={setSearchQuery}>
+            <RekomendasiKeuangan />
           </DashboardLayout>
         } />
 
