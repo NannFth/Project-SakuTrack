@@ -30,42 +30,44 @@ const App = () => {
     email: "" 
   });
 
+  const joinSocketRoom = (uId, uName) => {
+    if (uId && socket.connected) {
+      console.log("Socket: Join Room dengan ID:", uId);
+      socket.emit("join", { id: String(uId), name: uName });
+    }
+  };
+
   // Profil & Soket
   useEffect(() => {
     connection.get('/auth/profile')
       .then((res) => {
         const profile = res.data.data;
         if (profile) {
-          console.log("Mencoba Join Room untuk User ID:", profile.id);
           setUser({ id: profile.id, name: profile.name, email: profile.email });
           localStorage.setItem("user_nama", profile.name);
           
           if (socket.connected) {
-            socket.emit("join", { id: profile.id, name: profile.name });
+            joinSocketRoom(profile.id, profile.name);
           } else {
-            socket.once("connect", () => {
-              socket.emit("join", { id: profile.id, name: profile.name });
-            });
+            socket.once("connect", () => joinSocketRoom(profile.id, profile.name));
           }
         }
       })
       .catch((err) => console.log("Profil global error:", err));
   }, []);
 
+  // Reconnect 
   useEffect(() => {
     if (!user.id) return;
 
     const handleReconnect = () => {
-      console.log("Socket reconnected! Memastikan masuk ulang ke Room ID:", user.id);
-      socket.emit("join", String(user.id));
+      console.log("Socket: Reconnected! Re-joining room...");
+      joinSocketRoom(user.id, user.name);
     };
 
     socket.on("connect", handleReconnect);
-
-    return () => {
-      socket.off("connect", handleReconnect);
-    };
-  }, [user.id]);
+    return () => socket.off("connect", handleReconnect);
+  }, [user.id, user.name]);
 
   // Firebase Cloud Messaging
   useEffect(() => {
@@ -94,14 +96,15 @@ const App = () => {
     const unsubscribe = onMessage(messaging, (payload) => {
       if (payload.data?.isManual !== "true") return;
 
-      const category = payload.data?.category || 'info';
-      
       const styles = {
         alert: { icon: "🚨", color: "text-red-500", label: "BAHAYA" },
+        danger: { icon: "🚨", color: "text-red-500", label: "BAHAYA" },
         warning: { icon: "⚠️", color: "text-yellow-500", label: "PERINGATAN" },
-        info: { icon: "🔔", color: "text-blue-400", label: "INFO" }
+        info: { icon: "🔔", color: "text-blue-400", label: "INFO" },
+        success: { icon: "🏆", color: "text-blue-500", label: "PENCAPAIAN" }
       };
 
+      const category = payload.data?.category || 'info';
       const s = styles[category] || styles.info;
 
       window.dispatchEvent(new Event("new-notification-received"));
@@ -112,37 +115,18 @@ const App = () => {
           } max-w-md w-full bg-[#1e293b] shadow-2xl rounded-xl pointer-events-auto flex border border-slate-700/50 transition-all duration-500 transform z-[99999] mt-5`}>
           <div className="flex-1 w-0 p-5">
             <div className="flex items-center">
-              
-              {/* Ikon */} 
-              <div className="flex-shrink-0 text-3xl">
-                {s.icon}
-              </div>
-              
-              {/* Teks */}
+              <div className="flex-shrink-0 text-3xl">{s.icon}</div>
               <div className="ml-5 flex-1">
                 <div className="flex justify-between items-start">
                   <div>
-                    {/* Kategori */}
-                    <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${s.color} mb-1`}>
-                        {s.label}
-                    </p>
-                    {/* Judul Notif */}
-                    <p className="text-[15px] font-bold text-white leading-tight">
-                      {payload.data?.title || "SakuTrack Info"}
-                    </p>
+                    <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${s.color} mb-1`}>{s.label}</p>
+                    <p className="text-[15px] font-bold text-white leading-tight">{payload.data?.title || "SakuTrack Info"}</p>
                   </div>
-
-                  <button 
-                    onClick={() => toast.dismiss(t.id)} 
-                    className="ml-4 text-slate-500 hover:text-white transition-colors"
-                  >
+                  <button onClick={() => toast.dismiss(t.id)} className="text-slate-500 hover:text-white transition-colors">
                     <span className="text-xl leading-none">×</span>
                   </button>
                 </div>
-                {/* Isi */}
-                <p className="mt-2 text-[13px] text-slate-400 font-medium leading-relaxed">
-                  {payload.data?.message}
-                </p>
+                <p className="mt-2 text-[13px] text-slate-400 font-medium leading-relaxed">{payload.data?.message}</p>
               </div>
             </div>
           </div>

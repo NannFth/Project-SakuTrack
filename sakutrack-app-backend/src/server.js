@@ -33,12 +33,14 @@ const usersOnline = new Map();
 
 io.on("connection", (socket) => {
   socket.on("join", (userData) => {
-    const userId = typeof userData === 'object' ? userData.id : userData;
+    const userId = typeof userData === 'object' ? String(userData.id) : String(userData);
     const userName = userData.name || "Unknown User";
     
+    socket.join(userId);
+
     usersOnline.set(socket.id, { userId, userName, time: new Date().toLocaleTimeString() });
 
-    console.log(`\n[+] ONLINE: ${userName} (ID: ${userId})`);
+    console.log(`\n[+] ONLINE: ${userName} (ID: ${userId}) - Joined Room: ${userId}`);
     console.log(`Total Online: ${usersOnline.size} user`);
   });
 
@@ -55,13 +57,12 @@ io.on("connection", (socket) => {
 process.stdin.on('data', (data) => {
   const input = data.toString().trim();
   if (input === 'list') {
-    console.log("\n=== DAFTAR USER ONLINE SAAT INI ===");
+    console.log("\nDaftar User Online Saat Ini:");
     if (usersOnline.size === 0) {
       console.log("Tidak Ada User Yang Terkoneksi");
     } else {
       console.table(Array.from(usersOnline.values()));
     }
-    console.log("===================================\n");
   }
 });
 
