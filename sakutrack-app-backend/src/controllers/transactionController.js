@@ -106,7 +106,7 @@ const addTransaction = async (req, res) => {
                         [userId, title, message, 'warning']
                     );
 
-                    if (io) io.to(String(userId)).emit('new_notification', { title, message, type: 'alert' });
+                    if (io) io.to(String(userId)).emit('new_notification', { title, message, type: 'warning' });
                     sendPushNotification(userId, title, message).catch(e => console.log("Push Error:", e.message));
                 }
 

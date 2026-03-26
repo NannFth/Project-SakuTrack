@@ -50,18 +50,14 @@ export default function InputTransaksi() {
     setAmount(formatted);
   };
 
-  // Kirim Data
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (amount === "" || description === "" || date === "") {
       alert("Harap isi nominal, catatan, dan tanggal.");
       return;
     }
-
     setLoading(true);
     const cleanAmount = Number(amount.replace(/[^0-9]/g, ""));
-
     connection.post('/transactions', {
         amount: cleanAmount,
         type: type,
@@ -72,9 +68,7 @@ export default function InputTransaksi() {
       })
       .then((res) => {
         if (res.data.success) {
-          setTimeout(() => {
-            navigate("/dashboard");
-          }, 1000);
+          setTimeout(() => { navigate("/dashboard"); }, 1000);
         } else {
           alert(`Gagal menyimpan: ${res.data.message}`);
           setLoading(false);
@@ -90,15 +84,12 @@ export default function InputTransaksi() {
   return (
     <>
       <div className="max-w-6xl mx-auto space-y-8 p-4">
-        
-        {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-slate-800">Kelola Transaksi</h1>
           <p className="text-slate-500 text-sm mt-1">Masukan detail transaksi Anda.</p>
         </div>
 
-        {/* Form Utama */}
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded border border-slate-200 shadow-sm space-y-8">
+        <form onSubmit={handleSubmit} className="bg-white p-6 rounded border border-slate-200 shadow-sm space-y-6">
           
           {/* Tipe Transaksi */}
           <div className="flex p-1 bg-slate-100 rounded border border-slate-200 gap-1">
@@ -118,105 +109,136 @@ export default function InputTransaksi() {
             </button>
           </div>
 
-          {/* Input */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            {/* Baris Pertama */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+              {type === "expense" ? (
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Jenis</label>
+                  <select
+                    value={jenis}
+                    onChange={(e) => setJenis(e.target.value)}
+                    className="w-full p-3 border border-slate-200 rounded text-sm font-bold text-slate-700 focus:outline-none focus:border-slate-900"
+                  >
+                    <option value="kebutuhan">Kebutuhan</option>
+                    <option value="keinginan">Keinginan</option>
+                  </select>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                    <Wallet size={14} /> Nominal
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Rp 0"
+                    value={amount}
+                    onChange={handleAmountChange}
+                    className="w-full p-3 border border-slate-200 rounded focus:outline-none focus:border-slate-900 text-xl font-bold text-emerald-600"
+                  />
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                  <Calendar size={14} /> Tanggal
+                </label>
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full p-3 border border-slate-200 rounded focus:outline-none focus:border-slate-900 text-sm font-bold text-slate-800"
+                />
+              </div>
+            </div>
+
+            {/* Baris Kedua */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+              {type === "expense" ? (
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                    <Wallet size={14} /> Nominal
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Rp 0"
+                    value={amount}
+                    onChange={handleAmountChange}
+                    className="w-full p-3 border border-slate-200 rounded focus:outline-none focus:border-slate-900 text-xl font-bold text-rose-600"
+                  />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                    <FileText size={14} /> Catatan
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Contoh: Uang saku"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full p-3 border border-slate-200 rounded focus:outline-none focus:border-slate-900 text-sm font-medium"
+                  />
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                  <Tag size={14} /> Kategori
+                </label>
+                <div className="relative">
+                  <div
+                    onClick={() => setOpenKategori(!openKategori)}
+                    className="w-full p-3 bg-white border border-slate-200 rounded cursor-pointer flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className={type === "income" ? "text-emerald-600" : "text-rose-600"}>
+                        {categoryIcons[category]}
+                      </span>
+                      <span className="text-sm font-bold text-slate-800">{category}</span>
+                    </div>
+                    <span className="text-slate-400 text-xs">{openKategori ? "▲" : "▼"}</span>
+                  </div>
+
+                  {openKategori && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded shadow-md overflow-hidden">
+                      <div className="max-h-[200px] overflow-y-auto">
+                        {kategori[type].map((item, index) => (
+                          <div 
+                            key={index}
+                            onClick={() => { setCategory(item); setOpenKategori(false); }}
+                            className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0"
+                          >
+                            <span className={type === "income" ? "text-emerald-600" : "text-rose-600"}>
+                              {categoryIcons[item]}
+                            </span>
+                            <span className="text-sm font-bold text-slate-700">{item}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Baris Catatan */}
             {type === "expense" && (
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Jenis
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                  <FileText size={14} /> Catatan
                 </label>
-
-                <select
-                  value={jenis}
-                  onChange={(e) => setJenis(e.target.value)}
-                  className="w-full p-3 border border-slate-200 rounded text-sm font-bold text-slate-700"
-                >
-                  <option value="kebutuhan">Kebutuhan</option>
-                  <option value="keinginan">Keinginan</option>
-                </select>
+                <input
+                  type="text"
+                  placeholder="Contoh: Beli kopi"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full p-3 border border-slate-200 rounded focus:outline-none focus:border-slate-900 text-sm font-medium"
+                />
               </div>
             )}
-            
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                <Calendar size={14} /> Tanggal
-              </label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full p-3 border border-slate-200 rounded focus:outline-none focus:border-slate-900 text-sm font-bold text-slate-800"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                <Wallet size={14} /> Nominal
-              </label>
-              <input
-                type="text"
-                placeholder="Rp 0"
-                value={amount}
-                onChange={handleAmountChange}
-                className={`w-full p-3 border border-slate-200 rounded focus:outline-none focus:border-slate-900 text-xl font-bold ${type === "income" ? "text-emerald-600" : "text-rose-600"}`}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                <Tag size={14} /> Kategori
-              </label>
-              <div className="relative">
-                <div
-                  onClick={() => setOpenKategori(!openKategori)}
-                  className="w-full p-3 bg-white border border-slate-200 rounded cursor-pointer flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className={type === "income" ? "text-emerald-600" : "text-rose-600"}>
-                      {categoryIcons[category]}
-                    </span>
-                    <span className="text-sm font-bold text-slate-800">{category}</span>
-                  </div>
-                  <span className="text-slate-400 text-xs">{openKategori ? "▲" : "▼"}</span>
-                </div>
-
-                {/* Kategori */}
-                {openKategori && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded shadow-md overflow-hidden">
-                    <div className="max-h-[200px] overflow-y-auto">
-                      {kategori[type].map((item, index) => (
-                        <div 
-                          key={index}
-                          onClick={() => { setCategory(item); setOpenKategori(false); }}
-                          className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0"
-                        >
-                          <span className={type === "income" ? "text-emerald-600" : "text-rose-600"}>
-                            {categoryIcons[item]}
-                          </span>
-                          <span className="text-sm font-bold text-slate-700">{item}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                <FileText size={14} /> Catatan
-              </label>
-              <input
-                type="text"
-                placeholder={type === "expense" ? "Contoh: Beli kopi" : "Contoh: Uang saku"}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full p-3 border border-slate-200 rounded focus:outline-none focus:border-slate-900 text-sm font-medium"
-              />
-            </div>
           </div>
 
-          {/* Simpan */}
           <div className="pt-4">
             <button
               type="submit"

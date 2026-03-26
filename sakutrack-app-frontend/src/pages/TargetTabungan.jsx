@@ -30,6 +30,7 @@ export default function TargetTabungan() {
     fetchData();
   }, []);
 
+  // Aksi
   const handleDelete = (id) => {
     if (window.confirm("Yakin mau hapus target tabungan ini?")) {
       connection.delete(`/savings/${id}`)
@@ -114,6 +115,7 @@ export default function TargetTabungan() {
       });
   };
 
+  // Estimasi
   const calculateEstimation = (item) => {
     const current = Number(item.current_amount || item.currentAmount || 0);
     const target = Number(item.target_amount || item.targetAmount || 0);
@@ -124,18 +126,16 @@ export default function TargetTabungan() {
     if (!createdRaw) return null;
 
     const createdDate = new Date(createdRaw);
-    if (isNaN(createdDate.getTime())) return null;
-
     const today = new Date();
-    const daysDiff = Math.max(Math.floor((today - createdDate) / (1000 * 60 * 60 * 24)), 1);
+    const diffTime = Math.abs(today - createdDate);
+    const daysPassed = Math.max(Math.ceil(diffTime / (1000 * 60 * 60 * 24)), 1);
 
-    if (current <= 0) return "Yuk, mulai menabung untuk lihat estimasi!";
-
-    const dailyRate = current / daysDiff;
-    if (dailyRate <= 0) return "Yuk, tambah lagi saldonya!";
-
+    if (current <= 0) return "Mulai menabung";
+    const dailyRate = current / daysPassed;
+    if (dailyRate < 100) return "Belum ada estimasi";
     const remaining = target - current;
     const estimatedDays = Math.ceil(remaining / dailyRate);
+    if (estimatedDays > 3650) return "Jangka panjang";
 
     const completionDate = new Date();
     completionDate.setDate(completionDate.getDate() + estimatedDays);
@@ -157,7 +157,7 @@ export default function TargetTabungan() {
         <p className="text-slate-500 text-sm mt-1">Langkah kecil untuk mimpi besar Anda.</p>
       </header>
 
-      {/* Form Input Target */}
+      {/* Form Input */}
       <div className="bg-white p-6 rounded shadow border border-slate-200">
         <div className="flex items-center gap-3 mb-6 text-slate-900">
           <Plus size={20} strokeWidth={3} />
@@ -191,6 +191,7 @@ export default function TargetTabungan() {
                   isCompleted ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-200'
                 }`} 
             >
+              {/* Header Card */}
               <div className="flex justify-between items-start">
                 <div className={`p-3 rounded ${isCompleted ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-900'}`}>
                   <Target size={24} />
@@ -216,16 +217,9 @@ export default function TargetTabungan() {
                 </div>
               </div>
 
+              {/* Info Detail */}
               <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-slate-800 text-lg">{item.name}</h3>
-                  {isCompleted && (
-                    <span className="bg-emerald-600 text-white text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">
-                      Selesai
-                    </span>
-                  )}
-                </div>
-
+                <h3 className="font-bold text-slate-800 text-lg">{item.name}</h3>
                 <p className="text-sm text-slate-500">
                   {formatRupiah(current)} / {formatRupiah(target)}
                 </p>
@@ -237,7 +231,7 @@ export default function TargetTabungan() {
 
                     if (typeof estimation === "string") {  
                       return (
-                        <p className="text-xs text-emerald-600 font-bold uppercase tracking-wide bg-emerald-50 px-2 py-0.5 rounded w-fit">
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                           {estimation}
                         </p>
                       );
@@ -246,10 +240,9 @@ export default function TargetTabungan() {
                     return (
                       <p className="text-xs leading-relaxed bg-blue-50 text-blue-700 px-2 py-1 rounded-md border border-blue-100 w-fit">
                         <span className="opacity-80">Estimasi:</span>
-                        <span className="font-extrabold ml-1 underline decoration-blue-300">
+                        <span className="font-extrabold ml-1">
                           {estimation.days} hari
                         </span> lagi
-                        <span className="text-[10px] ml-1 opacity-70">({estimation.date})</span>
                       </p>
                     );
                   })()}
@@ -261,15 +254,15 @@ export default function TargetTabungan() {
                 <div className={`h-full rounded-full transition-all duration-700 ${isCompleted ? 'bg-emerald-500' : 'bg-slate-900'}`} style={{ width: `${percentage}%` }} />
               </div>
 
-              {/* Input Tambah Saldo */}
+              {/* Input Saldo */}
               <div className="pt-4 border-t border-slate-200 flex gap-2">
                 <input 
                   type="text" 
-                  placeholder={isCompleted ? "Target sudah tercapai!" : "Tambah nominal..."}
+                  placeholder={isCompleted ? "Target tercapai!" : "Tambah nominal..."}
                   value={isCompleted ? "" : (balanceInputs[item.id] ? formatRupiah(balanceInputs[item.id]) : "")}
                   disabled={isCompleted}
                   className={`flex-1 text-sm p-2 border border-slate-300 rounded focus:outline-none focus:border-slate-900 ${
-                    isCompleted ? "bg-emerald-50 border-emerald-200 text-emerald-600 font-bold placeholder:text-emerald-600 text-center" : ""
+                    isCompleted ? "bg-emerald-50 border-emerald-100 text-emerald-600 font-bold placeholder:text-emerald-600 text-center" : ""
                   }`}
                   onChange={(e) => {
                     const raw = e.target.value.replace(/\D/g, "");
@@ -286,9 +279,17 @@ export default function TargetTabungan() {
                   }}
                 />
                 {!isCompleted && (
-                  <div className="text-[10px] text-slate-400 italic flex items-center whitespace-nowrap leading-none">
-                    Enter untuk simpan
-                  </div>
+                  <button 
+                    onClick={() => {
+                      const rawValue = balanceInputs[item.id];
+                      if (rawValue) {
+                        handleUpdateBalance(item.id, current, rawValue, item);
+                      }
+                    }}
+                    className="bg-slate-100 text-slate-700 px-3 py-1 text-xs font-bold rounded hover:bg-slate-200"
+                  >
+                    Simpan
+                  </button>
                 )}
               </div>
             </div>

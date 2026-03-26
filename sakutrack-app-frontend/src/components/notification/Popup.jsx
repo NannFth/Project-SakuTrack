@@ -42,7 +42,12 @@ export default function Popup({ socket }) {
                 {label}
               </p>
               <p className="text-sm font-bold text-white truncate">
-                {data.title ? data.title.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2700}-\u{27BF}]/gu, '').trim() : 'Notifikasi'}
+                {data.title 
+                  ? data.title
+                      .replace(/[^\x00-\x7F]/g, "")
+                      .replace(/[⚠️🚨⭐📉✨🏆]/g, "")
+                      .trim() 
+                  : 'Notifikasi'}
               </p>
               <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
                 {data.message}

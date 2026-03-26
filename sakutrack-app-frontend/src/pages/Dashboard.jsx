@@ -151,6 +151,16 @@ const fetchData = () => {
 
   const isSearching = searchQuery && searchQuery.trim() !== "";
 
+  const today = new Date().toISOString().split('T')[0];
+  const expenseToday = transactions
+    .filter(t => t.type === 'expense' && t.date.startsWith(today))
+    .reduce((sum, t) => sum + Number(t.amount), 0);
+
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const dynamicDailyLimit = dashboardData.totalIncome > 0 
+    ? Math.floor(dashboardData.totalIncome / daysInMonth) 
+    : 100000;
+
   // Tampilan utama
   return (
     <div className="max-w-[1400px] mx-auto space-y-8 pb-10">
@@ -174,8 +184,8 @@ const fetchData = () => {
         {!isSearching ? (
           <motion.div key="normal" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
             <DailyGreeting 
-              totalExpense={dashboardData.totalExpense} 
-              dailyLimit={100000} 
+              totalExpense={expenseToday} 
+              dailyLimit={dynamicDailyLimit} 
             />
             <BudgetWallets totalBalance={dashboardData.balance} />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
