@@ -47,19 +47,19 @@ export default function TransactionList({ data = [], onDelete }) {
           });
 
           return (
-            <div key={item.id} className="grid grid-cols-[1fr_auto] items-center gap-4 border-b border-slate-200 pb-3 last:border-0 hover:bg-slate-50 rounded px-1">
+            <div key={item.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3 last:border-0 hover:bg-slate-50 rounded px-1 transition-all">
               
               {/* Keterangan */}
-              <div className="flex items-center gap-3 overflow-hidden">
+              <div className="flex items-center gap-3 overflow-hidden w-full">
                 <div className={`p-2 rounded flex-shrink-0 ${isIncome ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"}`}>
                   {isIncome ? <ArrowUpRight size={16} /> : <ArrowDownLeft size={16} />}
                 </div>
                 
                 <div className="min-w-0">
-                  <p className="font-bold text-slate-800 text-sm truncate">{item.description}</p>
+                  <p className="font-bold text-slate-800 text-sm break-words leading-tight">{item.description}</p>
                   
                   {/* Tanggal & Jam */}
-                  <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5">
+                  <div className="flex flex-wrap items-center gap-x-2 text-[10px] text-slate-500 mt-1">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold capitalize text-slate-600">
                         {item.category || "Lainnya"}
@@ -98,8 +98,8 @@ export default function TransactionList({ data = [], onDelete }) {
               </div>
 
               {/* Nominal & Hapus */}
-              <div className="flex items-center justify-end gap-4">
-                <p className={`font-bold text-sm whitespace-nowrap ${isIncome ? "text-emerald-600" : "text-rose-600"}`}>
+              <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pl-11 sm:pl-0 mt-1 sm:mt-0">
+                <p className={`font-extrabold text-sm whitespace-nowrap ${isIncome ? "text-emerald-600" : "text-rose-600"}`}>
                   {isIncome ? "+" : "-"} Rp {Number(item.amount).toLocaleString('id-ID')}
                 </p>
 

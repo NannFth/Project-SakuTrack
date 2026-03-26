@@ -82,7 +82,7 @@ export default function Notification({ userId, socket }) {
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)}></div>
           
-          <div className="absolute right-0 top-full mt-2 w-80 bg-white shadow-xl border border-slate-200 rounded z-[60] overflow-hidden">
+          <div className="fixed md:absolute right-2 md:right-0 top-16 md:top-full mt-2 w-[calc(100vw-1rem)] md:w-80 bg-white shadow-xl border border-slate-200 rounded z-[60] overflow-hidden">
             <div className="p-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <h3 className="font-bold text-slate-800 text-sm">Notifikasi</h3>
               {unreadCount > 0 && (
@@ -92,7 +92,7 @@ export default function Notification({ userId, socket }) {
               )}
             </div>
             
-            <div className="max-h-[320px] overflow-y-auto">
+            <div className="max-h-[400px] md:max-h-[320px] overflow-y-auto">
               {notifications.length === 0 ? (
                 <p className="text-slate-500 text-center text-sm p-6 italic">Belum ada notifikasi baru</p>
               ) : (
@@ -102,7 +102,7 @@ export default function Notification({ userId, socket }) {
                     onClick={() => {
                       markAsRead(notif.id, notif.is_read);
                     }}
-                    className={`p-4 border-b border-slate-50 cursor-pointer transition-colors ${notif.is_read ? 'bg-white opacity-70 hover:bg-slate-50' : 'bg-blue-50/40 hover:bg-blue-50/70'}`}
+                    className={`p-4 border-b border-slate-50 cursor-pointer transition-colors break-words ${notif.is_read ? 'bg-white opacity-70 hover:bg-slate-50' : 'bg-blue-50/40 hover:bg-blue-50/70'}`}
                   >
                     <div className="flex justify-between items-start gap-2">
                       <p className={`text-sm ${notif.is_read ? 'text-slate-600' : 'font-bold text-slate-800'}`}>
