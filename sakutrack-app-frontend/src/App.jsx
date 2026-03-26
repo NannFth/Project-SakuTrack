@@ -41,6 +41,21 @@ const App = () => {
       .catch((err) => console.log("Profil global error:", err));
   }, []);
 
+  useEffect(() => {
+    if (!user.id) return;
+
+    const handleReconnect = () => {
+      console.log("Socket reconnected! Memastikan masuk ulang ke Room ID:", user.id);
+      socket.emit("join", user.id);
+    };
+
+    socket.on("connect", handleReconnect);
+
+    return () => {
+      socket.off("connect", handleReconnect);
+    };
+  }, [user.id]);
+
   // Firebase Cloud Mesaging
   useEffect(() => {
     const setupFCM = async () => {

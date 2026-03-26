@@ -30,7 +30,7 @@ export default function Dashboard({ searchQuery, setSearchQuery }) {
   const [showAll, setShowAll] = useState(false);
 
 const fetchData = () => {
-    // 1. Ambil Data Dashboard
+    // Ambil Data
     connection.get(`/dashboard?month=${month}&year=${year}`)
       .then((res) => {
         if (res.data.success) {
@@ -39,7 +39,7 @@ const fetchData = () => {
 
           const jatahKeinginan = data.balance * 0.3;
           
-          // --- LOGIC 1: PERINGATAN BOROS
+          // Peringtan Boros
           if (data.totalExpense > jatahKeinginan && data.totalExpense > 0) {
             Swal.fire({
               title: 'Waduh, Pengeluaranmu Boros! 💸',
@@ -54,7 +54,7 @@ const fetchData = () => {
             });
           } 
           
-          // --- LOGIC 2: SALDO KRITIS
+          // Saldo Kritis
           else if (data.balance < 50000 && data.balance > 0) {
             Swal.fire({
               title: 'Saldo Kritis! ⚠️',
@@ -69,7 +69,7 @@ const fetchData = () => {
             });
           }
 
-          // --- LOGIC 3: APRESIASI HEMAT 
+          // Apareisiasi Hemat
           else if (data.totalExpense > 0 && data.totalExpense < (jatahKeinginan * 0.1)) {
             Swal.fire({
               title: 'Wah, Kamu Hebat! 🌟',

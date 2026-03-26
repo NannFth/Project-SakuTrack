@@ -28,7 +28,7 @@ export default function InputTransaksi() {
     income: ["Uang Harian", "Gaji", "Bonus", "Bulanan", "Freelance", "Hadiah", "Lainnya"]
   };
 
-  // Icon
+  // Ikon
   const categoryIcons = {
     "Makanan/Minuman": <Utensils size={18} />,
     "Belanja": <ShoppingBag size={18} />,
@@ -72,16 +72,19 @@ export default function InputTransaksi() {
       })
       .then((res) => {
         if (res.data.success) {
-          navigate("/dashboard");
+          setTimeout(() => {
+            navigate("/dashboard");
+          }, 1000);
         } else {
           alert(`Gagal menyimpan: ${res.data.message}`);
+          setLoading(false);
         }
       })
       .catch((error) => {
         console.error("Error server:", error);
         alert("Terjadi kesalahan pada sistem.");
-      })
-      .finally(() => setLoading(false));
+        setLoading(false);
+      });
   };
 
   return (
@@ -213,7 +216,7 @@ export default function InputTransaksi() {
             </div>
           </div>
 
-          {/* Tombol Simpan */}
+          {/* Simpan */}
           <div className="pt-4">
             <button
               type="submit"

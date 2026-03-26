@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "framer-motion": "^12.36.0"
+    "framer-motion": "^12.36.0",
+    "sweetalert2": "^11.26.24"
   }
 }

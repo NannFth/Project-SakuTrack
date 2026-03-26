@@ -37,7 +37,7 @@ export default function DailyGreeting({ totalExpense = 0, dailyLimit = 100000 })
         </p>
       </div>
 
-      {/* Kartu Peringatan (Hanya muncul kalau pengeluaran > limit) */}
+      {/* Kartu Peringatan */}
       {isOverLimit && (
         <div className="p-4 rounded-2xl border bg-rose-50 border-rose-200 flex items-start gap-3 animate-pulse shadow-sm">
           <div className="mt-1"><AlertCircle className="text-rose-500" size={20} /></div>

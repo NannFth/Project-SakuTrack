@@ -40,7 +40,7 @@ export default function BudgetWallets({ totalBalance = 0 }) {
           key={index} 
           className={`flex items-center gap-5 p-5 rounded-[1.5rem] border-2 transition-all hover:shadow-lg hover:-translate-y-1 ${w.lightTheme}`}
         >
-          {/* Icon Box - Ukuran dinaikkan sedikit */}
+          {/* Icon Box */}
           <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${w.theme} text-white shadow-md`}>
             {w.icon}
           </div>
