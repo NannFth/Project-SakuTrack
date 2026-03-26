@@ -3,21 +3,25 @@ require('./config/firebase');
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const cors = require('cors');
 const app = express();
 const server = http.createServer(app);
-const cors = require('cors');
+const allowedOrigins = ["http://localhost:5173", "http://localhost:3000", "http://13.229.64.163"];
+
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+app.use(express.json());
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:3000", "http://13.229.64.163"],
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "DELETE"]
   }
 });
-
 app.set('socketio', io);
-
-app.use(cors());
-app.use(express.json());
 
 const authRoutes = require('./routes/authRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
@@ -31,8 +35,10 @@ io.on('connection', (socket) => {
   console.log('Seseorang terkoneksi ke sistem real-time:', socket.id);
 
   socket.on('join', (userId) => {
-    socket.join(`user_${userId}`);
-    console.log(`User dengan ID ${userId} berhasil bergabung ke room notifikasi.`);
+    if (userId) {
+      socket.join(String(userId));
+      console.log(`User dengan ID ${userId} berhasil bergabung ke room: ${userId}`);
+    }
   });
 
   socket.on('disconnect', () => {
@@ -53,8 +59,8 @@ app.get('/', (req, res) => {
 startCronJobs(io);
 
 const port = process.env.PORT || 3000;
-const host = process.env.NODE_ENV !== 'production' ? 'localhost' : '0.0.0.0';
+const host = '0.0.0.0';
 
-server.listen(port, () => {
+server.listen(port, host, () => {
   console.log(`Server running at http://${host}:${port}`);
 });

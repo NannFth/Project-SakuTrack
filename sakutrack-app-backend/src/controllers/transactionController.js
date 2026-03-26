@@ -106,10 +106,8 @@ const addTransaction = async (req, res) => {
                         [userId, title, message, 'alert']
                     );
 
-                    try {
-                        if (io) io.to(String(userId)).emit('new_notification', { title, message, type: 'alert' });
-                        sendPushNotification(userId, title, message);
-                    } catch (err) { console.error("Notif Error:", err.message); }
+                    if (io) io.to(String(userId)).emit('new_notification', { title, message, type: 'alert' });
+                    sendPushNotification(userId, title, message).catch(e => console.log("Push Error:", e.message));
                 }
 
                 // Peringatan Batas Aman Harian
@@ -136,10 +134,8 @@ const addTransaction = async (req, res) => {
                         [userId, title, message, 'warning']
                     );
 
-                    try {
-                        if (io) io.to(String(userId)).emit('new_notification', { title, message, type: 'warning' });
-                        sendPushNotification(userId, title, message);
-                    } catch (err) { console.error("Notif Error:", err.message); }
+                    if (io) io.to(String(userId)).emit('new_notification', { title, message, type: 'warning' });
+                    sendPushNotification(userId, title, message).catch(e => console.log("Push Error:", e.message));
                 }
             }
 
@@ -164,10 +160,8 @@ const addTransaction = async (req, res) => {
                     [userId, title, message, 'alert']
                 );
 
-                try {
-                    if (io) io.to(String(userId)).emit('new_notification', { title, message, type: 'alert' });
-                    sendPushNotification(userId, title, message);
-                } catch (err) { console.error("Notif Error:", err.message); }
+                if (io) io.to(String(userId)).emit('new_notification', { title, message, type: 'alert' });
+                sendPushNotification(userId, title, message).catch(e => console.log("Push Error:", e.message));
             }
 
             // Peringatan Kategori Bocor
@@ -201,10 +195,8 @@ const addTransaction = async (req, res) => {
                     [userId, title, message, 'warning']
                 );
 
-                try {
-                    if (io) io.to(String(userId)).emit('new_notification', { title, message, type: 'warning' });
-                    sendPushNotification(userId, title, message);
-                } catch (err) { console.error("Notif Error:", err.message); }
+                if (io) io.to(String(userId)).emit('new_notification', { title, message, type: 'warning' });
+                sendPushNotification(userId, title, message).catch(e => console.log("Push Error:", e.message));
             }
         }
 
@@ -255,10 +247,8 @@ const addTransaction = async (req, res) => {
                     [userId, title, message, 'success']
                 );
 
-                try {
-                    if (io) io.to(String(userId)).emit('new_notification', { title, message, type: 'success' });
-                    sendPushNotification(userId, title, message);
-                } catch (err) { console.error("Notif Error:", err.message); }
+                if (io) io.to(String(userId)).emit('new_notification', { title, message, type: 'success' });
+                sendPushNotification(userId, title, message).catch(e => console.log("Push Error:", e.message));
             }
         }
 

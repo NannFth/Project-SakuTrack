@@ -23,7 +23,22 @@ export default function Notification({ userId, socket }) {
 
     if (socket) {
       socket.on("new_notification", (data) => {
-        fetchNotifications();
+        console.log("Sinyal masuk ke lonceng:", data);
+
+        const manualNotif = {
+          id: Date.now(),
+          title: data.title,
+          message: data.message,
+          type: data.type || 'info',
+          is_read: 0,
+          created_at: new Date().toISOString()
+        };
+
+        setNotifications(prev => [manualNotif, ...prev]);
+        setUnreadCount(prev => prev + 1);
+        setTimeout(() => {
+          fetchNotifications();
+        }, 2000);
       });
     }
 
