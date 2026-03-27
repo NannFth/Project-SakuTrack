@@ -1,5 +1,5 @@
 import React from "react";
-import { LayoutDashboard, Wallet, Target, TrendingUp, ShoppingBag, Brain } from "lucide-react";
+import { LayoutDashboard, Wallet, Target, TrendingUp, ShoppingBag, BellDot } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export default function Sidebar({ user }){
@@ -10,7 +10,7 @@ export default function Sidebar({ user }){
     { name: "Dashboard", path: "/dashboard", icon: <LayoutDashboard size={20} /> },
     { name: "Kelola Transaksi", path: "/input-transaksi", icon: <Wallet size={20} /> },
     { name: "Wishlist Impian", path: "/wishlist", icon: <ShoppingBag size={20} />},
-    { name: "Rekomendasi Keuangan", path: "/rekomendasi-keuangan", icon: <Brain size={20} /> },
+    { name: "Asisten Saku", path: "/rekomendasi-keuangan", icon: <BellDot size={20} /> },
     { name: "Target Tabungan", path: "/target-tabungan", icon: <Target size={20} /> },
     { name: "Proyeksi Keuangan", path: "/prediksi", icon: <TrendingUp size={20} /> },
   ];

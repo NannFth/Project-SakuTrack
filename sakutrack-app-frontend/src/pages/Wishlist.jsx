@@ -93,7 +93,7 @@ export default function Wishlist() {
                     <h1 className="text-3xl font-bold flex items-center gap-3">
                         <ShoppingBag size={32} className="text-blue-400"/> Wishlist Impian
                     </h1>
-                    <p className="opacity-70 mt-2 font-medium">Pantau tabungan untuk barang-barang yang kamu inginkan.</p>
+                    <p className="opacity-70 mt-2 font-medium">Simpan dulu, wujudkan nanti. Daftar kecil untuk impian besar kamu.</p>
                 </div>
                 <Heart className="absolute -right-10 -bottom-10 text-white/5 w-64 h-64" />
             </div>
