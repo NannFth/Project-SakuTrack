@@ -35,7 +35,7 @@ const financialTips = [
 
 const getRecommendations = async (req, res) => {
     try {
-        const { uid } = req.user;
+        const { uid } = req.user; 
 
         // Ambil ID
         const [userRows] = await pool.execute(
@@ -53,7 +53,7 @@ const getRecommendations = async (req, res) => {
         const userId = userRows[0].id;
         const today = new Date();
         
-        // Ambil format 
+        // Ambil Tanggak
         const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
         
         const yesterdayDate = new Date(today);
@@ -142,7 +142,7 @@ const getRecommendations = async (req, res) => {
 
         // Progres Target Tabungan 
         const [savings] = await pool.execute(`
-            SELECT id, goal_name, target_amount, current_amount 
+            SELECT id, name, target_amount, current_amount 
             FROM savings 
             WHERE user_id = ? 
             ORDER BY target_date ASC
@@ -161,7 +161,7 @@ const getRecommendations = async (req, res) => {
             
             recommendations.push({
                 type: 'goal_progress',
-                message: `Progres tabungan [${target.goal_name}] baru mencapai ${progress}%. Anda memerlukan Rp ${remaining.toLocaleString('id-ID')} lagi.`
+                message: `Progres tabungan [${target.name}] baru mencapai ${progress}%. Anda memerlukan Rp ${remaining.toLocaleString('id-ID')} lagi.`
             });
 
             // Alokasi Surplus
@@ -170,7 +170,7 @@ const getRecommendations = async (req, res) => {
                 const surplus = saldo - (expectedDailyLimit * daysLeft);
                 recommendations.push({
                     type: 'surplus_allocation',
-                    message: `Ada sisa dana aman sekitar Rp ${surplus.toLocaleString('id-ID')}. Anda dapat mengalokasikannya ke target [${target.goal_name}] agar lebih cepat tercapai.`
+                    message: `Ada sisa dana aman sekitar Rp ${surplus.toLocaleString('id-ID')}. Anda dapat mengalokasikannya ke target [${target.name}] agar lebih cepat tercapai.`
                 });
             }
         }
