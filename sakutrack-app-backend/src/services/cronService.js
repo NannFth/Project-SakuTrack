@@ -10,7 +10,7 @@ const startCronJobs = (io) => {
             const [users] = await pool.execute('SELECT id, name FROM users');
 
             for (const user of users) {
-                const title = 'Pengingat Anggaran Harian';
+                const title = '🔔 Pengingat Anggaran Harian';
                 const message = `Selamat pagi, ${user.name}. Mari mulai hari dengan bijak. Pastikan untuk memantau batas anggaran harian Anda agar keuangan tetap stabil.`;
 
                 await pool.execute(
@@ -52,8 +52,8 @@ const startCronJobs = (io) => {
                 );
 
                 if (transactions.length === 0) {
-                    const title = 'Pengingat Pencatatan Transaksi';
-                    const message = 'Anda belum mencatat aktivitas keuangan hari ini. Harap luangkan waktu sejenak untuk memperbarui catatan kas Anda.';
+                    const title = '🔔 Pengingat Pencatatan Transaksi';
+                    const message = 'Anda belum mencatat aktivitas keuangan hari ini. Harap luangkan waktu sejenak untuk memperbarui catatan keuangan Anda.';
 
                     await pool.execute(
                         `INSERT INTO notifications (user_id, title, message, type, is_read) 

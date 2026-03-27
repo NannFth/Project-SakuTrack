@@ -28,7 +28,9 @@ const transactionRoutes = require('./routes/transactionRoutes');
 const savingRoutes = require('./routes/savingRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const recommendationRoutes = require('./routes/recommendationRoutes');
 const { startCronJobs } = require('./services/cronService');
+
 const usersOnline = new Map();
 
 io.on("connection", (socket) => {
@@ -71,9 +73,10 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/savings', savingRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/recommendations', recommendationRoutes); 
 
 app.get('/', (req, res) => {
-  res.status(200).send('API SakuTrack is running with Real-time Support...');
+  res.status(200).send('API SakuTrack is running...');
 });
 
 startCronJobs(io);
