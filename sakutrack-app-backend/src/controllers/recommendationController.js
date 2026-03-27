@@ -1,6 +1,5 @@
-const db = require('../config/database');
+const pool = require('../config/database');
 
-// Finansial Tips 
 const financialTips = [
     "Catat setiap pengeluaran, sekecil apa pun, agar arus kas selalu terpantau.",
     "Biasakan menabung pada awal bulan, bukan menunggu sisa uang di akhir bulan.",
@@ -34,26 +33,42 @@ const financialTips = [
     "Masa depan finansial Anda ditentukan oleh keputusan yang Anda buat hari ini."
 ];
 
-exports.getRecommendations = async (req, res) => {
-    const userId = req.params.userId;
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-    
-    // Tanggal kemarin
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
-
-    const currentMonth = today.getMonth() + 1;
-    const currentYear = today.getFullYear();
-    const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
-    const daysLeft = daysInMonth - today.getDate() + 1;
-
+const getRecommendations = async (req, res) => {
     try {
+        const { uid } = req.user;
+
+        // Ambil ID
+        const [userRows] = await pool.execute(
+            'SELECT id FROM users WHERE firebase_uid = ?',
+            [uid]
+        );
+
+        if (userRows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Data pengguna tidak ditemukan'
+            });
+        }
+
+        const userId = userRows[0].id;
+        const today = new Date();
+        
+        // Ambil format 
+        const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+        
+        const yesterdayDate = new Date(today);
+        yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+        const yesterdayStr = yesterdayDate.getFullYear() + '-' + String(yesterdayDate.getMonth() + 1).padStart(2, '0') + '-' + String(yesterdayDate.getDate()).padStart(2, '0');
+
+        const currentMonth = today.getMonth() + 1;
+        const currentYear = today.getFullYear();
+        const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+        const daysLeft = daysInMonth - today.getDate() + 1;
+
         let recommendations = [];
 
-        // Ambil data
-        const [transaksiBulanIni] = await db.promise().query(`
+        // Ambil data Income & Expense
+        const [transaksiBulanIni] = await pool.execute(`
             SELECT type, SUM(amount) as total 
             FROM transactions 
             WHERE user_id = ? AND MONTH(date) = ? AND YEAR(date) = ?
@@ -64,8 +79,8 @@ exports.getRecommendations = async (req, res) => {
         let totalExpense = 0;
 
         transaksiBulanIni.forEach(row => {
-            if (row.type === 'income') totalIncome = row.total;
-            if (row.type === 'expense') totalExpense = row.total;
+            if (row.type === 'income') totalIncome = parseFloat(row.total);
+            if (row.type === 'expense') totalExpense = parseFloat(row.total);
         });
 
         const saldo = totalIncome - totalExpense;
@@ -84,8 +99,8 @@ exports.getRecommendations = async (req, res) => {
             });
         }
 
-        // Evaluasi Keinginan
-        const [wantsNeedsData] = await db.promise().query(`
+        // Evaluasi Kebutuhan & Keinginan
+        const [wantsNeedsData] = await pool.execute(`
             SELECT jenis, SUM(amount) as total 
             FROM transactions 
             WHERE user_id = ? AND type = 'expense' AND MONTH(date) = ? AND YEAR(date) = ?
@@ -96,65 +111,71 @@ exports.getRecommendations = async (req, res) => {
         let totalNeeds = 0;
 
         wantsNeedsData.forEach(row => {
-            if (row.jenis && row.jenis.toLowerCase() === 'keinginan') totalWants = row.total;
-            if (row.jenis && row.jenis.toLowerCase() === 'kebutuhan') totalNeeds = row.total;
+            if (row.jenis && row.jenis.toLowerCase() === 'keinginan') totalWants = parseFloat(row.total);
+            if (row.jenis && row.jenis.toLowerCase() === 'kebutuhan') totalNeeds = parseFloat(row.total);
         });
 
-        const totalExpenseBulanIni = totalWants + totalNeeds;
-        if (totalExpenseBulanIni > 0) {
-            const wantsPercentage = (totalWants / totalExpenseBulanIni) * 100;
+        const totalExpenseKategori = totalWants + totalNeeds;
+        if (totalExpenseKategori > 0) {
+            const wantsPercentage = (totalWants / totalExpenseKategori) * 100;
             if (wantsPercentage > 30) {
                 recommendations.push({
                     type: 'warning_wants',
-                    message: `Pengeluaran untuk kategori 'Keinginan' Anda telah mencapai ${Math.round(wantsPercentage)}% dari total pengeluaran bulan ini. Harap kendalikan pengeluaran Anda.`
+                    message: `Pengeluaran 'Keinginan' Anda mencapai ${Math.round(wantsPercentage)}% dari total pengeluaran. Harap kendalikan agar fokus pada kebutuhan utama.`
                 });
             }
         }
 
-        // Evaluasi Kemarin
-        const [yesterdaySpend] = await db.promise().query(`
+        // Evaluasi Pengeluaran Kemarin
+        const [yesterdaySpend] = await pool.execute(`
             SELECT SUM(amount) as total FROM transactions 
             WHERE user_id = ? AND type = 'expense' AND DATE(date) = ?
         `, [userId, yesterdayStr]);
 
-        const totalKemarin = yesterdaySpend[0].total || 0;
+        const totalKemarin = yesterdaySpend[0].total ? parseFloat(yesterdaySpend[0].total) : 0;
         if (totalKemarin > 50000) {
             recommendations.push({
                 type: 'yesterday_eval',
-                message: `Kemarin Anda menghabiskan Rp ${totalKemarin.toLocaleString('id-ID')}. Mari mencoba untuk lebih berhemat hari ini.`
+                message: `Kemarin Anda menghabiskan Rp ${totalKemarin.toLocaleString('id-ID')}. Mari mencoba untuk lebih berhemat pada hari ini.`
             });
         }
 
-        // Progres 
-        const [savings] = await db.promise().query(`
-            SELECT id, goal_name, target_amount, current_amount, target_date 
+        // Progres Target Tabungan 
+        const [savings] = await pool.execute(`
+            SELECT id, goal_name, target_amount, current_amount 
             FROM savings 
-            WHERE user_id = ? AND current_amount < target_amount
-            ORDER BY target_date ASC LIMIT 1
+            WHERE user_id = ? 
+            ORDER BY target_date ASC
         `, [userId]);
 
-        if (savings.length > 0) {
-            const target = savings[0];
-            const progress = Math.round((target.current_amount / target.target_amount) * 100);
-            const sisaDuitBuatTarget = target.target_amount - target.current_amount;
+        const activeSavings = savings.filter(item => {
+            return parseFloat(item.current_amount || 0) < parseFloat(item.target_amount || 0);
+        });
+
+        if (activeSavings.length > 0) {
+            const target = activeSavings[0];
+            const targetAmount = parseFloat(target.target_amount || 0);
+            const currentAmount = parseFloat(target.current_amount || 0);
+            const progress = Math.round((currentAmount / targetAmount) * 100);
+            const remaining = targetAmount - currentAmount;
             
             recommendations.push({
                 type: 'goal_progress',
-                message: `Progres target tabungan [${target.goal_name}] Anda baru mencapai ${progress}%. Anda membutuhkan Rp ${sisaDuitBuatTarget.toLocaleString('id-ID')} lagi untuk menyelesaikannya.`
+                message: `Progres tabungan [${target.goal_name}] baru mencapai ${progress}%. Anda memerlukan Rp ${remaining.toLocaleString('id-ID')} lagi.`
             });
 
-            // Alokasi Sisa
-            const expectedDailyLimit = 50000;
+            // Alokasi Surplus
+            const expectedDailyLimit = 50000; 
             if (saldo > (expectedDailyLimit * daysLeft)) {
                 const surplus = saldo - (expectedDailyLimit * daysLeft);
                 recommendations.push({
                     type: 'surplus_allocation',
-                    message: `Terdapat sisa dana yang aman sekitar Rp ${surplus.toLocaleString('id-ID')}. Anda dapat mengalokasikannya ke target tabungan [${target.goal_name}] agar lebih cepat tercapai.`
+                    message: `Ada sisa dana aman sekitar Rp ${surplus.toLocaleString('id-ID')}. Anda dapat mengalokasikannya ke target [${target.goal_name}] agar lebih cepat tercapai.`
                 });
             }
         }
 
-        // Tantangan harian
+        // Tantangan Harian & Streak
         const isBawaBekalDay = today.getDate() % 2 === 0;
         if (isBawaBekalDay) {
             recommendations.push({
@@ -168,8 +189,7 @@ exports.getRecommendations = async (req, res) => {
             });
         }
 
-        // Apresiasi Konsistensi 
-        const [streakData] = await db.promise().query(`
+        const [streakData] = await pool.execute(`
             SELECT COUNT(DISTINCT DATE(date)) as streak_days
             FROM transactions 
             WHERE user_id = ? AND date >= DATE_SUB(CURDATE(), INTERVAL 3 DAY)
@@ -182,7 +202,7 @@ exports.getRecommendations = async (req, res) => {
             });
         }
 
-        // Tips Finansial 
+        // Tips Finansial Harian
         const tipIndex = today.getDate() % financialTips.length;
         recommendations.push({
             type: 'financial_tip',
@@ -190,12 +210,19 @@ exports.getRecommendations = async (req, res) => {
         });
 
         res.status(200).json({
-            status: 'success',
+            success: true,
+            message: 'Rekomendasi berhasil diambil',
             data: recommendations
         });
 
     } catch (error) {
-        console.error("Gagal mengambil rekomendasi:", error);
-        res.status(500).json({ status: 'error', message: 'Terjadi kesalahan pada server' });
+        console.error('Error fetching recommendations:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan pada server saat mengambil rekomendasi',
+            error: error.message
+        });
     }
 };
+
+module.exports = { getRecommendations };
