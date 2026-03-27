@@ -27,7 +27,7 @@ const financialTips = [
     "Alokasikan 50% dari bonus atau pendapatan tambahan Anda untuk ditabung atau diinvestasikan.",
     "Rawatlah barang-barang Anda dengan baik agar tidak perlu sering membeli yang baru.",
     "Buat daftar belanjaan sebelum ke pasar atau swalayan agar terhindar dari pembelian impulsif.",
-    "Periksa tagihan utilitas secara rutin; menghemat energi berarti menghemat uang.",
+    "Periksa tagihan utilitas secara rutin, menghemat energi berarti menghemat uang.",
     "Pilihlah lingkungan pertemanan yang mendukung gaya hidup sesuai dengan kemampuan finansial Anda.",
     "Pastikan target tabungan bulanan sudah tercapai sebelum mengalokasikan dana untuk hiburan.",
     "Masa depan finansial Anda ditentukan oleh keputusan yang Anda buat hari ini."
@@ -52,8 +52,6 @@ const getRecommendations = async (req, res) => {
 
         const userId = userRows[0].id;
         const today = new Date();
-        
-        // Ambil Tanggak
         const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
         
         const yesterdayDate = new Date(today);
@@ -67,7 +65,7 @@ const getRecommendations = async (req, res) => {
 
         let recommendations = [];
 
-        // Ambil data Income & Expense
+        // Ambil data
         const [transaksiBulanIni] = await pool.execute(`
             SELECT type, SUM(amount) as total 
             FROM transactions 
@@ -86,20 +84,35 @@ const getRecommendations = async (req, res) => {
         const saldo = totalIncome - totalExpense;
 
         // Batas Harian
-        if (saldo > 0) {
-            const dailyLimit = Math.floor(saldo / daysLeft);
+        const [todaySpendData] = await pool.execute(`
+            SELECT SUM(amount) as total FROM transactions 
+            WHERE user_id = ? AND type = 'expense' AND DATE(date) = ?
+        `, [userId, todayStr]);
+        const todayExpense = parseFloat(todaySpendData[0].total || 0);
+        
+        const saldoAwalHariIni = saldo + todayExpense;
+        const dailyLimit = Math.floor(saldoAwalHariIni / daysLeft);
+
+        if (saldo <= 0) {
             recommendations.push({
                 type: 'daily_limit',
-                message: `Batas pengeluaran aman Anda hari ini adalah Rp ${dailyLimit.toLocaleString('id-ID')}. Usahakan untuk tidak melebihinya.`
+                message: "Saldo Anda bulan ini sudah habis atau minus. Segera hentikan pengeluaran yang tidak mendesak hingga gajian berikutnya."
+            });
+        } else if (todayExpense > dailyLimit) {
+            const overspent = todayExpense - dailyLimit;
+            recommendations.push({
+                type: 'daily_limit',
+                message: `Waspada! Pengeluaran Anda hari ini (Rp ${todayExpense.toLocaleString('id-ID')}) telah melebihi batas aman harian. Anda overbudget Rp ${overspent.toLocaleString('id-ID')} hari ini.`
             });
         } else {
+            const sisaLimitHariIni = dailyLimit - todayExpense;
             recommendations.push({
                 type: 'daily_limit',
-                message: "Saldo Anda bulan ini sudah mencapai batas. Mari lebih berhemat hingga waktu gajian tiba."
+                message: `Batas pengeluaran harian Anda adalah Rp ${dailyLimit.toLocaleString('id-ID')}. Anda masih bisa memakai maksimal Rp ${sisaLimitHariIni.toLocaleString('id-ID')} lagi untuk hari ini.`
             });
         }
 
-        // Evaluasi Kebutuhan & Keinginan
+        // Evaluasi Kebutuhan Keinginan
         const [wantsNeedsData] = await pool.execute(`
             SELECT jenis, SUM(amount) as total 
             FROM transactions 
@@ -115,32 +128,39 @@ const getRecommendations = async (req, res) => {
             if (row.jenis && row.jenis.toLowerCase() === 'kebutuhan') totalNeeds = parseFloat(row.total);
         });
 
-        const totalExpenseKategori = totalWants + totalNeeds;
-        if (totalExpenseKategori > 0) {
-            const wantsPercentage = (totalWants / totalExpenseKategori) * 100;
-            if (wantsPercentage > 30) {
-                recommendations.push({
-                    type: 'warning_wants',
-                    message: `Pengeluaran 'Keinginan' Anda mencapai ${Math.round(wantsPercentage)}% dari total pengeluaran. Harap kendalikan agar fokus pada kebutuhan utama.`
-                });
-            }
+        const maxWants = totalIncome * 0.30;
+        if (totalIncome > 0 && totalWants > maxWants) {
+            recommendations.push({
+                type: 'warning_wants',
+                message: `Peringatan: Belanja 'Keinginan' Anda (Rp ${totalWants.toLocaleString('id-ID')}) telah melampaui 30% dari Pemasukan bulan ini. Rem segera pengeluaran tersier Anda.`
+            });
+        } else if (totalIncome === 0 && totalWants > totalNeeds && totalWants > 0) {
+            recommendations.push({
+                type: 'warning_wants',
+                message: `Bulan ini Anda menghabiskan uang lebih besar untuk 'Keinginan' dibandingkan 'Kebutuhan'. Evaluasi kembali prioritas finansial Anda.`
+            });
         }
 
-        // Evaluasi Pengeluaran Kemarin
+        // Evaluasi Pengeluaran
         const [yesterdaySpend] = await pool.execute(`
             SELECT SUM(amount) as total FROM transactions 
             WHERE user_id = ? AND type = 'expense' AND DATE(date) = ?
         `, [userId, yesterdayStr]);
 
         const totalKemarin = yesterdaySpend[0].total ? parseFloat(yesterdaySpend[0].total) : 0;
-        if (totalKemarin > 50000) {
+        if (totalKemarin > dailyLimit && dailyLimit > 0) {
             recommendations.push({
                 type: 'yesterday_eval',
-                message: `Kemarin Anda menghabiskan Rp ${totalKemarin.toLocaleString('id-ID')}. Mari mencoba untuk lebih berhemat pada hari ini.`
+                message: `Kemarin Anda menghabiskan Rp ${totalKemarin.toLocaleString('id-ID')} (menembus batas wajar harian). Hari ini Anda wajib berhemat untuk menutupi defisit anggaran kemarin.`
+            });
+        } else if (totalKemarin === 0) {
+            recommendations.push({
+                type: 'yesterday_eval',
+                message: `Luar biasa! Kemarin Anda sukses melewati hari tanpa pengeluaran (No-Spend Day). Pertahankan momentum positif ini.`
             });
         }
 
-        // Progres Target Tabungan 
+        // Progres Target Tabungan
         const [savings] = await pool.execute(`
             SELECT id, name, target_amount, current_amount 
             FROM savings 
@@ -161,16 +181,14 @@ const getRecommendations = async (req, res) => {
             
             recommendations.push({
                 type: 'goal_progress',
-                message: `Progres tabungan [${target.name}] baru mencapai ${progress}%. Anda memerlukan Rp ${remaining.toLocaleString('id-ID')} lagi.`
+                message: `Progres tabungan [${target.name}] baru mencapai ${progress}%. Anda membutuhkan suntikan dana Rp ${remaining.toLocaleString('id-ID')} lagi.`
             });
 
             // Alokasi Surplus
-            const expectedDailyLimit = 50000; 
-            if (saldo > (expectedDailyLimit * daysLeft)) {
-                const surplus = saldo - (expectedDailyLimit * daysLeft);
+            if (daysLeft <= 10 && saldo > (0.3 * totalIncome) && totalIncome > 0) {
                 recommendations.push({
                     type: 'surplus_allocation',
-                    message: `Ada sisa dana aman sekitar Rp ${surplus.toLocaleString('id-ID')}. Anda dapat mengalokasikannya ke target [${target.name}] agar lebih cepat tercapai.`
+                    message: `Sisa bulan tinggal ${daysLeft} hari dan Anda mengamankan surplus cukup besar (Rp ${saldo.toLocaleString('id-ID')}). Transfer ke target tabungan [${target.name}] sekarang sebelum uangnya menguap.`
                 });
             }
         }
@@ -180,12 +198,12 @@ const getRecommendations = async (req, res) => {
         if (isBawaBekalDay) {
             recommendations.push({
                 type: 'challenge',
-                message: "Tantangan Hari Ini: Bawalah bekal dari rumah untuk menghemat anggaran makan siang Anda."
+                message: "Tantangan Hari Ini: Bawalah bekal dari rumah untuk memangkas drastis anggaran makan siang Anda."
             });
         } else {
             recommendations.push({
                 type: 'challenge',
-                message: "Tantangan Hari Tanpa Belanja: Cobalah untuk tidak mengeluarkan uang untuk kategori 'Keinginan' sama sekali hari ini."
+                message: "Tantangan Hari Tanpa Belanja: Tantang diri Anda untuk tidak mengeluarkan uang sepeserpun untuk kategori 'Keinginan' hari ini."
             });
         }
 
@@ -198,7 +216,7 @@ const getRecommendations = async (req, res) => {
         if (streakData[0].streak_days >= 3) {
             recommendations.push({
                 type: 'streak_praise',
-                message: "Luar biasa! Anda sangat konsisten mencatat keuangan selama 3 hari terakhir. Pertahankan kebiasaan baik ini."
+                message: "Mantap! Anda mencatatkan streak disiplin 3 hari berturut-turut dalam mencatat keuangan. Pertahankan habit juara ini."
             });
         }
 
