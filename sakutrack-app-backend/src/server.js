@@ -29,6 +29,7 @@ const savingRoutes = require('./routes/savingRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const recommendationRoutes = require('./routes/recommendationRoutes');
+const settingRoutes = require('./routes/settingRoutes');
 const { startCronJobs } = require('./services/cronService');
 
 const usersOnline = new Map();
@@ -74,6 +75,7 @@ app.use('/api/savings', savingRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/recommendations', recommendationRoutes); 
+app.use('/api/settings', settingRoutes);
 
 app.get('/', (req, res) => {
   res.status(200).send('API SakuTrack is running...');

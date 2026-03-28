@@ -27,16 +27,34 @@ export default function Dashboard({ searchQuery, setSearchQuery }) {
   const [transactions, setTransactions] = useState([]);
   const [chartData, setChartData] = useState({ labels: [], incomeTrend: [], expenseTrend: [] });
   const [showAll, setShowAll] = useState(false);
+  const [userSettings, setUserSettings] = useState({ needsRatio: 50, wantsRatio: 30, savingsRatio: 20, dailyLimit: 80 });
 
 // Ambil data
-const fetchData = () => {
+const fetchData = async () => {
+    let currentWantsRatio = 30;
+    
+    try {
+      const resSet = await connection.get('/settings');
+      if (resSet.data.success && resSet.data.data) {
+        setUserSettings({
+          needsRatio: resSet.data.data.needs_ratio,
+          wantsRatio: resSet.data.data.wants_ratio,
+          savingsRatio: resSet.data.data.savings_ratio,
+          dailyLimit: resSet.data.data.daily_limit_percentage || 80
+        });
+        currentWantsRatio = resSet.data.data.wants_ratio;
+      }
+    } catch (err) {
+      console.log(err);
+    }
+
     connection.get(`/dashboard?month=${month}&year=${year}`)
       .then((res) => {
         if (res.data.success) {
           const data = res.data.data;
           setDashboardData(data);
 
-          const jatahKeinginan = data.balance * 0.3;
+          const jatahKeinginan = data.balance * (currentWantsRatio / 100);
           
           const todayString = new Date().toLocaleDateString('id-ID');
           const savedDate = localStorage.getItem('lastDashboardAlertDate');
@@ -158,7 +176,7 @@ const fetchData = () => {
 
   const daysInMonth = new Date(year, month, 0).getDate();
   const dynamicDailyLimit = dashboardData.totalIncome > 0 
-    ? Math.floor(dashboardData.totalIncome / daysInMonth) 
+    ? Math.floor((dashboardData.totalIncome * (userSettings.dailyLimit / 100)) / daysInMonth) 
     : 100000;
 
   // Tampilan utama
@@ -187,7 +205,12 @@ const fetchData = () => {
               totalExpense={expenseToday} 
               dailyLimit={dynamicDailyLimit} 
             />
-            <BudgetWallets totalBalance={dashboardData.balance} />
+            <BudgetWallets 
+              totalBalance={dashboardData.balance} 
+              needsRatio={userSettings.needsRatio} 
+              wantsRatio={userSettings.wantsRatio} 
+              savingsRatio={userSettings.savingsRatio} 
+            />
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <BalanceCard title="Total Saldo" amount={dashboardData.balance} />
               <BalanceCard title="Pemasukan" amount={dashboardData.totalIncome} />

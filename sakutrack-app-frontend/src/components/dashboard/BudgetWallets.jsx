@@ -1,16 +1,21 @@
 import React from 'react';
 import { Utensils, Heart, PiggyBank } from 'lucide-react';
 
-export default function BudgetWallets({ totalBalance = 0 }) {
-  const kebutuhan = totalBalance * 0.5;
-  const keinginan = totalBalance * 0.3;
-  const tabungan = totalBalance * 0.2;
+export default function BudgetWallets({ 
+  totalBalance = 0, 
+  needsRatio = 50, 
+  wantsRatio = 30, 
+  savingsRatio = 20 
+}) {
+  const kebutuhan = totalBalance * (needsRatio / 100);
+  const keinginan = totalBalance * (wantsRatio / 100);
+  const tabungan = totalBalance * (savingsRatio / 100);
 
   const wallets = [
     {
       title: "Kebutuhan",
       amount: kebutuhan,
-      percent: "50%",
+      percent: `${needsRatio}%`,
       icon: <Utensils size={18} />,
       theme: "bg-emerald-500",
       lightTheme: "bg-emerald-50 border-emerald-200 text-emerald-700",
@@ -18,7 +23,7 @@ export default function BudgetWallets({ totalBalance = 0 }) {
     {
       title: "Keinginan",
       amount: keinginan,
-      percent: "30%",
+      percent: `${wantsRatio}%`,
       icon: <Heart size={18} />,
       theme: "bg-sky-500",
       lightTheme: "bg-sky-50 border-sky-200 text-sky-700",
@@ -26,7 +31,7 @@ export default function BudgetWallets({ totalBalance = 0 }) {
     {
       title: "Tabungan",
       amount: tabungan,
-      percent: "20%",
+      percent: `${savingsRatio}%`,
       icon: <PiggyBank size={18} />,
       theme: "bg-purple-500",
       lightTheme: "bg-purple-50 border-purple-200 text-purple-700",

@@ -1,8 +1,9 @@
-  import { useState } from "react";
+import { useState } from "react";
   import Sidebar from "../components/ui/Sidebar";
-  import { Search, Settings, LogOut, Calendar, Menu, X } from "lucide-react";
+  import { Search, Calendar, Menu, X } from "lucide-react";
   import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
   import Notification from "../components/dashboard/Notification";
+  import SettingsMenu from "../components/dashboard/SettingsMenu";
 
   export default function DashboardLayout({ children, searchQuery, setSearchQuery, user, socket }) {
     const navigate = useNavigate();
@@ -95,21 +96,7 @@
                 <Notification userId={user.id} socket={socket} />
               </div>
 
-              <div className="relative">
-                <button onClick={() => setOpenMenu(openMenu === "setting" ? null : "setting")}
-                  className={`p-2 rounded ${openMenu === 'setting' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-200'}`}>
-                  <Settings size={18} md:size={20} />
-                </button>
-                {openMenu === "setting" && (
-                  <div className="absolute right-0 top-full mt-2 w-40 bg-white shadow-xl border border-slate-200 rounded p-1 z-[60]">
-                    <button onClick={() => { localStorage.clear(); navigate("/"); }}
-                      className="flex items-center gap-2 w-full text-left hover:bg-slate-50 p-2 rounded text-sm text-red-600 font-bold">
-                      <LogOut size={16} />
-                      <span>LogOut</span>
-                    </button>
-                  </div>
-                )}
-              </div>
+              <SettingsMenu />
 
               <div className="hidden xs:block w-px h-6 bg-slate-300 mx-0.5"></div>
 
