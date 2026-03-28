@@ -43,10 +43,10 @@ export default function BudgetWallets({
       {wallets.map((w, index) => (
         <div 
           key={index} 
-          className={`flex items-center gap-4 p-4 rounded-lg border ${w.lightTheme}`}
+          className={`flex items-center gap-4 p-4 rounded border ${w.lightTheme}`}
         >
           {/* Icon Box */}
-          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${w.theme} text-white`}>
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded ${w.theme} text-white`}>
             {w.icon}
           </div>
 

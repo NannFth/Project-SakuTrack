@@ -17,8 +17,7 @@ import RekomendasiKeuangan from './pages/RekomendasiKeuangan';
 import DashboardLayout from './layouts/DashboardLayout';
 import Popup from "./components/notification/Popup";
 
-const socket = io("http://13.229.64.163:3000", {
-  transports: ["websocket"],
+const socket = io("http://54.255.51.12:3000", {
   reconnection: true
 });
 
@@ -112,7 +111,7 @@ const App = () => {
       toast.custom((t) => (
         <div className={`${
             t.visible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-4 scale-95'
-          } max-w-md w-full bg-[#1e293b] shadow-2xl rounded-xl pointer-events-auto flex border border-slate-700/50 transition-all duration-500 transform z-[99999] mt-5`}>
+          } max-w-md w-full bg-[#1e293b] shadow-2xl rounded pointer-events-auto flex border border-slate-700/50 transition-all duration-500 transform z-[99999] mt-5`}>
           <div className="flex-1 w-0 p-5">
             <div className="flex items-center">
               <div className="flex-shrink-0 text-3xl">{s.icon}</div>

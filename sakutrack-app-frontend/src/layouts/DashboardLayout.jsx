@@ -62,7 +62,7 @@ import { useState } from "react";
           <header className="bg-slate-100 border-b border-slate-300 sticky top-0 z-[45] px-2 md:px-8 py-3 flex items-center justify-between gap-2 md:gap-4 h-16 md:h-20">
 
             <div className="flex items-center gap-2 flex-1 max-w-md">
-              <button onClick={() => setOpenMenu("sidebar")} className="md:hidden p-2 rounded-lg border border-slate-300 hover:bg-slate-200 text-slate-700">
+              <button onClick={() => setOpenMenu("sidebar")} className="md:hidden p-2 rounded border border-slate-300 hover:bg-slate-200 text-slate-700">
                 <Menu size={20} />
               </button>
 
@@ -81,7 +81,7 @@ import { useState } from "react";
             </div>
 
             <div className="flex items-center gap-1.5 md:gap-3">
-              <div className="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-1 md:px-2 py-1.5 shadow-sm">
+              <div className="flex items-center gap-1 bg-white border border-slate-300 rounded px-1 md:px-2 py-1.5 shadow-sm">
                 <Calendar size={14} className="text-slate-400" />
                 <select 
                   value={currentMonth}
@@ -102,7 +102,7 @@ import { useState } from "react";
 
               <button 
                 onClick={() => navigate("/profil")}
-                className="w-8 h-8 md:w-10 md:h-10 bg-slate-900 rounded-lg flex items-center justify-center text-white text-[10px] md:text-xs font-bold hover:bg-slate-800 transition-colors"
+                className="w-8 h-8 md:w-10 md:h-10 bg-slate-900 rounded flex items-center justify-center text-white text-[10px] md:text-xs font-bold hover:bg-slate-800 transition-colors"
               >
                 {initials}
               </button>

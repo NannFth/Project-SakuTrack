@@ -14,7 +14,7 @@ export default function Login() {
   // Login Email
   const handleLogin = async () => {
     if (!email || !password) {
-      alert("Harap isi email dan password Anda.");
+      alert("Harap isi email dan password Kamu.");
       return;
     }
     setLoading(true);
@@ -30,7 +30,7 @@ export default function Login() {
       }
     } catch (error) {
       console.error(error);
-      alert("Login gagal. Periksa kembali email atau password Anda.");
+      alert("Login gagal. Periksa kembali email atau password Kamu.");
     } finally {
       setLoading(false);
     }
@@ -64,12 +64,13 @@ export default function Login() {
       {/* Kiri */}
       <div className="hidden lg:flex lg:w-1/2 bg-slate-900 pt-10 px-16 pb-16 flex-col justify-between relative overflow-hidden">
         {/* Background */}
-        <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-slate-800 rounded-full blur-3xl opacity-40"></div>
-        <div className="absolute bottom-[-10%] left-[-10%] w-72 h-72 bg-slate-800 rounded-full blur-3xl opacity-40"></div>
+        <div className="absolute top-0 right-0 w-full h-full opacity-10 pointer-events-none">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-slate-700 rounded border border-slate-600 rotate-12 translate-x-1/2 -translate-y-1/2"></div>
+        </div>
 
         {/* Logo */}
         <div className="flex items-center gap-2.5 z-10">
-          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-2xl">
+          <div className="w-10 h-10 bg-white rounded flex items-center justify-center">
             <Wallet className="text-slate-900" size={22} />
           </div>
           <span className="text-xl font-black text-white tracking-tighter">SakuTrack</span>
@@ -82,33 +83,33 @@ export default function Login() {
             <span className="text-slate-400">Capai Targetmu</span>
           </h1>
           <p className="text-slate-400 text-base max-w-md leading-relaxed">
-            Kelola finansial harian Anda dengan fitur lengkap yang dirancang untuk kemudahan navigasi.
+            Kelola finansial harian Kamu dengan fitur lengkap yang dirancang untuk kemudahan navigasi.
           </p>
           
           {/* Daftar Fitur */}
-          <div className="grid grid-cols-2 gap-6 mt-12">
-            <div className="space-y-3 p-5 rounded-2xl bg-slate-800/30 border border-slate-700/50 backdrop-blur-sm">
+          <div className="grid grid-cols-2 gap-4 mt-12">
+            <div className="space-y-3 p-5 rounded bg-slate-800/40 border border-slate-700">
                 <LayoutDashboard className="text-white" size={24} />
                 <div>
                   <p className="text-white font-bold text-base">Dashboard Utama</p>
                   <p className="text-slate-500 text-xs mt-1">Ringkasan pemasukan, pengeluaran, dan saldo secara real-time.</p>
                 </div>
             </div>
-            <div className="space-y-3 p-5 rounded-2xl bg-slate-800/30 border border-slate-700/50 backdrop-blur-sm">
+            <div className="space-y-3 p-5 rounded bg-slate-800/40 border border-slate-700">
                 <Wallet className="text-white" size={24} />
                 <div>
                   <p className="text-white font-bold text-base">Kelola Transaksi</p>
                   <p className="text-slate-500 text-xs mt-1">Catat dan pantau riwayat transaksi harian dengan mudah.</p>
                 </div>
             </div>
-            <div className="space-y-3 p-5 rounded-2xl bg-slate-800/30 border border-slate-700/50 backdrop-blur-sm">
+            <div className="space-y-3 p-5 rounded bg-slate-800/40 border border-slate-700">
                 <Target className="text-white" size={24} />
                 <div>
                   <p className="text-white font-bold text-base">Target Tabungan</p>
-                  <p className="text-slate-500 text-xs mt-1">Setel target finansial dan pantau progres tabungan Anda.</p>
+                  <p className="text-slate-500 text-xs mt-1">Setel target finansial dan pantau progres tabungan Kamu.</p>
                 </div>
             </div>
-            <div className="space-y-3 p-5 rounded-2xl bg-slate-800/30 border border-slate-700/50 backdrop-blur-sm">
+            <div className="space-y-3 p-5 rounded bg-slate-800/40 border border-slate-700">
                 <TrendingUp className="text-white" size={24} />
                 <div>
                   <p className="text-white font-bold text-base">Proyeksi Keuangan</p>
@@ -127,65 +128,65 @@ export default function Login() {
       </div>
 
       {/* Form Login */}
-      <div className="flex-1 lg:w-1/2 flex items-center justify-center p-6 bg-slate-100 lg:bg-slate-50">
-        <div className="w-full max-w-[280px] lg:max-w-[420px] bg-white p-6 lg:p-12 rounded-xl lg:rounded-3xl shadow-md lg:shadow-none lg:bg-transparent border border-slate-200 lg:border-none">
+      <div className="flex-1 lg:w-1/2 flex items-center justify-center p-6 bg-slate-50">
+        <div className="w-full max-w-[320px] lg:max-w-[420px] bg-white p-8 lg:p-12 rounded border border-slate-200 lg:border-none lg:bg-transparent">
           
           {/* Mobile Header */}
-          <div className="lg:hidden text-center mb-6">
-            <div className="inline-block p-2 bg-slate-900 rounded-lg mb-3">
+          <div className="lg:hidden text-center mb-8">
+            <div className="inline-block p-2 bg-slate-900 rounded mb-3">
                <Wallet className="text-white" size={24} />
             </div>
-            <h2 className="text-lg font-bold text-slate-900 uppercase">SakuTrack</h2>
+            <h2 className="text-lg font-bold text-slate-900 uppercase tracking-tight">SakuTrack</h2>
           </div>
 
-          <div className="mb-6 lg:mb-10 text-center lg:text-left">
-            <h3 className="text-xl lg:text-3xl font-bold text-slate-900">Masuk Akun</h3>
-            <p className="text-slate-500 mt-1 text-[10px] lg:text-sm">Lanjutkan kelola keuanganmu hari ini.</p>
+          <div className="mb-8 text-center lg:text-left">
+            <h3 className="text-2xl lg:text-3xl font-bold text-slate-900 tracking-tight">Masuk Akun</h3>
+            <p className="text-slate-500 mt-1 text-xs lg:text-sm">Lanjutkan kelola keuangan Kamu hari ini.</p>
           </div>
 
-          <div className="space-y-3 lg:space-y-5">
-            <div className="space-y-1">
-              <label className="text-[10px] lg:text-sm font-bold text-slate-600 ml-1">Email</label>
+          <div className="space-y-4 lg:space-y-5">
+            <div className="space-y-1.5">
+              <label className="text-xs lg:text-sm font-bold text-slate-600 ml-0.5">Email</label>
               <input 
                 type="email" 
                 placeholder="nama@email.com" 
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)} 
-                className="w-full p-3 lg:p-4 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-slate-900 text-[10px] lg:text-sm" 
+                className="w-full p-3 lg:p-4 bg-white border border-slate-200 rounded outline-none focus:border-slate-900 text-xs lg:text-sm transition-colors" 
               />
             </div>
 
-            <div className="space-y-1">
-              <label className="text-[10px] lg:text-sm font-bold text-slate-600 ml-1">Password</label>
+            <div className="space-y-1.5">
+              <label className="text-xs lg:text-sm font-bold text-slate-600 ml-0.5">Password</label>
               <input 
                 type="password" 
                 placeholder="••••••••" 
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)} 
-                className="w-full p-3 lg:p-4 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-slate-900 text-[10px] lg:text-sm" 
+                className="w-full p-3 lg:p-4 bg-white border border-slate-200 rounded outline-none focus:border-slate-900 text-xs lg:text-sm transition-colors" 
               />
             </div>
 
             <button
               onClick={handleLogin}
               disabled={loading}
-              className={`w-full py-3 lg:py-4 rounded-lg font-bold text-xs lg:text-base mt-4 shadow-sm flex items-center justify-center gap-2
-                ${loading ? 'bg-slate-300 text-slate-500' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
+              className={`w-full py-3 lg:py-4 rounded font-bold text-xs lg:text-base mt-4 transition-colors flex items-center justify-center gap-2
+                ${loading ? 'bg-slate-200 text-slate-400' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
             >
-              {loading ? '...' : 'Masuk Sekarang'}
+              {loading ? 'Memproses...' : 'Masuk Sekarang'}
             </button>
           </div>
 
-          <div className="mt-6 flex items-center justify-between">
+          <div className="mt-8 flex items-center justify-between">
             <hr className="w-full border-slate-200" />
-            <span className="px-3 text-[9px] text-slate-400 font-bold whitespace-nowrap uppercase">ATAU</span>
+            <span className="px-3 text-[10px] text-slate-400 font-bold whitespace-nowrap uppercase tracking-widest">Atau</span>
             <hr className="w-full border-slate-200" />
           </div>
 
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="mt-4 w-full py-3 rounded-lg font-bold text-[10px] lg:text-sm text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 flex items-center justify-center gap-2"
+            className="mt-6 w-full py-3 rounded font-bold text-xs lg:text-sm text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 flex items-center justify-center gap-2 transition-colors"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -193,12 +194,12 @@ export default function Login() {
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
             </svg>
-            Login Dengan Google
+            Masuk dengan Google
           </button>
 
-          <div className="mt-8 text-center text-[10px] lg:text-sm">
+          <div className="mt-10 text-center text-xs lg:text-sm">
             <span className="text-slate-400 font-medium">Baru di SakuTrack? </span>
-            <Link to="/register" className="text-slate-900 font-bold hover:underline underline-offset-4">
+            <Link to="/register" className="text-slate-900 font-bold hover:underline underline-offset-4 decoration-2 transition-all">
               Daftar di Sini
             </Link>
           </div>

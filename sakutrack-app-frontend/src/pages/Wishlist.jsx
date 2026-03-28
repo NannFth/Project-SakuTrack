@@ -140,12 +140,12 @@ export default function Wishlist() {
                         const progress = Math.floor(Math.min((currentVal / item.price) * 100, 100));
 
                         return (
-                            <div key={item.id} className="bg-white border border-slate-200 rounded-md p-6 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
+                            <div key={item.id} className="bg-white border border-slate-200 rounded-md p-6 flex flex-col justify-between shadow-sm">
                                 <div>
                                     <div className="flex justify-between items-start mb-4">
                                         <h3 className="font-bold text-slate-800 text-lg">{item.name}</h3>
                                         {isAchieved && (
-                                            <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-[10px] font-black uppercase">Tercapai</span>
+                                            <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-[10px] uppercase">Tercapai</span>
                                         )}
                                     </div>
 

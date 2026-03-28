@@ -21,7 +21,7 @@ export default function Sidebar({ user }){
       {/* Header Logo */}
       <div className="p-8 flex justify-center items-center">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
+          <div className="w-10 h-10 bg-slate-900 rounded flex items-center justify-center">
             <Wallet className="text-white" size={24} />
           </div>
           <span className="text-2xl font-bold text-slate-900">
@@ -40,10 +40,10 @@ export default function Sidebar({ user }){
           const { path, name, icon } = item;
           const isActive = location.pathname === path;
           
-          let linkClass = "flex items-center gap-3 px-4 py-2 rounded-lg text-sm text-slate-900 font-medium hover:bg-slate-400";
+          let linkClass = "flex items-center gap-3 px-4 py-2 rounded text-sm text-slate-900 font-medium hover:bg-slate-400 transition-colors";
           
           if (isActive) {
-            linkClass = "flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-bold bg-slate-900 text-white";
+            linkClass = "flex items-center gap-3 px-4 py-2 rounded text-sm font-bold bg-slate-900 text-white";
           }
 
           return (

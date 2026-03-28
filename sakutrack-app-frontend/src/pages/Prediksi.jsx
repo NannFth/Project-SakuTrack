@@ -70,38 +70,37 @@ export default function Prediksi() {
   const dailyAverage = data.expense / (dayForCalculation || 1);
   
   // Deteksi progres
-  const monthProgress = dayForCalculation / daysInMonth;
-  const spendingProgress = data.expense / (data.income || 1);
-
+  const timeProgress = dayForCalculation / daysInMonth;
+  const spendingProgress = data.income > 0 ? data.expense / data.income : 0;
+  
   // Faktor boros 
-  const overspendFactor = (isCurrentMonth && spendingProgress > monthProgress) ? 1.25 : 1;
-  const adjustedDaily = dailyAverage * overspendFactor;
+  const efficiencyScore = timeProgress > 0 ? spendingProgress / timeProgress : 0;
+  const volatilityBuffer = 1.15; 
+  const adjustedDaily = dailyAverage * (efficiencyScore > 1 ? efficiencyScore : 1) * volatilityBuffer;
 
   // Estimasi Saldo
-  const estimatedBalance = data.balance - (remainingDays * adjustedDaily);
-  const incomeRatio = data.income > 0 ? data.expense / data.income : 0;
+  const projectedFutureExpense = remainingDays * adjustedDaily;
+  const estimatedBalance = data.balance - projectedFutureExpense;
   const safeDays = adjustedDaily > 0 ? Math.floor(data.balance / adjustedDaily) : 0;
   
   // Status & Rekomendasi
   let statusLabel = "Aman";
   let statusColor = "bg-emerald-50 text-emerald-600";
-  let statusAdvice = "Kondisi keuangan Anda stabil. Pertahankan pola ini.";
-  let actionPlan = "Teruskan menabung!";
+  let statusAdvice = "Kondisi keuangan Kamu stabil. Pertahankan pola hemat ini agar jatah Kamu cukup sampai kiriman berikutnya.";
+  let actionPlan = "Rencana: Teruskan menabung untuk wishlist Kamu!";
 
-  if (incomeRatio >= 0.6 && incomeRatio < 1) {
+  if (efficiencyScore > 1.1) {
     statusLabel = "Waspada";
     statusColor = "bg-orange-50 text-orange-600";
-    statusAdvice = "Pengeluaran mulai mendekati pemasukan. Kurangi belanja tersier.";
-    actionPlan = `Batasi belanja harian maksimal Rp ${Math.max(0, Math.round(data.balance / (remainingDays || 1))).toLocaleString()} agar aman.`;
-  } else if (incomeRatio >= 1) {
-    statusLabel = "Bahaya";
-    statusColor = "bg-rose-50 text-rose-600";
-    statusAdvice = "Pengeluaran melebihi pemasukan! Segera cek riwayat transaksi Anda.";
-    actionPlan = "Segera stop pengeluaran non-pokok dan cek transaksi terakhir Anda.";
+    statusAdvice = "Laju pengeluaran Kamu lebih cepat dari biasanya. Ada risiko jatah kiriman habis sebelum akhir bulan.";
+    actionPlan = `Rencana: Batasi belanja harian maksimal Rp ${Math.max(0, Math.round(data.balance / (remainingDays || 1))).toLocaleString('id-ID')} agar tetap aman.`;
   }
 
-  if (overspendFactor > 1 && incomeRatio < 1) {
-    statusAdvice = "Peringatan: Laju pengeluaran Anda lebih cepat dari biasanya untuk tanggal segini.";
+  if (estimatedBalance <= 0 && isCurrentMonth) {
+    statusLabel = "Bahaya";
+    statusColor = "bg-rose-50 text-rose-600";
+    statusAdvice = "Pengeluaran Kamu melampaui batas! Segera cek riwayat transaksi dan stop belanja non-pokok.";
+    actionPlan = "Rencana: Segera stop jajan berlebihan dan bawa bekal dari rumah agar saldo tidak minus.";
   }
 
   const changeMonth = (dir) => {
@@ -151,11 +150,11 @@ export default function Prediksi() {
               <div className="space-y-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-500">Rata-rata Pengeluaran/Hari</span>
-                  <span className="font-bold text-slate-800">Rp {Math.round(adjustedDaily).toLocaleString()}</span>
+                  <span className="font-bold text-slate-800">Rp {Math.round(adjustedDaily).toLocaleString('id-ID')}</span>
                 </div>
                 <div className="flex justify-between text-sm border-t pt-2">
                   <span className="text-slate-500">Total Pengeluaran</span>
-                  <span className="font-bold text-rose-500">Rp {data.expense.toLocaleString()}</span>
+                  <span className="font-bold text-rose-500">Rp {data.expense.toLocaleString('id-ID')}</span>
                 </div>
               </div>
             </div>
@@ -169,7 +168,7 @@ export default function Prediksi() {
               </div>
               <p className="text-sm font-medium opacity-80 mt-1">
                 {isCurrentMonth
-                  ? (safeDays < remainingDays ? "Habis sebelum akhir bulan" : "Cukup sampai dapat bulanan")
+                  ? (safeDays < remainingDays ? "Habis sebelum kiriman baru tiba" : "Cukup sampai jatah berikutnya")
                   : "Data historis bulan lalu"}
               </p>
             </div>
@@ -179,7 +178,7 @@ export default function Prediksi() {
               <div>
                 <h2 className="text-xs font-bold text-slate-500">Estimasi Saldo Akhir</h2>
                 <p className="text-2xl font-bold text-slate-800 mt-1">
-                  Rp {Math.max(0, Math.round(estimatedBalance)).toLocaleString()}
+                  Rp {Math.max(0, Math.round(estimatedBalance)).toLocaleString('id-ID')}
                 </p>
               </div>
               <div className={`px-4 py-2 rounded font-bold text-xs ${statusColor}`}>

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Lightbulb, Target, Wallet, AlertCircle } from 'lucide-react';
 
-export default function DailyGreeting({ totalExpense = 0, dailyLimit = 100000 }) {
+export default function DailyGreeting({ totalExpense = 0, dailyLimit = 0 }) {
   
   const reminders = [
     {
@@ -25,12 +25,12 @@ export default function DailyGreeting({ totalExpense = 0, dailyLimit = 100000 })
     return reminders[Math.floor(Math.random() * reminders.length)];
   }, []);
 
-  const isOverLimit = totalExpense > dailyLimit;
+  const isOverLimit = dailyLimit > 0 && totalExpense >= dailyLimit;
 
   return (
     <div className="space-y-3 mb-6">
       {/* Kartu Motivasi */}
-      <div className={`p-4 rounded-lg border ${randomReminder.color} flex items-center gap-3`}>
+      <div className={`p-4 rounded border ${randomReminder.color} flex items-center gap-3`}>
         <div className="shrink-0">{randomReminder.icon}</div>
         <p className="text-sm text-slate-700">
           {randomReminder.text}
@@ -39,14 +39,14 @@ export default function DailyGreeting({ totalExpense = 0, dailyLimit = 100000 })
 
       {/* Kartu Peringatan */}
       {isOverLimit && (
-        <div className="p-4 rounded-lg border bg-red-50 border-red-200 flex items-center gap-3">
+        <div className="p-4 rounded border bg-red-50 border-red-200 flex items-center gap-3 shadow-sm">
           <div className="shrink-0">
             <AlertCircle className="text-red-600" size={20} />
           </div>
           <div>
             <p className="text-sm text-red-700 font-bold">Waduh, Jaga Dompetmu!</p>
             <p className="text-xs text-red-600">
-              Pengeluaranmu Rp {totalExpense.toLocaleString('id-ID')} (Batas: Rp {dailyLimit.toLocaleString('id-ID')}).
+              Pengeluaranmu Rp {totalExpense.toLocaleString('id-ID')} ({totalExpense > dailyLimit ? 'Lebih' : 'Pas'} dari Batas Aman: Rp {dailyLimit.toLocaleString('id-ID')}).
             </p>
           </div>
         </div>

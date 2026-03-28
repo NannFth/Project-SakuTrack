@@ -30,7 +30,7 @@ export default function Popup({ socket }) {
         <div
           className={`${
             t.visible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-4 scale-95'
-          } max-w-md w-full bg-[#1e293b] text-white shadow-2xl rounded-xl border border-slate-700/50 pointer-events-auto flex transition-all duration-500 transform z-[99999] mt-5`}
+          } max-w-md w-full bg-[#1e293b] text-white shadow-2xl rounded border border-slate-700/50 pointer-events-auto flex transition-all duration-500 transform z-[99999] mt-5`}
         >
           <div className="flex-1 p-5">
             <div className="flex items-center">

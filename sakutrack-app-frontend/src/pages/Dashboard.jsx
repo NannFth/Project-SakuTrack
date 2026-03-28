@@ -1,9 +1,7 @@
-import Swal from 'sweetalert2';
 import BudgetWallets from '../components/dashboard/BudgetWallets';
 import DailyGreeting from '../components/dashboard/DailyGreeting';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion'; 
 import BalanceCard from "../components/dashboard/BalanceCard";
 import FinanceChart from "../components/dashboard/FinanceChart";
 import CategoryChart from "../components/dashboard/CategoryChart";
@@ -11,6 +9,7 @@ import TransactionList from "../components/dashboard/TransactionList";
 import { Link } from "react-router-dom";
 import { Plus } from "lucide-react";
 import connection from "../connection";
+import { checkDashboardAlerts } from '../components/dashboard/dashboardAlerts';
 
 export default function Dashboard({ searchQuery, setSearchQuery }) {
   const [searchParams] = useSearchParams();
@@ -53,61 +52,7 @@ const fetchData = async () => {
         if (res.data.success) {
           const data = res.data.data;
           setDashboardData(data);
-
-          const jatahKeinginan = data.balance * (currentWantsRatio / 100);
-          
-          const todayString = new Date().toLocaleDateString('id-ID');
-          const savedDate = localStorage.getItem('lastDashboardAlertDate');
-
-          if (savedDate !== todayString) {
-            // Peringtan Boros
-            if (data.totalExpense > jatahKeinginan && data.totalExpense > 0) {
-              localStorage.setItem('lastDashboardAlertDate', todayString);
-              Swal.fire({
-                title: 'Waduh, Pengeluaranmu Boros! 💸',
-                html: `Pengeluaranmu (<b>Rp ${data.totalExpense.toLocaleString('id-ID')}</b>) sudah melewati jatah keinginanmu (<b>Rp ${Math.floor(jatahKeinginan).toLocaleString('id-ID')}</b>). <br><br> Yuk, rem dulu Pengeluarannya biar tabungan aman!`,
-                icon: 'warning',
-                background: '#ffffff',
-                borderRadius: '20px',
-                confirmButtonText: '<span style="color: black !important; font-weight: bold;">Siap, Saya Tobat!</span>',
-                confirmButtonColor: '#ffffff',
-                buttonsStyling: true,
-                customClass: { confirmButton: 'force-show-text border border-slate-300 px-6 py-2' }
-              });
-            } 
-            
-            // Saldo Kritis
-            else if (data.balance < 50000 && data.balance > 0) {
-              localStorage.setItem('lastDashboardAlertDate', todayString);
-              Swal.fire({
-                title: 'Saldo Kritis! ⚠️',
-                html: `Waduh, saldo kamu tinggal <b>Rp ${data.balance.toLocaleString('id-ID')}</b> nih. <br> Hati-hati ya, jangan sampai minus!`,
-                icon: 'error',
-                background: '#ffffff',
-                borderRadius: '20px',
-                confirmButtonText: '<span style="color: black !important; font-weight: bold;">Oke, Saya Irit!</span>',
-                confirmButtonColor: '#ffffff',
-                buttonsStyling: true,
-                customClass: { confirmButton: 'force-show-text border border-slate-300 px-6 py-2' }
-              });
-            }
-
-            // Apareisiasi Hemat
-            else if (data.totalExpense > 0 && data.totalExpense < (jatahKeinginan * 0.1)) {
-              localStorage.setItem('lastDashboardAlertDate', todayString);
-              Swal.fire({
-                title: 'Wah, Kamu Hebat! 🌟',
-                html: `Pengeluaranmu bulan ini masih terkendali banget. <br> Pertahankan gaya hidup hematmu ya!`,
-                icon: 'success',
-                background: '#ffffff',
-                borderRadius: '20px',
-                confirmButtonText: '<span style="color: black !important; font-weight: bold;">Mantap!</span>',
-                confirmButtonColor: '#ffffff',
-                buttonsStyling: true,
-                customClass: { confirmButton: 'force-show-text border border-slate-300 px-6 py-2' }
-              });
-            }
-          }
+          checkDashboardAlerts(data, currentWantsRatio);
         }
       })
       .catch((err) => console.log("Dashboard error:", err));
@@ -169,14 +114,27 @@ const fetchData = async () => {
 
   const isSearching = searchQuery && searchQuery.trim() !== "";
 
-  const today = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
   const expenseToday = transactions
-    .filter(t => t.type === 'expense' && t.date.startsWith(today))
+    .filter(t => t.type === 'expense' && t.date.startsWith(todayStr))
     .reduce((sum, t) => sum + Number(t.amount), 0);
 
-  const daysInMonth = new Date(year, month, 0).getDate();
+  const totalExpMonth = transactionsBulanIni
+    .filter(t => t.type === 'expense')
+    .reduce((sum, t) => sum + Number(t.amount), 0);
+
+  const expBeforeToday = totalExpMonth - expenseToday;
+  const daysTotal = new Date(year, month, 0).getDate();
+  const remainDays = (month === (now.getMonth() + 1) && year === now.getFullYear())
+    ? (daysTotal - now.getDate() + 1)
+    : daysTotal;
+
+  const budgetTotal = dashboardData.totalIncome * (userSettings.dailyLimit / 100);
+  const budgetSisa = budgetTotal - expBeforeToday;
+
   const dynamicDailyLimit = dashboardData.totalIncome > 0 
-    ? Math.floor((dashboardData.totalIncome * (userSettings.dailyLimit / 100)) / daysInMonth) 
+    ? (budgetSisa > 0 ? Math.floor(budgetSisa / remainDays) : 0)
     : 100000;
 
   // Tampilan utama
@@ -184,23 +142,18 @@ const fetchData = async () => {
     <div className="max-w-[1400px] mx-auto space-y-8 pb-10">
       <div className="flex justify-between items-end">
         <div>
-          <motion.h1 
-            key={isSearching ? "search" : "normal"}
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-3xl font-bold text-slate-800"
-          >
+          <h1 className="text-3xl font-bold text-slate-800">
             {isSearching ? `Hasil Pencarian: ${searchQuery}` : "Ringkasan Keuangan"}
-          </motion.h1>
+          </h1>
           <p className="text-slate-400 text-sm mt-1">
             {isSearching ? `Ditemukan ${filteredTransactions.length} transaksi` : "Pantau arus kas secara berkala."}
           </p>
         </div>
       </div>
 
-      <AnimatePresence mode="wait">
+      <div>
         {!isSearching ? (
-          <motion.div key="normal" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
+          <div className="space-y-8">
             <DailyGreeting 
               totalExpense={expenseToday} 
               dailyLimit={dynamicDailyLimit} 
@@ -244,18 +197,18 @@ const fetchData = async () => {
                 )}
               </div>
             </div>
-          </motion.div>
+          </div>
         ) : (
-          <motion.div key="search" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-4">
               <CategoryChart transactions={filteredTransactions} />
             </div>
             <div className="lg:col-span-8">
               <TransactionList data={filteredTransactions} onDelete={deleteTransaction} />
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
+      </div>
 
       <Link to="/input-transaksi" className="md:hidden fixed bottom-8 right-8 bg-slate-900 text-white w-14 h-14 flex items-center justify-center rounded-full shadow z-50">
         <Plus size={28} />

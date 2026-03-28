@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import connection from '../../src/connection'; 
 import { 
@@ -9,7 +8,7 @@ import {
   getThemeByType, 
   getIconByType,
   getDailyExtras
-} from './rekomendasiUtils';
+} from '../components/ui/rekomendasiUtils';
 
 const RekomendasiKeuangan = () => {
   const [recommendations, setRecommendations] = useState([]);
@@ -28,6 +27,19 @@ const RekomendasiKeuangan = () => {
         setLoading(true);
         setError(null);
 
+        let fetchedLimit = 80;
+        let totalIncome = 0;
+        let expenseToday = 0;
+        let expenseBeforeToday = 0;
+
+        const date = new Date();
+        const month = date.getMonth() + 1;
+        const year = date.getFullYear();
+        const todayDate = date.getDate();
+        const todayStr = date.toISOString().split('T')[0];
+        const daysInMonth = new Date(year, month, 0).getDate();
+        const remainingDays = daysInMonth - todayDate + 1;
+
         try {
           const resSet = await connection.get('/settings');
           if (resSet.data.success && resSet.data.data) {
@@ -36,48 +48,80 @@ const RekomendasiKeuangan = () => {
               wants_ratio: resSet.data.data.wants_ratio,
               savings_ratio: resSet.data.data.savings_ratio
             });
-            setLimitValue(resSet.data.data.daily_limit_percentage || 80);
+            fetchedLimit = resSet.data.data.daily_limit_percentage || 80;
+            setLimitValue(fetchedLimit);
           }
         } catch (err) {
           console.error("Error fetching settings:", err);
         }
 
-        const response = await connection.get('/recommendations');
-        const { data } = response;
+        try {
+          const [resDash, resTrans] = await Promise.all([
+            connection.get(`/dashboard?month=${month}&year=${year}`),
+            connection.get('/transactions')
+          ]);
 
-        if (data.success && data.data.length > 0) {
-          // Format data
-          let formattedData = data.data.map((item, index) => ({
-            id: index + 1,
-            type: item.type,
-            title: getTitleByType(item.type),
-            description: item.message,
-            actionText: getActionTextByType(item.type),
-            theme: getThemeByType(item.type)
-          }));
-
-          const dynamicExtras = getDailyExtras();
-          let extraIndex = 0;
-          while (formattedData.length < 6 && extraIndex < dynamicExtras.length) {
-            formattedData.push(dynamicExtras[extraIndex]);
-            extraIndex++;
+          if (resDash.data.success) {
+            totalIncome = resDash.data.data.totalIncome || 0;
           }
 
-          setRecommendations(formattedData);
-        } else {
-          const dynamicExtras = getDailyExtras();
-          setRecommendations([
-            {
-              id: 1,
-              type: 'setup_limit',
-              title: "Tentukan Rencana Belanja Harian",
-              description: "Sistem belum mendeteksi rencana batasan belanja untuk hari ini. Segera tentukan limit agar pengeluaran tidak melampaui sisa pendapatan bulan ini.",
-              actionText: "Terapkan Limit",
-              theme: { bg: "bg-white", border: "border-blue-500", text: "text-slate-900", iconBg: "bg-blue-50", iconText: "text-blue-600", button: "bg-blue-600 text-white hover:bg-blue-700" }
-            },
-            ...dynamicExtras.slice(0, 3)
-          ]);
+          if (resTrans.data.success && resTrans.data.data) {
+            let totalExpenseMonth = 0;
+            
+            resTrans.data.data.forEach(t => {
+              const tDate = new Date(t.date);
+              if (tDate.getMonth() + 1 === month && tDate.getFullYear() === year && t.type === 'expense') {
+                totalExpenseMonth += Number(t.amount);
+                if (t.date.startsWith(todayStr)) {
+                  expenseToday += Number(t.amount);
+                }
+              }
+            });
+            expenseBeforeToday = totalExpenseMonth - expenseToday;
+          }
+        } catch (err) {
+          console.error("Error fetching dashboard or transactions:", err);
         }
+
+        const totalBudget = totalIncome * (fetchedLimit / 100);
+        const remainingBudget = totalBudget - expenseBeforeToday;
+
+        let dailyLimitRp = 0;
+        if (remainingBudget > 0) {
+          dailyLimitRp = Math.floor(remainingBudget / remainingDays);
+        }
+
+        let dynamicDescription = "Sistem belum mendeteksi rencana batasan belanja untuk hari ini. Segera tentukan limit agar pengeluaran tidak melampaui sisa pendapatan bulan ini.";
+
+        if (totalIncome === 0) {
+          dynamicDescription = "Belum ada pemasukan bulan ini. Catat pemasukan agar sistem dapat mengalkulasi batas aman pengeluaran harian kamu secara akurat.";
+        } else if (remainingBudget <= 0) {
+          dynamicDescription = `Peringatan: Total pengeluaran kamu hari ini sudah mencapai atau melewati batas (${fetchedLimit}% dari pendapatan). Tahan pengeluaran kamu sebisa mungkin!`;
+        } else if (dailyLimitRp > 0) {
+          if (expenseToday < dailyLimitRp) {
+            dynamicDescription = `Batas aman pengeluaran kamu hari ini adalah Rp ${dailyLimitRp.toLocaleString('id-ID')}. Kamu sudah menggunakan Rp ${expenseToday.toLocaleString('id-ID')}.`;
+          } else if (expenseToday === dailyLimitRp) {
+            dynamicDescription = `Pengeluaran hari ini sudah tepat Rp ${dailyLimitRp.toLocaleString('id-ID')}, usahakan berhenti.`;
+          } else {
+            const excess = expenseToday - dailyLimitRp;
+            dynamicDescription = `Kamu sudah mengeluarkan Rp ${expenseToday.toLocaleString('id-ID')}, lebih Rp ${excess.toLocaleString('id-ID')} dari batas aman yang ditentukan.`;
+          }
+        }
+
+        // Format data
+        const dynamicExtras = getDailyExtras();
+        setRecommendations([
+          {
+            id: 1,
+            type: 'setup_limit',
+            title: "Batas Aman Pengeluaran Harian",
+            description: dynamicDescription,
+            actionText: "Ubah Limit",
+            theme: { bg: "bg-white", border: "border-blue-500", text: "text-slate-900", iconBg: "bg-blue-50", iconText: "text-blue-600", button: "bg-blue-600 text-white hover:bg-blue-700" }
+          },
+          ...dynamicExtras
+        ]);
+
       } catch (err) {
         console.error("Error fetching recommendations:", err);
         const errorMessage = err.response?.data?.message || err.message || "Gagal mengambil rekomendasi";
@@ -134,9 +178,9 @@ const RekomendasiKeuangan = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {mainCard && (
-          <div className={`md:col-span-3 bg-white p-8 rounded border ${mainCard.theme.border} shadow-sm flex flex-col md:flex-row justify-between items-center gap-6`}>
+          <div className={`md:col-span-3 mb-8 bg-white p-8 rounded-sm border ${mainCard.theme.border} flex flex-col md:flex-row justify-between items-center gap-6`}>
             <div className="flex items-start gap-5">
-              <div className={`p-3 rounded flex-shrink-0 ${mainCard.theme.iconBg} ${mainCard.theme.iconText}`}>
+              <div className={`p-3 rounded-sm flex-shrink-0 ${mainCard.theme.iconBg} ${mainCard.theme.iconText}`}>
                 <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   {getIconByType(mainCard.type)}
                 </svg>
@@ -148,7 +192,7 @@ const RekomendasiKeuangan = () => {
             </div>
             <button 
               onClick={() => handleActionClick(mainCard.type)}
-              className={`whitespace-nowrap px-6 py-3 rounded font-bold text-sm transition-colors shadow-sm ${mainCard.theme.button}`}
+              className={`whitespace-nowrap px-6 py-3 rounded-sm font-bold text-sm transition-colors ${mainCard.theme.button}`}
             >
               {mainCard.actionText}
             </button>
@@ -157,9 +201,9 @@ const RekomendasiKeuangan = () => {
 
         {/* Card Pendukung */}
         {supportingCards.map((item) => (
-          <div key={item.id} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col hover:shadow-md transition-shadow">
+          <div key={item.id} className="bg-white p-6 rounded-sm border border-slate-200 flex flex-col">
             <div className="flex-1">
-              <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-5 ${item.theme.iconBg} ${item.theme.iconText}`}>
+              <div className={`w-12 h-12 rounded-sm flex items-center justify-center mb-5 ${item.theme.iconBg} ${item.theme.iconText}`}>
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   {getIconByType(item.type)}
                 </svg>
@@ -169,64 +213,46 @@ const RekomendasiKeuangan = () => {
                 {item.description}
               </p>
             </div>
-            <button 
-              onClick={() => handleActionClick(item.type)}
-              className={`mt-6 w-full py-3 rounded font-bold text-xs transition-colors border ${item.theme.button}`}
-            >
-              {item.actionText}
-            </button>
           </div>
         ))}
       </div>
 
-      <AnimatePresence>
-        {showLimitModal && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm"
-          >
-            <motion.div 
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-slate-100"
-            >
-              <h3 className="text-lg font-bold text-slate-800 mb-2">Atur Limit Pengeluaran</h3>
-              <p className="text-sm text-slate-500 mb-5 leading-relaxed">
-                Tentukan batas maksimal pengeluaran dari total pendapatan bulan ini agar tabunganmu tetap aman.
-              </p>
-              
-              <div className="flex items-center gap-3 mb-6 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                <input 
-                  type="number" 
-                  value={limitValue}
-                  onChange={(e) => setLimitValue(e.target.value)}
-                  className="w-full bg-transparent px-2 text-2xl font-black text-slate-800 outline-none text-center"
-                />
-                <span className="text-2xl font-black text-slate-400 pr-2">%</span>
-              </div>
+      {showLimitModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-sm p-6 w-full max-w-sm border border-slate-100 shadow-2xl">
+            <h3 className="text-lg font-bold text-slate-800 mb-2">Atur Limit Pengeluaran</h3>
+            <p className="text-sm text-slate-500 mb-5 leading-relaxed">
+              Tentukan batas maksimal pengeluaran dari total pendapatan bulan ini agar tabunganmu tetap aman.
+            </p>
+            
+            <div className="flex items-center gap-3 mb-6 bg-slate-50 p-3 rounded-sm border border-slate-200">
+              <input 
+                type="number" 
+                value={limitValue}
+                onChange={(e) => setLimitValue(e.target.value)}
+                className="w-full bg-transparent px-2 text-2xl font-black text-slate-800 outline-none text-center"
+              />
+              <span className="text-2xl font-black text-slate-400 pr-2">%</span>
+            </div>
 
-              <div className="flex gap-3">
-                <button 
-                  onClick={() => setShowLimitModal(false)}
-                  className="flex-1 py-3 rounded-xl font-bold text-sm text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors"
-                >
-                  Batal
-                </button>
-                <button 
-                  onClick={handleSaveLimit}
-                  disabled={isSaving}
-                  className="flex-1 py-3 rounded-xl font-bold text-sm text-white bg-blue-600 hover:bg-blue-700 transition-colors disabled:opacity-50"
-                >
-                  {isSaving ? 'Menyimpan...' : 'Simpan Limit'}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setShowLimitModal(false)}
+                className="flex-1 py-3 rounded-sm font-bold text-sm text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors"
+              >
+                Batal
+              </button>
+              <button 
+                onClick={handleSaveLimit}
+                disabled={isSaving}
+                className="flex-1 py-3 rounded-sm font-bold text-sm text-white bg-blue-600 hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                {isSaving ? 'Menyimpan...' : 'Simpan Limit'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

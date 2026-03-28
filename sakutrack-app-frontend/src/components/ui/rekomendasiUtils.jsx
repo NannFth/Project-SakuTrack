@@ -108,22 +108,26 @@ export const getThemeByType = (type) => {
 
 export const getIconByType = (type) => {
   switch (type) {
+    case 'setup_limit':
+      return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />;
     case 'daily_limit':
+      return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />;
     case 'financial_health':
-      return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />;
+      return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />;
     case 'warning_wants':
-      return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />;
+      return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />;
     case 'yesterday_eval':
-    case 'input_expense':
-      return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />;
+      return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />;
     case 'goal_progress':
+      return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.382-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />;
     case 'surplus_allocation':
+      return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />;
     case 'check_goals':
-      return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />;
+      return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />;
     case 'challenge': 
       return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />;   
     case 'streak_praise':
-      return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />;
+      return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />;
     case 'financial_tip': 
       return <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.674a1 1 0 00.908-.588l3.37-7c.225-.468.17-.11-.12-.412A7 7 0 105.51 9.412l3.37 7a1 1 0 00.908.588zM9 21h6" />;
     default:
@@ -132,34 +136,55 @@ export const getIconByType = (type) => {
 };
 
 export const getDailyExtras = () => {
-  const today = new Date();
-  const dayOfWeek = today.getDay(); 
-  const dayOfMonth = today.getDate();
+  const userEmail = localStorage.getItem('user_email') || 'default_user';
+  const todayDate = new Date().toISOString().split('T')[0];
+  
+  const seedString = userEmail + todayDate;
+  let hash = 0;
+  for (let i = 0; i < seedString.length; i++) {
+    hash = ((hash << 5) - hash) + seedString.charCodeAt(i);
+    hash |= 0; 
+  }
+  const absoluteHash = Math.abs(hash);
 
-  const dailyMessages = [
-    { id: 'extra-sun', type: 'check_goals', title: 'Refleksi Finansial', description: 'Luangkan waktu hari ini untuk merekap pengeluaran minggu lalu dan merencanakan strategi keuangan untuk esok hari.', actionText: 'Evaluasi Sekarang', theme: getThemeByType('goal_progress') },
-    { id: 'extra-mon', type: 'financial_health', title: 'Fokus Anggaran Mingguan', description: 'Awali minggu ini dengan meninjau kembali alokasi dana. Pastikan prioritas pengeluaran sejalan dengan target finansial Anda.', actionText: 'Lihat Proyeksi', theme: getThemeByType('daily_limit') },
-    { id: 'extra-tue', type: 'input_expense', title: 'Konsistensi Pencatatan', description: 'Tetap disiplin pada rencana awal. Segera catat setiap transaksi agar arus kas di pertengahan minggu terpantau akurat.', actionText: 'Catat Transaksi', theme: getThemeByType('default') },
-    { id: 'extra-wed', type: 'yesterday_eval', title: 'Evaluasi Tengah Minggu', description: 'Periksa kembali riwayat transaksi Anda. Pastikan laju pengeluaran dalam tiga hari terakhir masih berada dalam batas wajar.', actionText: 'Cek Pengeluaran', theme: getThemeByType('warning_wants') },
-    { id: 'extra-thu', type: 'challenge', title: 'Prinsip Tunda Beli', description: 'Menjelang akhir pekan, terapkan aturan tunggu 24 jam sebelum memutuskan untuk membeli barang di luar kebutuhan pokok.', actionText: 'Tahan Pengeluaran', theme: getThemeByType('challenge') },
-    { id: 'extra-fri', type: 'daily_limit', title: 'Antisipasi Akhir Pekan', description: 'Merayakan selesainya aktivitas minggu ini diperbolehkan, namun pastikan Anda mematuhi batas pengeluaran yang telah ditetapkan.', actionText: 'Pantau Limit', theme: getThemeByType('daily_limit') },
-    { id: 'extra-sat', type: 'challenge', title: 'Kendali Hiburan', description: 'Bersenang-senang tidak harus menguras tabungan. Pilihlah alternatif kegiatan yang lebih hemat namun tetap bermakna bagi Anda.', actionText: 'Cari Alternatif', theme: getThemeByType('challenge') }
+  const bankData = [
+    { id: 'b1', type: 'challenge', title: 'Tantangan Habit Keuangan', description: 'Cobalah untuk tidak membeli jajanan di luar hari ini. Alokasikan uang tersebut langsung ke target tabungan Kamu.', theme: getThemeByType('challenge') },
+    { id: 'b2', type: 'challenge', title: 'Tantangan Habit Keuangan', description: 'Terapkan aturan "Tunggu 24 Jam" sebelum Kamu memutuskan untuk membeli barang di luar kebutuhan pokok hari ini.', theme: getThemeByType('challenge') },
+    { id: 'b3', type: 'challenge', title: 'Tantangan Habit Keuangan', description: 'Cari alternatif hiburan gratis hari ini. Bersenang-senang tidak harus selalu menguras isi dompet Kamu.', theme: getThemeByType('challenge') },
+    { id: 'b4', type: 'financial_tip', title: 'Prinsip Dasar Finansial', description: 'Sisihkan minimal 10% pendapatan Kamu untuk dana darurat segera setelah gajian, jangan menunggu sisa uang di akhir bulan.', theme: getThemeByType('financial_tip') },
+    { id: 'b5', type: 'financial_tip', title: 'Prinsip Dasar Finansial', description: 'Investasikan waktu untuk mempelajari instrumen keuangan baru. Pemahaman yang matang adalah aset masa depan yang sangat berharga.', theme: getThemeByType('financial_tip') },
+    { id: 'b6', type: 'financial_tip', title: 'Prinsip Dasar Finansial', description: 'Setiap nominal yang Kamu sisihkan hari ini akan mempercepat tercapainya visi finansial Kamu di masa depan. Tetaplah konsisten.', theme: getThemeByType('financial_tip') },
+    { id: 'b7', type: 'yesterday_eval', title: 'Tinjauan Pengeluaran Kemarin', description: 'Periksa kembali riwayat transaksi kemarin. Pastikan laju pengeluaran Kamu masih berada dalam batas aman yang Kamu tentukan.', theme: getThemeByType('yesterday_eval') },
+    { id: 'b8', type: 'warning_wants', title: 'Evaluasi Belanja Keinginan', description: 'Berhati-hatilah dengan pengeluaran impulsif. Pastikan barang yang Kamu beli hari ini benar-benar memberikan nilai manfaat jangka panjang.', theme: getThemeByType('warning_wants') },
+    { id: 'b9', type: 'goal_progress', title: 'Status Target Tabungan', description: 'Setiap Rupiah yang Kamu hemat hari ini adalah langkah nyata menuju impian Kamu. Jangan menyerah pada keinginan sesaat.', theme: getThemeByType('goal_progress') },
+    { id: 'b10', type: 'surplus_allocation', title: 'Rekomendasi Alokasi Dana', description: 'Jika Kamu memiliki sisa uang belanja hari ini, segera pindahkan ke rekening tabungan agar tidak terpakai secara tidak sengaja.', theme: getThemeByType('surplus_allocation') },
+    { id: 'b11', type: 'streak_praise', title: 'Apresiasi Kedisiplinan', description: 'Kedisiplinan Kamu dalam mencatat keuangan adalah kunci utama. Pertahankan kebiasaan baik ini demi kebebasan finansial Kamu.', theme: getThemeByType('streak_praise') },
+    { id: 'b12', type: 'financial_tip', title: 'Manajemen Utang', description: 'Prioritaskan pelunasan tagihan dengan bunga tertinggi terlebih dahulu untuk meringankan beban finansial Kamu secara keseluruhan.', theme: getThemeByType('financial_tip') },
+    { id: 'b13', type: 'challenge', title: 'Tantangan Memasak Harian', description: 'Cobalah untuk memasak makanan Kamu sendiri hari ini. Selain lebih sehat, Kamu bisa menghemat biaya makan hingga 50%.', theme: getThemeByType('challenge') },
+    { id: 'b14', type: 'financial_tip', title: 'Efek Inflasi', description: 'Ingatlah bahwa nilai uang akan menurun seiring waktu. Pertimbangkan untuk mulai berinvestasi agar kekayaan Kamu tetap bertumbuh.', theme: getThemeByType('financial_tip') },
+    { id: 'b15', type: 'yesterday_eval', title: 'Analisis Biaya Langganan', description: 'Tinjau kembali layanan berlangganan Kamu. Hapus layanan yang sudah jarang Kamu gunakan untuk menambah jatah tabungan harian.', theme: getThemeByType('yesterday_eval') },
+    { id: 'b16', type: 'streak_praise', title: 'Pencapaian Mingguan', description: 'Kamu telah berhasil mencatat transaksi secara rutin minggu ini. Langkah kecil ini akan membawa perubahan besar bagi masa depan Kamu.', theme: getThemeByType('streak_praise') },
+    { id: 'b17', type: 'challenge', title: 'Hari Tanpa Belanja', description: 'Mampukah Kamu melewati hari ini tanpa melakukan pengeluaran non-rutin sama sekali? Mari kita uji kedisiplinan Kamu.', theme: getThemeByType('challenge') },
+    { id: 'b18', type: 'financial_tip', title: 'Diversifikasi Aset', description: 'Jangan meletakkan semua uang Kamu di satu tempat. Diversifikasi adalah strategi terbaik untuk meminimalisir risiko keuangan.', theme: getThemeByType('financial_tip') },
+    { id: 'b19', type: 'warning_wants', title: 'Kontrol Keinginan Belanja', description: 'Sebelum membeli sesuatu, tanyakan pada diri sendiri: "Apakah saya benar-benar membutuhkannya atau hanya menginginkannya sekarang?"', theme: getThemeByType('warning_wants') },
+    { id: 'b20', type: 'goal_progress', title: 'Optimasi Dana Sisa', description: 'Gunakan dana tak terduga yang Kamu terima untuk mempercepat pelunasan target wishlist impian Kamu.', theme: getThemeByType('goal_progress') },
+    { id: 'b21', type: 'financial_tip', title: 'Pentingnya Asuransi', description: 'Proteksi diri dan aset Kamu adalah bagian dari perencanaan keuangan yang sehat untuk menghindari pengeluaran darurat yang besar.', theme: getThemeByType('financial_tip') },
+    { id: 'b22', type: 'challenge', title: 'Tantangan Hemat Transportasi', description: 'Gunakan transportasi umum atau berjalan kaki untuk jarak dekat hari ini guna mengurangi pengeluaran bahan bakar.', theme: getThemeByType('challenge') },
+    { id: 'b23', type: 'streak_praise', title: 'Konsistensi Anggaran', description: 'Hebat! Kamu berhasil menjaga pengeluaran tetap di bawah batas aman hari ini. Terus pertahankan ritme ini.', theme: getThemeByType('streak_praise') },
+    { id: 'b24', type: 'yesterday_eval', title: 'Refleksi Pengeluaran Makan', description: 'Apakah biaya makan Kamu kemarin terlalu tinggi? Cobalah untuk mencari alternatif menu yang lebih ekonomis namun tetap bergizi.', theme: getThemeByType('yesterday_eval') },
+    { id: 'b25', type: 'financial_tip', title: 'Kekuatan Bunga Majemuk', description: 'Mulailah berinvestasi sedini mungkin. Waktu adalah teman terbaik bagi pertumbuhan aset Kamu melalui bunga majemuk.', theme: getThemeByType('financial_tip') }
   ];
 
-  const randomBank = [
-    { id: 'rand-1', type: 'financial_tip', title: 'Investasi Pengetahuan', description: 'Sisihkan waktu untuk mempelajari instrumen keuangan. Pemahaman yang baik adalah aset masa depan yang sangat bernilai.', actionText: 'Pahami Prinsip', theme: getThemeByType('financial_tip') },
-    { id: 'rand-2', type: 'surplus_allocation', title: 'Optimalisasi Dana Sisa', description: 'Apabila terdapat sisa dana dari alokasi hari ini, biasakan untuk segera mengalihkannya ke rekening tabungan atau investasi.', actionText: 'Alokasikan Dana', theme: getThemeByType('surplus_allocation') },
-    { id: 'rand-3', type: 'input_expense', title: 'Akurasi Data Finansial', description: 'Sistem membutuhkan data yang valid. Jangan tunda mencatat pengeluaran sekecil apa pun demi keakuratan proyeksi.', actionText: 'Catat Sekarang', theme: getThemeByType('default') },
-    { id: 'rand-4', type: 'goal_progress', title: 'Visi Jangka Panjang', description: 'Setiap nominal yang Anda sisihkan hari ini akan mempercepat realisasi visi finansial di masa mendatang. Tetap konsisten.', actionText: 'Tinjau Target', theme: getThemeByType('goal_progress') }
-  ];
+  const index1 = absoluteHash % bankData.length;
+  const index2 = (absoluteHash + 13) % bankData.length;
+  const index3 = (absoluteHash + 21) % bankData.length;
 
-  const specificDayMessage = dailyMessages[dayOfWeek];
-  const randomMessage = randomBank[dayOfMonth % randomBank.length];
+  const uniqueIndices = Array.from(new Set([index1, index2, index3]));
+  
+  while (uniqueIndices.length < 3) {
+    let nextIndex = (uniqueIndices[uniqueIndices.length - 1] + 5) % bankData.length;
+    uniqueIndices.push(nextIndex);
+  }
 
-  return [
-    specificDayMessage,
-    randomMessage,
-    { id: 'extra-base-1', type: 'check_goals', title: 'Tinjauan Target Finansial', description: 'Pantau secara berkala target tabungan aktif Anda. Konsistensi kecil setiap hari akan mempercepat pencapaian tujuan akhir.', actionText: 'Kelola Target', theme: getThemeByType('goal_progress') },
-    { id: 'extra-base-2', type: 'financial_health', title: 'Pemeriksaan Berkala', description: 'Luangkan waktu lima menit hari ini untuk meninjau proyeksi saldo dan memastikan alokasi dana berjalan sesuai rencana.', actionText: 'Lihat Proyeksi', theme: getThemeByType('daily_limit') }
-  ];
+  return uniqueIndices.map(idx => bankData[idx]);
 };

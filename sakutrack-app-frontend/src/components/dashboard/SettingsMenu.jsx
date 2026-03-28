@@ -124,7 +124,6 @@ export default function SettingsMenu() {
               disabled={total !== 100 || isLoading}
               className={`flex items-center justify-center gap-2 w-full py-2 rounded text-xs font-bold transition-colors ${total === 100 ? 'bg-slate-900 text-white hover:bg-slate-800' : 'bg-slate-100 text-slate-400 cursor-not-allowed'}`}
             >
-              <Save size={14} />
               <span>{isLoading ? 'Menyimpan...' : 'Simpan Rasio'}</span>
             </button>
             {total !== 100 && (
@@ -141,7 +140,7 @@ export default function SettingsMenu() {
               localStorage.clear(); 
               navigate("/"); 
             }}
-            className="flex items-center gap-2 w-full text-left hover:bg-rose-50 p-2.5 rounded text-sm text-rose-600 font-bold transition-colors"
+            className="flex items-center gap-2 w-full text-left p-2.5 rounded text-sm text-rose-600 font-bold"
           >
             <LogOut size={16} />
             <span>Keluar Akun</span>
