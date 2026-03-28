@@ -17,7 +17,8 @@ import RekomendasiKeuangan from './pages/RekomendasiKeuangan';
 import DashboardLayout from './layouts/DashboardLayout';
 import Popup from "./components/notification/Popup";
 
-const socket = io("http://54.255.51.12:3000", {
+const socket = io({
+  transports: ["polling"],
   reconnection: true
 });
 
