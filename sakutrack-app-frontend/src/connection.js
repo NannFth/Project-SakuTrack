@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 const connection = axios.create({
-  baseURL: '/api',
+  baseURL: 'http://54.255.51.12:3000/api',
 });
 
 const getValidToken = () => {
