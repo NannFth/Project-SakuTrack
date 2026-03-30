@@ -13,6 +13,7 @@ import { useState } from "react";
     const currentMonth = searchParams.get("month") || String(now.getMonth() + 1);
     
     const [openMenu, setOpenMenu] = useState(null);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
     const isDashboard = location.pathname === "/dashboard";
 
     const months = [
@@ -51,7 +52,7 @@ import { useState } from "react";
         {/* Mobile Sidebar */}
         <aside className={`fixed inset-y-0 left-0 w-72 bg-white z-50 transform transition-transform duration-300 ease-in-out md:hidden ${openMenu === "sidebar" ? "translate-x-0" : "-translate-x-full"}`}>
           <div className="h-full relative">
-            <button onClick={() => setOpenMenu(null)} className="absolute top-4 right-4 p-2 text-slate-500 md:hidden">
+            <button onClick={() => setOpenMenu(null)} className="absolute top-5 right-5 p-2 text-slate-500 hover:bg-slate-100 rounded-full">
               <X size={24} />
             </button>
             <Sidebar user={user} />
@@ -59,14 +60,14 @@ import { useState } from "react";
         </aside>
 
         <div className="flex-1 md:ml-64 flex flex-col min-w-0">
-          <header className="bg-slate-100 border-b border-slate-300 sticky top-0 z-[45] px-2 md:px-8 py-3 flex items-center justify-between gap-2 md:gap-4 h-16 md:h-20">
+          <header className="bg-slate-100 border-b border-slate-300 sticky top-0 z-[45] px-6 md:px-12 py-3 flex items-center justify-between gap-3 h-16 md:h-20">
 
-            <div className="flex items-center gap-2 flex-1 max-w-md">
-              <button onClick={() => setOpenMenu("sidebar")} className="md:hidden p-2 rounded border border-slate-300 hover:bg-slate-200 text-slate-700">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <button onClick={() => setOpenMenu("sidebar")} className="md:hidden p-2 rounded border border-slate-300 hover:bg-slate-200 text-slate-700 shrink-0">
                 <Menu size={20} />
               </button>
 
-              <div className="relative w-full max-w-[200px] md:max-w-md">
+              <div className={`relative flex-1 transition-all duration-300 ${isSearchOpen ? 'flex' : 'hidden md:flex'} max-w-md`}>
                 <span className="absolute inset-y-0 left-3 flex items-center text-slate-400">
                   <Search size={18} />
                 </span>
@@ -75,20 +76,30 @@ import { useState } from "react";
                   placeholder="Cari transaksi..."
                   value={searchQuery} 
                   onChange={(e) => setSearchQuery && setSearchQuery(e.target.value)}
-                  className="w-full pl-8 md:pl-10 pr-2 md:pr-4 py-2 bg-white border border-slate-300 rounded focus:border-slate-900 text-xs md:text-sm outline-none"
+                  className="w-full pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-full md:rounded-lg focus:border-slate-900 text-sm outline-none"
                 />
               </div>
+              <button 
+                onClick={() => setIsSearchOpen(!isSearchOpen)}
+                className="md:hidden p-2 text-slate-600 hover:bg-slate-200 rounded-full"
+              >
+                {isSearchOpen ? <X size={20} /> : <Search size={20} />}
+              </button>
             </div>
-
-            <div className="flex items-center gap-1.5 md:gap-3">
-              <div className="flex items-center gap-1 bg-white border border-slate-300 rounded px-1 md:px-2 py-1.5 shadow-sm">
-                <Calendar size={14} className="text-slate-400" />
+          
+            <div className={`items-center gap-1.5 md:gap-4 ${isSearchOpen ? 'hidden sm:flex' : 'flex'}`}>
+              <div className="flex items-center gap-1 bg-white border border-slate-300 rounded-lg px-2 py-1.5 shadow-sm">
+                <Calendar size={14} className="text-slate-400 hidden sm:block" />
                 <select 
                   value={currentMonth}
                   onChange={(e) => handleMonthChange(e.target.value)}
                   className="bg-transparent text-[10px] md:text-xs font-bold text-slate-700 outline-none cursor-pointer"
                 >
-                  {months.map(m => <option key={m.v} value={m.v}>{m.n}</option>)}
+                  {months.map(m => (
+                  <option key={m.v} value={m.v}>
+                    {m.n}
+                  </option>
+                ))}
                 </select>
               </div>
 
@@ -110,7 +121,7 @@ import { useState } from "react";
           </header>
           
 
-          <main className="p-2 md:p-8 relative z-0 min-h-[calc(100vh-80px)] overflow-xx-auto">
+          <main className="p-6 md:p-12 relative z-0 min-h-[calc(100vh-64px)] md:min-h-[calc(100vh-80px)] overflow-x-hidden pb-24 md:pb-8">
             <div className="max-w-[1400px] mx-auto w-full">
                 {children}
             </div>

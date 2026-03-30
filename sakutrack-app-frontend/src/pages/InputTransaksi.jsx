@@ -83,7 +83,7 @@ export default function InputTransaksi() {
 
   return (
     <>
-      <div className="max-w-6xl mx-auto space-y-8 p-4">
+      <div className="max-w-xl mx-auto space-y-8 p-4 md:p-6">
         <div>
           <h1 className="text-3xl font-bold text-slate-800">Kelola Transaksi</h1>
           <p className="text-slate-500 text-sm mt-1">Masukan detail transaksi Anda.</p>
@@ -111,18 +111,36 @@ export default function InputTransaksi() {
 
           <div className="space-y-6">
             {/* Baris Pertama */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
               {type === "expense" ? (
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Jenis</label>
-                  <select
-                    value={jenis}
-                    onChange={(e) => setJenis(e.target.value)}
-                    className="w-full p-3 border border-slate-200 rounded text-sm font-bold text-slate-700 focus:outline-none focus:border-slate-900"
-                  >
-                    <option value="kebutuhan">Kebutuhan</option>
-                    <option value="keinginan">Keinginan</option>
-                  </select>
+                  <div className="relative">
+                    <div
+                      onClick={() => setOpenKategori(openKategori === "jenis" ? false : "jenis")}
+                      className="w-full p-3 bg-white border border-slate-200 rounded-lg cursor-pointer flex items-center justify-between hover:border-slate-300 transition-all shadow-sm"
+                    >
+                      <span className="text-sm font-bold text-slate-800 capitalize">{jenis}</span>
+                      <span className="text-slate-400 text-[10px]">{openKategori === "jenis" ? "▲" : "▼"}</span>
+                    </div>
+
+                    {openKategori === "jenis" && (
+                      <div className="absolute z-50 mt-1 bg-white border border-slate-200 rounded shadow-lg overflow-hidden w-fit min-w-[140px]">
+                        <div 
+                          onClick={() => { setJenis("kebutuhan"); setOpenKategori(false); }}
+                          className="px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm font-bold text-slate-700 border-b border-slate-50"
+                        >
+                          Kebutuhan
+                        </div>
+                        <div 
+                          onClick={() => { setJenis("keinginan"); setOpenKategori(false); }}
+                          className="px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm font-bold text-slate-700"
+                        >
+                          Keinginan
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -147,7 +165,7 @@ export default function InputTransaksi() {
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full p-3 border border-slate-200 rounded focus:outline-none focus:border-slate-900 text-sm font-bold text-slate-800"
+                  className="w-full max-w-sm p-3 border border-slate-200 rounded focus:outline-none focus:border-slate-900 text-sm font-bold text-slate-800"
                 />
               </div>
             </div>
@@ -189,7 +207,7 @@ export default function InputTransaksi() {
                 <div className="relative">
                   <div
                     onClick={() => setOpenKategori(!openKategori)}
-                    className="w-full p-3 bg-white border border-slate-200 rounded cursor-pointer flex items-center justify-between"
+                    className="w-full p-3 bg-white border border-slate-200 rounded cursor-pointer flex items-center justify-between hover:border-slate-300 transition-colors"
                   >
                     <div className="flex items-center gap-2">
                       <span className={type === "income" ? "text-emerald-600" : "text-rose-600"}>
