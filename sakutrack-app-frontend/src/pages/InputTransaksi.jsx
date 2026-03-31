@@ -107,7 +107,7 @@ export default function InputTransaksi() {
 
         <div className="space-y-6">
           
-          {/* 1. TANGGAL */}
+          {/* TANGGAL */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
               <Calendar size={14} /> Tanggal
@@ -120,7 +120,6 @@ export default function InputTransaksi() {
             />
           </div>
 
-          {/* <--- REVISI: TATA LETAK KATEGORI & JENIS AGAR SEJAJAR ---> */}
           <div className={`grid grid-cols-1 ${type === "expense" ? "md:grid-cols-2" : "md:grid-cols-1"} gap-4 items-end`}>
             
             {/* Kategori */}
@@ -163,7 +162,6 @@ export default function InputTransaksi() {
               </div>
             </div>
 
-            {/* Jenis (Sekarang sejajar karena ada ikon Layers dan items-end) */}
             {type === "expense" && (
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
@@ -188,7 +186,7 @@ export default function InputTransaksi() {
             )}
           </div>
 
-          {/* 4. NOMINAL */}
+          {/* NOMINAL */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
               <Wallet size={14} /> Nominal
@@ -202,7 +200,7 @@ export default function InputTransaksi() {
             />
           </div>
 
-          {/* 5. CATATAN */}
+          {/* CATATAN */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
               <FileText size={14} /> Catatan
