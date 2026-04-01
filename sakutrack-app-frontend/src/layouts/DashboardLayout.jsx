@@ -50,11 +50,13 @@ import { useState } from "react";
         </aside>
 
         {/* Mobile Sidebar */}
-        <aside className={`fixed inset-y-0 left-0 w-72 bg-white z-50 transform transition-transform duration-300 ease-in-out md:hidden ${openMenu === "sidebar" ? "translate-x-0" : "-translate-x-full"}`}>
-          <div className="h-full relative">
-            <button onClick={() => setOpenMenu(null)} className="absolute top-5 right-5 p-2 text-slate-500 hover:bg-slate-100 rounded-full">
-              <X size={24} />
-            </button>
+        <aside className={`fixed inset-y-0 left-0 w-72 bg-slate-200 z-[60] transform transition-transform duration-300 ease-in-out md:hidden ${openMenu === "sidebar" ? "translate-x-0" : "-translate-x-full"} shadow-2xl border-r border-slate-300}`}>
+          <div className="h-full relative flex flex-col">
+            <div className="absolute top-3 right-3 z-[70]">
+              <button onClick={() => setOpenMenu(null)} className="p-1.5 bg-black text-white rounded-lg hover:bg-slate-900 transition-all border border-white/10 shadow-lg">
+                <X size={22} />
+              </button>
+            </div>
             <Sidebar user={user} />
           </div>
         </aside>
