@@ -87,8 +87,9 @@ const RekomendasiKeuangan = () => {
         const remainingBudget = totalBudget - expenseBeforeToday;
 
         let dailyLimitRp = 0;
-        if (remainingBudget > 0) {
-          dailyLimitRp = Math.floor(remainingBudget / remainingDays);
+        if (totalIncome > 0) {
+          const averageDailyIncome = totalIncome / todayDate;
+          dailyLimitRp = Math.floor(averageDailyIncome * (fetchedLimit / 100));
         }
 
         let dynamicDescription = "Sistem belum mendeteksi rencana batasan belanja untuk hari ini. Segera tentukan limit agar pengeluaran tidak melampaui sisa pendapatan bulan ini.";
