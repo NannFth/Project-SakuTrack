@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Settings, LogOut, Save, Info } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getAuth, signOut } from "firebase/auth";
 import connection from "../../connection";
 
 export default function SettingsMenu() {
@@ -47,6 +48,17 @@ export default function SettingsMenu() {
       } finally {
         setIsLoading(false);
       }
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const auth = getAuth();
+      await signOut(auth); 
+      localStorage.clear(); 
+      navigate("/login", { replace: true }); 
+    } catch (error) {
+      console.error("Gagal logout dari Firebase:", error);
     }
   };
 
@@ -136,11 +148,8 @@ export default function SettingsMenu() {
           <div className="h-px bg-slate-100 my-1"></div>
 
           <button 
-            onClick={() => { 
-              localStorage.clear(); 
-              navigate("/"); 
-            }}
-            className="flex items-center gap-2 w-full text-left p-2.5 rounded text-sm text-rose-600 font-bold"
+            onClick={handleLogout}
+            className="flex items-center gap-2 w-full text-left p-2.5 rounded text-sm text-rose-600 font-bold hover:bg-rose-50 transition-colors"
           >
             <LogOut size={16} />
             <span>Keluar Akun</span>
