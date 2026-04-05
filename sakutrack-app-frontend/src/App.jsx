@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { io } from "socket.io-client";
 import { Toaster, toast } from "react-hot-toast"; 
@@ -143,9 +143,9 @@ const App = () => {
       <Popup socket={socket} />
 
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/" element={user.id ? <Navigate to="/dashboard" replace /> : <Login />} />
+        <Route path="/login" element={user.id ? <Navigate to="/dashboard" replace /> : <Login />} />
+        <Route path="/register" element={user.id ? <Navigate to="/dashboard" replace /> : <Register />} />
         
         <Route path="/dashboard" element={
           <DashboardLayout user={user} socket={socket} searchQuery={searchQuery} setSearchQuery={setSearchQuery}>
