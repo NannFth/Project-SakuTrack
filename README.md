@@ -3,13 +3,13 @@ SakuTrack adalah aplikasi manajemen keuangan pribadi berbasis web yang dirancang
 
 ## Anggota Tim
 
-|          Nama         | ID |       Path       |
-|:---------------------:|:----------:|:----------------:|
-|  Muhammad Adnan Al Fathir  |  CFS254D6Y318  | Full Stack Developer |
-|  Syahrul Ma'Arif  |  CFS254D6Y319  | Full Stack Developer |
-|   Amira    |  CFS254D6X320  |   Full Stack Developer |
-|  Adinda Amelia Rahmadani  |  CFS254D6X321  |  Full Stack Developer |
-|    Nur Aisyah     |  CFS254D6X322  |      Full Stack Developer     |
+|          Nama          |      ID      |         Path         |
+|:----------------------:|:------------:|:--------------------:|
+| Muhammad Adnan Al Fathir | CFS254D6Y318 | Full Stack Developer |
+|     Syahrul Ma'Arif    | CFS254D6Y319 | Full Stack Developer |
+|         Amira          | CFS254D6X320 | Full Stack Developer |
+| Adinda Amelia Rahmadani| CFS254D6X321 | Full Stack Developer |
+|       Nur Aisyah       | CFS254D6X322 | Full Stack Developer |
 
 ## Akses Website Produksi
 Untuk mengakses website yang telah selesai dibuat, anda dapat mengaksesnya melalui link berikut: https://sakutrack.netlify.app/
@@ -18,16 +18,16 @@ Untuk mengakses website yang telah selesai dibuat, anda dapat mengaksesnya melal
 SakuTrack memiliki beberapa halaman dan fitur utama yang dirancang untuk bertindak sebagai asisten keuangan proaktif:
 
 * **Dashboard (Pusat Kendali)**
-  Halaman utama yang menyajikan *helicopter view* kondisi keuangan pengguna secara *real-time*. Dilengkapi dengan grafik arus kas dan fitur **Budget Wallets**, yaitu dompet visual yang otomatis memisahkan saldo ke dalam pos Kebutuhan, Keinginan, dan Tabungan sesuai rasio alokasi pengguna (misal: 50/30/20).
+  Halaman utama yang menyajikan kondisi keuangan pengguna secara real-time. Dilengkapi dengan grafik arus kas dan fitur Budget Wallets, yaitu dompet visual yang otomatis memisahkan saldo ke dalam pos Kebutuhan, Keinginan, dan Tabungan sesuai rasio alokasi pengguna (misal: 50/30/20).
 
 * **Manajemen Transaksi**
-  Halaman pencatatan kas masuk dan keluar yang praktis. Keunggulan utamanya ada pada pemisahan kategori cerdas; saat mencatat pengeluaran, pengguna diwajibkan untuk mengklasifikasikan transaksi tersebut sebagai pengeluaran pokok (Needs) atau sekadar keinginan (Wants).
+  Halaman pencatatan kas masuk dan keluar yang praktis. Keunggulan utamanya ada pada pemisahan kategori cerdas. Saat mencatat pengeluaran, pengguna diwajibkan untuk mengklasifikasikan transaksi tersebut sebagai pengeluaran pokok atau sekadar keinginan.
 
 * **Proyeksi Keuangan (Forecasting)**
-  Halaman analitik yang memprediksi masa depan keuangan pengguna menggunakan *Logika Pacing* (Ritme Berjalan). Fitur ini menghitung rata-rata pengeluaran harian, mengkalkulasi daya tahan saldo saat ini (Safe Days), dan memberikan estimasi sisa saldo di akhir bulan dengan status peringatan (Aman/Waspada/Bahaya).
+  Halaman analisis yang memprediksi masa depan keuangan pengguna menggunakan Logika Pacing (Ritme Berjalan). Fitur ini menghitung rata-rata pengeluaran harian, mengkalkulasi daya tahan saldo saat ini, dan memberikan estimasi sisa saldo di akhir bulan dengan status peringatan (Aman/Waspada/Bahaya).
 
 * **Rekomendasi Harian (Asisten Saku)**
-  Halaman penasihat cerdas yang memberikan rekomendasi batas aman pengeluaran harian dalam bentuk nominal pasti (Rupiah). Batas ini bersifat dinamis; jika pemasukan pengguna bertambah, batas jajan akan otomatis menyesuaikan agar tidak terjadi defisit.
+  Halaman penasihat cerdas yang memberikan rekomendasi batas aman pengeluaran harian dalam bentuk nominal pasti (Rupiah). Batas ini bersifat dinamis, jika pemasukan pengguna bertambah, batas aman pengeluaran akan otomatis menyesuaikan agar tidak terjadi defisit.
 
 * **Target Tabungan (Savings Goals)**
   Fitur yang memungkinkan pengguna untuk menetapkan tujuan menabung secara spesifik, seperti untuk membeli laptop, biaya kursus, atau dana darurat. Pengguna dapat memantau progres tabungan secara visual dari angka 0% hingga 100%, sehingga memberikan gambaran yang jelas mengenai sejauh mana pencapaian finansial mereka.
@@ -39,40 +39,40 @@ SakuTrack memiliki beberapa halaman dan fitur utama yang dirancang untuk bertind
   Sistem proaktif yang bekerja di latar belakang. Meliputi **Morning Briefing (09:00)** untuk mengingatkan batas anggaran harian, dan **Evening Review (20:00)** untuk mengingatkan pencatatan transaksi sebelum tidur. Sistem juga akan memunculkan peringatan jika mendeteksi pengeluaran abnormal atau kebocoran anggaran pada kategori tertentu.
 
 * **Gamifikasi (Pencapaian & Konsistensi)**
-  Fitur *engagement* yang memberikan apresiasi visual (*pop-up achievement*) saat target tabungan tercapai, serta memberikan penghargaan *streak* bagi pengguna yang disiplin mencatat transaksi selama 3, 7, hingga 30 hari berturut-turut.
+  Fitur engagement yang memberikan apresiasi visual (pop-up achievement) saat target tabungan tercapai, serta memberikan penghargaan streak bagi pengguna yang disiplin mencatat transaksi selama 3, 7, hingga 30 hari berturut-turut.
 
 ## Dependensi Proyek
-Proyek ini dipisahkan menjadi dua *environment* (*Frontend* dan *Backend*) dengan dependensi masing-masing:
+Proyek ini dipisahkan menjadi dua environment (Frontend dan Backend) dengan dependensi masing-masing:
 
 ### Frontend
-* **`react` & `react-dom`:** Library utama untuk membangun *User Interface* (UI) berbasis komponen.
-* **`react-router-dom`:** Menangani *routing* dan navigasi antar halaman secara *Single Page Application* (SPA).
-* **`axios`:** HTTP Client untuk melakukan *request* data (GET, POST, PUT, DELETE) ke API backend.
+* **`react` & `react-dom`:** Library utama untuk membangun User Interface (UI) berbasis komponen.
+* **`react-router-dom`:** Menangani routing dan navigasi antar halaman secara Single Page Application (SPA).
+* **`axios`:** HTTP Client untuk melakukan request data (GET, POST, PUT, DELETE) ke API backend.
 * **`firebase`:** SDK untuk integrasi Firebase Authentication (Sistem Login/Register).
 * **`chart.js` & `react-chartjs-2`:** Mengelola dan merender visualisasi data (grafik arus kas dan kategori) secara interaktif.
 * **`framer-motion`:** Memberikan efek animasi transisi dan mikro-interaksi yang mulus pada antarmuka.
 * **`lucide-react`:** Menyediakan pustaka ikon yang modern, ringan, dan mudah dikustomisasi.
-* **`sweetalert2` & `react-hot-toast`:** Menampilkan *pop-up alert*, notifikasi sukses/gagal, dan pesan konfirmasi yang elegan.
-* **`socket.io-client`:** *Client-side library* untuk menerima notifikasi *real-time* dari backend (fitur *Smart Alerts*).
-* **`vite` & `@vitejs/plugin-react`:** *Build tool* generasi baru yang memberikan pengalaman *development server* super cepat.
-* **`tailwindcss`, `postcss`, `autoprefixer`:** *Framework* CSS berbasis *utility-first* untuk *styling* aplikasi yang responsif.
-* **`eslint` & plugin terkait:** *Linter* untuk menjaga konsistensi dan kualitas penulisan kode JavaScript/React.
+* **`sweetalert2` & `react-hot-toast`:** Menampilkan pop-up alert, notifikasi sukses/gagal, dan pesan konfirmasi yang elegan.
+* **`socket.io-client`:** Client-side library untuk menerima notifikasi real-time dari backend (fitur Smart Alerts).
+* **`vite` & `@vitejs/plugin-react`:** Build tool generasi baru yang memberikan pengalaman development server super cepat.
+* **`tailwindcss`, `postcss`, `autoprefixer`:** Framework CSS berbasis utility-first untuk styling aplikasi yang responsif.
+* **`eslint` & plugin terkait:** Linter untuk menjaga konsistensi dan kualitas penulisan kode JavaScript/React.
 
 ### Backend 
-* **`express`:** *Framework* web minimalis untuk Node.js, digunakan untuk membangun RESTful API dan *routing* server.
-* **`mysql2`:** *Driver* database yang efisien untuk menghubungkan server Node.js dengan database MySQL.
+* **`express`:** Framework web minimalis untuk Node.js, digunakan untuk membangun RESTful API dan routing server.
+* **`mysql2`:** Driver database yang efisien untuk menghubungkan server Node.js dengan database MySQL.
 * **`firebase-admin`:** SDK Admin Firebase untuk memverifikasi token autentikasi pengguna secara aman di sisi server.
-* **`cors`:** *Middleware* keamanan komunikasi untuk mengizinkan (atau memblokir) permintaan HTTP antar domain (*Cross-Origin*).
-* **`dotenv`:** Mengelola konfigurasi variabel lingkungan (*environment variables*) yang sensitif secara terpusat.
-* **`socket.io`:** Mengelola koneksi *WebSockets* untuk mengirim notifikasi peringatan secara *real-time* ke frontend pengguna.
-* **`node-cron`:** *Task scheduler* berbasis waktu (cron) untuk menjalankan perintah secara otomatis sesuai jadwal (digunakan pada fitur *Morning Briefing* dan *Evening Review* harian).
-* **`nodemon`:** *Utility* pengembangan yang secara otomatis me-*restart* server ketika ada perubahan pada *source code*.
+* **`cors`:** Middleware keamanan komunikasi untuk mengizinkan (atau memblokir) permintaan HTTP antar domain (Cross-Origin).
+* **`dotenv`:** Mengelola konfigurasi variabel lingkungan (environment variables) yang sensitif secara terpusat.
+* **`socket.io`:** Mengelola koneksi WebSockets untuk mengirim notifikasi peringatan secara real-time ke frontend pengguna.
+* **`node-cron`:** Task scheduler berbasis waktu (cron) untuk menjalankan perintah secara otomatis sesuai jadwal (digunakan pada fitur Morning Briefing dan Evening Review harian).
+* **`nodemon`:** Utility pengembangan yang secara otomatis me-restart server ketika ada perubahan pada source code.
 
 ## Tools & Environment yang Digunakan
-Pastikan perangkat Anda memiliki *tools* berikut sebelum menjalankan proyek ini:
+Pastikan perangkat Anda memiliki tools berikut sebelum menjalankan proyek ini:
 * **Node.js:** Versi 18.x atau yang lebih baru (Disarankan v20.x LTS).
 * **Package Manager:** `npm` (Bawaan dari Node.js).
-* **Database Server:** MySQL (Dapat menggunakan XAMPP, WAMP, atau MySQL Server *standalone*).
+* **Database Server:** MySQL (Dapat menggunakan XAMPP, WAMP, atau MySQL Server standalone).
 * **Code Editor:** Visual Studio Code (Disarankan).
 * **Layanan Cloud (Produksi):** AWS EC2 (Backend Server), Netlify (Frontend Hosting), Firebase (Authentication).
 
@@ -80,7 +80,7 @@ Pastikan perangkat Anda memiliki *tools* berikut sebelum menjalankan proyek ini:
 Untuk menjalankan proyek SakuTrack di komputer lokal, Anda dapat memilih satu dari dua skenario di bawah ini sesuai kebutuhan Anda:
 
 ### Skenario 1: Menjalankan Frontend Lokal
-Skenario ini adalah yang paling praktis karena Anda hanya perlu menjalankan antarmuka (Frontend) secara lokal. Aplikasi akan secara otomatis terhubung ke *server* dan *database* utama kami yang saat ini beroperasi di lingkungan AWS.
+Skenario ini adalah yang paling praktis karena Anda hanya perlu menjalankan antarmuka (Frontend) secara lokal. Aplikasi akan secara otomatis terhubung ke server dan database utama kami yang saat ini beroperasi di lingkungan AWS.
 1. Buka **Command Prompt (CMD)** atau Terminal di komputer Anda.
 2. Arahkan terminal ke dalam folder utama proyek SakuTrack yang sudah diunduh.
 3. Masuk ke folder frontend dengan perintah: cd sakutrack-app-frontend
