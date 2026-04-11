@@ -1,0 +1,12 @@
+# Server Configuration
+PORT=3000
+NODE_ENV=development
+
+# Database Configuration
+DB_HOST=
+DB_USER=
+DB_PASSWORD=
+DB_NAME=
+
+# Firebase Configuration
+FIREBASE_SERVICE_ACCOUNT_PATH=./serviceAccountKey.json
